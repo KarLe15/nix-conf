@@ -1,0 +1,66 @@
+## Missing parts
+- Global Font Setting
+- SystemD startup 
+- - UWSM
+- - https://wiki.archlinux.org/title/Universal_Wayland_Session_Manager
+- - https://wiki.hyprland.org/Useful-Utilities/Systemd-start/
+- - https://github.com/abenz1267/walker/issues/279
+- HyprIdle / Hyprlock / Hyprpaper
+- https://gist.github.com/brunoanc/2dea6ddf6974ba4e5d26c3139ffb7580
+- Status bar
+- - https://github.com/jasper-clarke/hypr-ws-switcher
+- - https://github.com/KZDKM/Hyprspace
+- - https://github.com/elkowar/eww
+- - https://github.com/JakeStanger/ironbar
+- - https://github.com/Alexays/Waybar
+- - https://github.com/vars1ty/HybridBar
+- - https://github.com/LBCrion/sfwbar  (S* expression defined status bar)
+- extra XDG Portals
+- - https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/
+- Authentication Agent 
+- - https://wiki.hyprland.org/Hypr-Ecosystem/hyprpolkitagent/
+- Screenshots 
+- - https://github.com/flameshot-org/flameshot
+- - https://github.com/gabm/satty
+- CLI utilities 
+- - fzf
+- - ripgrep
+- - fd
+- - bat
+- - eza
+- - starship
+- - nushell
+- Notifications
+- Git config
+- Browser configs 
+- - brave
+- - firefox
+- - zen browser
+- Clipboard Manager
+- - https://github.com/sentriz/cliphist
+- Docker / Libvirt / kvm / Qemu
+- SDDM setup
+- Cachix https://wiki.hyprland.org/Nix/Cachix/
+- Nix LSP
+- - https://github.com/oxalica/nil
+- Awesome Hyprland
+- - https://github.com/hyprland-community/awesome-hyprland
+- Nix Config IDEA
+- - https://github.com/Oughie/nixos-config
+- - https://github.com/mylinuxforwork/dotfiles
+- - https://github.com/fufexan/dotfiles
+- - https://github.com/notusknot/dotfiles-nix
+- - https://github.com/coffebar/dotfiles
+- Gaming (Steam / Drivers)
+## Nice to have
+- OSD 
+- - https://github.com/System64fumo/syshud
+- - https://github.com/heyjuvi/avizo
+- - https://github.com/ErikReider/SwayOSD
+- Pipewire 
+- - https://github.com/wwmm/easyeffects
+- Plug/unplug screen
+- - https://git.sr.ht/~emersion/kanshi
+- - https://github.com/coffebar/hyprland-monitor-attached
+- https://github.com/Zerodya/hyprfreeze
+- https://github.com/ckaznable/hyprnavi?tab=readme-ov-file

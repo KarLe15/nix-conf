@@ -1,0 +1,347 @@
+
+
+
+flake.nix   <-  Flake for nixos configuration
+- hosts/
+- - mastodant1/
+- - - configuration.nix
+- - - services-configuration.nix
+- - - hardware-configuration.nix
+- - - options.nix
+- homeManagerModules/
+- - default.nix
+- - hyprland/
+- - - default.nix
+- - - home.nix
+- nixosModules/
+- - default.nix
+- hardwareConfigurations/
+- - default.nix
+- - monitors/
+- - - default.nix 
+- - - mastodant-3-screens.nix  
+
+===========   hardwareConfigurations/monitors/mastodant-3-screens.nix
+## =======================================================================================
+##
+##                  +----------------+ 
+##                  |       Top      | 
+##              200 |  3440 * 1440   | 200
+##                  +----------------+ 
+##              +-----------+ +-----------+
+##              |   Left    | |    Right  |
+##              | 1920*1080 | | 1920*1080 |
+##              +-----------+ +-----------+
+##              |---------< 3840 >--------|  
+##
+##
+## =======================================================================================
+
+
+{ lib, config, ... }:
+
+let
+  cfg = config.hardware.monitors;
+in
+{
+  # TODO :: 03/04/2025 :: Make this interface for options more detailled and common for all monitorSetups
+  # options.hardware.monitors.configs = lib.mkOption {
+  #   type = lib.types.attrsOf lib.types.anything;
+  # };
+
+  config = lib.mkIf (cfg.active == "mastodant-3-screens") {
+    hardware.monitors.configs = {
+      mastodant-3-screens = {
+        monitors = [
+          ## Left Monitor
+          {
+            name = "DP-1";
+            width = 1920;
+            height = 1080;
+            refreshRate = 60;
+            position = { x = 0; y = 1440; };
+            scale = 1;
+            primary = true;
+          }
+          ## Top Monitor
+          {
+            name = "HDMI-A-2";
+            width = 3440;
+            height = 1440;
+            refreshRate = 100;
+            scale = 1;
+            position = { x = 200; y = 0; };
+          }
+          ## Right Monitor
+          {
+            name = "DP-3";
+            width = 1920;
+            height = 1080;
+            refreshRate = 60;
+            scale = 1;
+            position = { x = 1920; y = 1440; };
+          }
+        ];
+        ## TODO :: 03/04/2025 :: Configuration from Claude 3.7 but not used now
+        # You could add more properties here specific to this setup
+        workspaces = {
+        };
+      };
+    };
+  };
+}
+
+===========   hardwareConfigurations/monitors/default.nix
+{ lib, config, ... } : {
+  imports = [
+    ./mastodant-3-screens.nix
+  ];
+
+  options.hardware.monitors = {
+    active = lib.mkOption {
+      type = lib.types.str;
+      default = "mastodant-3-screens";
+      description = "Active Monitor setup configuration to use";
+    };
+    activeConfig = lib.mkOption {
+      type = lib.types.anything;
+      internal = true;
+      description = "The resolved active monitor configuration";
+    };
+  };
+
+  config = {
+    hardware.monitors.activeConfig = # "KARIM CONF";
+      config.hardware.monitors.configs.${config.hardware.monitors.active};
+  };
+
+}
+
+===========   hardwareConfigurations/default.nix 
+{ lib, ... } : {
+  imports = [
+    ./monitors
+  ];
+}
+
+
+
+
+===========   hosts/mastodant-1/configuration.nix
+{ config, ... }:
+{
+  imports =
+    [ # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+      ./options.nix
+    ];
+
+    ...........
+
+  programs.hyprland.enable = true;
+  system.stateVersion = "24.11"; # Did you read the comment?
+
+  ## ==========================================================================================================
+  # Added configuration
+  nix.settings.experimental-features = ["nix-command" "flakes"];
+}
+
+===========   hosts/mastodant-1/options.nix
+{ lib, ... }: {
+  hardware.monitors.active = "mastodant-3-screens";
+}
+
+===========   homeManagerModules/default.nix
+{config, lib, pkgs, inputs, ... } : {
+    
+    imports = [
+      ./hyprland
+    ];
+    
+    programs.home-manager.enable = true;
+    
+
+
+    xdg.enable = true;
+    home = {
+      stateVersion = "24.11";
+      packages = with pkgs; [
+        htop
+        btop
+        zenith
+        ripgrep
+        git
+        vim
+        neovim
+        kitty
+        fastfetch
+        vscodium
+      ];
+    };
+    
+}
+
+
+===========   homeManagerModules/hyprland/default.nix
+{inputs, pkgs, lib, ... } : {
+    imports = [
+        ./home.nix
+    ];
+}
+
+===========   homeManagerModules/hyprland/home.nix
+{inputs, pkgs, lib, hardwareConfigs, config, systemInputs, ... } : 
+let 
+  activeMonitorConfig = hardwareConfigs.activeMonitorConfig;
+in
+{
+  stylix.targets.hyprland.enable = true;
+  wayland.windowManager.hyprland = {
+    enable = true;
+    settings = {
+      "$mod" = "ALT";
+
+      monitor = map (m: 
+        "${m.name}, ${toString m.width}x${toString m.height}@${toString m.refreshRate}, ${toString m.position.x}x${toString m.position.y}, 1"
+      ) activeMonitorConfig.monitors;
+    };
+  };
+}
+
+===========   flake.nix
+{
+  description = "Flake definition";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs-darwin.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    darwin = {
+      url = "github:lnl7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
+    
+    stylix.url = "github:danth/stylix";
+
+    hyprland.url = "github:hyprwm/Hyprland";
+
+  };
+
+  outputs = { self, nixpkgs, nixpkgs-darwin, darwin, home-manager, stylix, hyprland,  ... }@flakeInputs :
+    let 
+      mkCommon = { system, user, hostname, ... }@args: {
+        inherit system user hostname;
+        pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+        };
+        darwinPkgs = import nixpkgs-darwin {
+            inherit system;
+            config.allowUnfree = true;
+        };
+      };
+      mkHomeManagerConfig = { user, hostOptions, ... }@mkHomeManagerConfigInputs: {
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+        home-manager.users.${user} = import ./homeManagerModules;
+
+        home-manager.extraSpecialArgs =  {
+          # inherit inputs;
+          systemInputs = mkHomeManagerConfigInputs;
+          hardwareConfigs = self.hardwareConfigsGenerator { cfg = hostOptions; };
+          styleConfigs = self.styleConfigs;
+        };
+      };
+
+      commonConfigurationModules = [
+        ./hardwareConfigurations
+        # ./styleConfigurations
+      ];
+      
+      # mkDarwinSystem = {system, user, hostname, ... }@inputs: 
+        # let
+        #   params = mkCommon { inherit system user hostname; };
+        # in
+        # darwin.lib.darwinSystem {
+        #   inherit system;
+        #   modules = commonConfigurationModules ++ [
+        #     (mkHomeManagerConfig user)
+        #     inputs.stylix.darwinModules.stylix
+        #     { _module.args = { inherit params inputs; }; }
+        #   ];
+        #   specialArgs = { 
+        #     inherit inputs;
+        #     hardwareConfigs = self.hardwareConfigs;
+        #     styleConfigs = self.styleConfigs;
+        #   };
+        # };
+      
+      mkNixosSystem = {system, user, hostname, ... }@mkSystemInputs:
+        let
+          params = mkCommon { inherit system user hostname; };
+        in
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = commonConfigurationModules ++ [
+            mkSystemInputs.hostConfigPath
+            home-manager.nixosModules.home-manager
+            (
+              mkHomeManagerConfig {
+                inherit user;
+                hostOptions = (import mkSystemInputs.hostOptionsPath) { 
+                  config = mkSystemInputs.flakeInputs.config;
+                  lib = nixpkgs.lib;
+                };
+              }
+            )
+            mkSystemInputs.stylix.nixosModules.stylix
+            ./nixosModules
+            { _module.args = { inherit params mkSystemInputs; }; }
+          ];
+          specialArgs = { 
+            styleConfigs = self.styleConfigs;
+          };
+        };
+    in {
+      imports = [
+        ./hardwareConfigurations
+      ];
+
+      hardwareConfigsGenerator = { cfg, ... }: {
+        # Create a more direct reference that won't have evaluation-order issues
+        activeMonitorConfig = let
+          monitorSetup = cfg.hardware.monitors.active;
+        in {
+          monitors = import ./hardwareConfigurations/monitors/presets/${monitorSetup}.nix;
+        };
+      };
+      styleConfigs = [
+        # fonts = import ./styleConfigurations/fonts;
+        # cursors = import ./styleConfigurations/cursors;
+        # wallpapers = import ./styleConfigurations/wallpapers;
+        # icons = import ./styleConfigurations/icons;
+      ];
+
+      darwinConfigurations = {
+      #   "mac-m1" = mkDarwinSystem {
+      #       inherit stylix;
+      #       system = "aarch64-darwin";
+      #       user = "karim";
+      #       hostname = "karle";
+      #   };
+      };
+      nixosConfigurations = {
+        "mastodant1" = mkNixosSystem {
+          inherit stylix flakeInputs;
+          hostConfigPath = ./hosts/mastodant-1/configuration.nix;
+          hostOptionsPath = ./hosts/mastodant-1/options.nix;
+          system = "x86_64-linux";
+          user = "karim";
+          hostname = "karle";
+      };
+    };
+  };
+}

@@ -1,6 +1,4 @@
-{config, lib, pkgs, hardwareConfigs, styleConfigs, ... } : {
+{config, lib, pkgs, hardwareConfigs, styleConfigs, hyprland,  ... }@inputs : {
     imports = [
-        ./cursors/configuration.nix
-        ./stylix/configuration.nix
     ];
 }

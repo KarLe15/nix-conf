@@ -17,6 +17,12 @@
 
     hyprland.url = "github:hyprwm/Hyprland";
 
+
+    # walker = {
+    #   url = "github:abenz1267/walker";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
     # Base 16 utils from base16 yaml to Nix Set
     base16utils = {
       url = "github:SenchoPens/base16.nix";
@@ -24,7 +30,7 @@
 
   };
 
-  outputs = { self, nixpkgs, nixpkgs-darwin, darwin, home-manager, stylix, hyprland, base16utils,  ... }@flakeInputs :
+  outputs = { self, nixpkgs, nixpkgs-darwin, darwin, home-manager, stylix, hyprland, base16utils, ... }@flakeInputs :
   let 
     mkHomeManagerConfig = { user, system, hostOptions, ... }@mkHomeManagerConfigInputs: {
       ## INFO :: To use the same NixPkgs Instance from Nixos and HomeManager to ensure sync :: https://nix-community.github.io/home-manager/index.xhtml#sec-install-nixos-module
@@ -37,6 +43,9 @@
         imports = [
           ./homeManagerModules
           base16utils.homeManagerModule
+          ## TODO :: 06/04/2024 :: Home-Manager module not merged into home-manager repo 
+          ## Using Custom Home-manager module defined by KarLe
+          # walker.homeManagerModules.default 
         ];
       };
       home-manager.extraSpecialArgs =  {
@@ -46,12 +55,25 @@
       };
     };
 
-    mkNixosConfig = { system, hostOptions , ... }@mkNixosConfigInput: {
-      imports = [ ./nixosModules ];
+    mkCommonOsConfig = { system, hostOptions , ... }@mkCommonOsConfigInput: {
+      imports = [ ./nixCommonModules ];
       _module.args = {
         hardwareConfigs = self.hardwareConfigsGenerator { cfg = hostOptions; };
         styleConfigs = self.styleConfigsGenerator { cfg = hostOptions; };
         softwareConfigs = self.softwareConfigsGenerator { cfg = hostOptions; };
+      };
+    };
+
+    mkNixosConfig = { system, hostOptions, ... }@mkNixosConfigInput: {
+      imports = [ ./nixosModules ];
+      _module.args = {
+        hyprland = mkNixosConfigInput.hyprland;
+      };
+    };
+
+    mkNixDarwinConfig = { system, hostOptions , ... }@mkNixDarwinConfigInput: {
+      imports = [ ./nixDarwinModules ];
+      _module.args = {
       };
     };
 
@@ -64,36 +86,43 @@
     
 
 
-    # mkDarwinSystem = {system, user, hostname, ... }@inputs: 
-      # let
-      # in
-      # darwin.lib.darwinSystem {
-      #   inherit system;
-      #   modules = commonConfigurationModules ++ [
-      #     (mkHomeManagerConfig user)
-      #     inputs.stylix.darwinModules.stylix
-      #     { _module.args = { inherit params inputs; }; }
-      #   ];
-      #   specialArgs = { 
-      #     inherit inputs;
-      #     hardwareConfigs = self.hardwareConfigs;
-      #     styleConfigs = self.styleConfigs;
-      #   };
-      # };
+    # mkDarwinSystem = {system, user, hostname, ... }@mkDarwinSystemInputs: 
+    #   let
+    #     hostOptions = (import mkDarwinSystemInputs.hostOptionsPath) { 
+    #       config = mkDarwinSystemInputs.flakeInputs.config;
+    #       lib = mkDarwinSystemInputs.flakeInputs.nixpkgs.lib;
+    #     };
+    #   in
+    #   darwin.lib.darwinSystem {
+    #     inherit system;
+    #     modules = commonConfigurationModules ++ [
+    #       mkDarwinSystemInputs.hostConfigPath
+    #       mkDarwinSystemInputs.stylix.darwinModules.stylix
+    #       (mkCommonOsConfig {inherit system hostOptions; })
+    #       (mkNixDarwinConfig {inherit system hostOptions; })
+    #       home-manager.darwinModules.home-manager
+    #       (mkHomeManagerConfig { inherit user system hostOptions; })
+    #     ];
+    #   }
+    # ;
     
-    mkNixosSystem = {system, user, hostname, ... }@mkSystemInputs:
+    mkNixosSystem = {system, user, hostname, ... }@mkNixOsSystemInputs:
       let
-        hostOptions = (import mkSystemInputs.hostOptionsPath) { 
-          config = mkSystemInputs.flakeInputs.config;
-          lib = nixpkgs.lib;
+        hostOptions = (import mkNixOsSystemInputs.hostOptionsPath) { 
+          config = mkNixOsSystemInputs.flakeInputs.config;
+          lib = mkNixOsSystemInputs.flakeInputs.nixpkgs.lib;
         };
       in
       nixpkgs.lib.nixosSystem {
         inherit system;
         modules = commonConfigurationModules ++ [
-          mkSystemInputs.hostConfigPath
-          mkSystemInputs.stylix.nixosModules.stylix
-          (mkNixosConfig {inherit system hostOptions; })
+          mkNixOsSystemInputs.hostConfigPath
+          mkNixOsSystemInputs.stylix.nixosModules.stylix
+          (mkCommonOsConfig {inherit system hostOptions; })
+          (mkNixosConfig {
+            inherit system hostOptions;
+            hyprland = mkNixOsSystemInputs.flakeInputs.hyprland;
+          })
           home-manager.nixosModules.home-manager
           (mkHomeManagerConfig { inherit user system hostOptions; })
         ];
@@ -101,9 +130,6 @@
     ;
       
   in {
-    imports = [
-      ./configurations
-    ];
 
     hardwareConfigsGenerator = { cfg, ... }: 
       let

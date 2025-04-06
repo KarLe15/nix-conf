@@ -30,7 +30,7 @@ rec {
       description = "FullScreen Active Window (True full screen (without BAR))";
       mod1 = mod-shift;
       key = "F";
-      command = "1";
+      command = "0";
       dispatcher-type = "fullscreen";
     }
     ## ===========================<  Launchers Manage  >==========================

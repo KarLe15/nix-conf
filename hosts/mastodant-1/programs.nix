@@ -1,9 +1,14 @@
-{ config, lib, pkgs, modulesPath, ... }: {
+{ config, lib, pkgs, modulesPath, hyprland, ... }@inputs: {
 
   # Install firefox.
   programs.firefox.enable = true;
   stylix.enable = true;
-  programs.hyprland.enable = true;
+  programs.hyprland = builtins.trace "HomeManagerModue content: ${(builtins.toJSON (builtins.attrNames inputs ))}" {
+    enable = true;
+    package = hyprland.packages."${pkgs.system}".hyprland;
+    portalPackage = hyprland.packages."${pkgs.system}".xdg-desktop-portal-hyprland;
+    withUWSM = true;
+  };
   # programs.hyprland.package = inputs.hyprland.packages."${pkgs.system}".hyprland;
   
   environment.systemPackages = with pkgs; [

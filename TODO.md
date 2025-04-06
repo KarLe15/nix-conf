@@ -1,11 +1,11 @@
 ## DONE
 - Global Font Setting
-## Missing parts
 - SystemD startup 
 - - UWSM
 - - https://wiki.archlinux.org/title/Universal_Wayland_Session_Manager
 - - https://wiki.hyprland.org/Useful-Utilities/Systemd-start/
 - - https://github.com/abenz1267/walker/issues/279
+## Missing parts
 - HyprIdle / Hyprlock / Hyprpaper
 - https://gist.github.com/brunoanc/2dea6ddf6974ba4e5d26c3139ffb7580
 - Secrets Management

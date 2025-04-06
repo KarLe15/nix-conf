@@ -12,6 +12,7 @@ in  {
     # Main Walker configuration
     settings = {
       # Top-level settings
+      app_launch_prefix = "uwsm app -- ";
       close_when_open = false;
       theme = theme-name;
       as_window = false;

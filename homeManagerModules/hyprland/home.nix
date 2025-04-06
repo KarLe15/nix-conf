@@ -18,6 +18,7 @@ in
   stylix.targets.hyprland.enable = true;
   wayland.windowManager.hyprland = {
     enable = true;
+    systemd.enable = false;
     settings = {
       # "$mod" = "ALT";
 
@@ -35,7 +36,14 @@ in
       };
       
       ## Shortcuts definition
-      bind = (map (shortcut: "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, ${shortcut.command}") shortcuts-impl);
+      bind = (
+        map (shortcut: 
+          if shortcut.command != null && shortcut.command != "" && shortcut.dispatcher-type == "exec" then 
+            "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, uwsm app -- ${shortcut.command}"
+          else 
+            "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, ${shortcut.command}"
+        ) shortcuts-impl
+      );
       
       input = {
         "kb_layout" = "fr";

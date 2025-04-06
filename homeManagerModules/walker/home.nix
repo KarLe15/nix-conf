@@ -1,4 +1,4 @@
-{pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, base16Lib, ... } :
+{pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, ... } :
 let
   cfg = softwareConfigs.modules.walker;
   system-theme = styleConfigs.themes.apply {inherit pkgs; };

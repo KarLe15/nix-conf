@@ -1,28 +1,26 @@
 { pkgs, lib, config, styleConfigs, ... }@inputs : 
 let 
-    theme = builtins.trace "NixOsModule content: ${(builtins.toJSON (builtins.attrNames config.lib.base16 ))}" styleConfigs.themes.apply {inherit pkgs; };
+    theme = styleConfigs.themes.apply {inherit pkgs; };
     cursor = styleConfigs.cursors.apply {inherit pkgs; };
+    fonts = styleConfigs.fonts.apply {inherit pkgs; };
 in {
     stylix.base16Scheme = theme.base16-schemes-yaml;
     stylix.fonts = with pkgs; {
         serif = {
-            package = dejavu_fonts;
-            name = "DejaVu Serif";
+            package = fonts.serif.package;
+            name = fonts.serif.exact-name;
         };
-
         sansSerif = {
-            package = dejavu_fonts;
-            name = "DejaVu Sans";
+            package = fonts.sansSerif.package;
+            name = fonts.sansSerif.exact-name;
         };
-
         monospace = {
-            package = dejavu_fonts;
-            name = "DejaVu Sans Mono";
+            package = fonts.mono.package;
+            name = fonts.mono.exact-name;
         };
-
         emoji = {
-            package = noto-fonts-emoji;
-            name = "Noto Color Emoji";
+            package = fonts.emoji.package;
+            name = fonts.emoji.exact-name;
         };
     };
 

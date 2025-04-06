@@ -7,6 +7,7 @@
     catppuccin-cursors.macchiatoDark
     catppuccin-cursors.macchiatoBlue
     nerd-fonts.jetbrains-mono
+    nerd-fonts.meslo-lg
   ];
 
 }

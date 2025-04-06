@@ -1,5 +1,6 @@
-## Missing parts
+## DONE
 - Global Font Setting
+## Missing parts
 - SystemD startup 
 - - UWSM
 - - https://wiki.archlinux.org/title/Universal_Wayland_Session_Manager
@@ -7,6 +8,9 @@
 - - https://github.com/abenz1267/walker/issues/279
 - HyprIdle / Hyprlock / Hyprpaper
 - https://gist.github.com/brunoanc/2dea6ddf6974ba4e5d26c3139ffb7580
+- Secrets Management
+- - https://github.com/yaxitech/ragenix
+- - https://github.com/alyraffauf/secrets
 - Status bar
 - - https://github.com/jasper-clarke/hypr-ws-switcher
 - - https://github.com/KZDKM/Hyprspace
@@ -46,13 +50,17 @@
 - Awesome Hyprland
 - - https://github.com/hyprland-community/awesome-hyprland
 - Nix Config IDEA
+- - https://github.com/alyraffauf/nixcfg
 - - https://github.com/Oughie/nixos-config
 - - https://github.com/mylinuxforwork/dotfiles
 - - https://github.com/fufexan/dotfiles
 - - https://github.com/notusknot/dotfiles-nix
 - - https://github.com/coffebar/dotfiles
 - Gaming (Steam / Drivers)
+- - https://emudeck.github.io/
+- - https://github.com/alyraffauf/bazznix/blob/master/nixosModules/apps/podman/default.nix
 ## Nice to have
+- https://github.com/nix-community/disko
 - OSD 
 - - https://github.com/System64fumo/syshud
 - - https://github.com/heyjuvi/avizo
@@ -64,3 +72,4 @@
 - - https://github.com/coffebar/hyprland-monitor-attached
 - https://github.com/Zerodya/hyprfreeze
 - https://github.com/ckaznable/hyprnavi?tab=readme-ov-file
+- https://github.com/alyraffauf/wallpapers

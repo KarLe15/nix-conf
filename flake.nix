@@ -20,27 +20,16 @@
     # Base 16 utils from base16 yaml to Nix Set
     base16utils = {
       url = "github:SenchoPens/base16.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
   };
 
   outputs = { self, nixpkgs, nixpkgs-darwin, darwin, home-manager, stylix, hyprland, base16utils,  ... }@flakeInputs :
   let 
-    mkCommon = { system, user, hostname, ... }@args: {
-      inherit system user hostname;
-      pkgs = import nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-      };
-      darwinPkgs = import nixpkgs-darwin {
-          inherit system;
-          config.allowUnfree = true;
-      };
-    };
-
     mkHomeManagerConfig = { user, system, hostOptions, ... }@mkHomeManagerConfigInputs: {
+      ## INFO :: To use the same NixPkgs Instance from Nixos and HomeManager to ensure sync :: https://nix-community.github.io/home-manager/index.xhtml#sec-install-nixos-module
       home-manager.useGlobalPkgs = true;
+      ## INFO :: Value set to use nixos-rebuild build-vm :: https://nix-community.github.io/home-manager/index.xhtml#sec-install-nixos-module
       home-manager.useUserPackages = true;
       home-manager.users.${user} = {
         ## INFO :: 05/04/2025 :: Preloaded modules for HomeManager
@@ -77,7 +66,6 @@
 
     # mkDarwinSystem = {system, user, hostname, ... }@inputs: 
       # let
-      #   params = mkCommon { inherit system user hostname; };
       # in
       # darwin.lib.darwinSystem {
       #   inherit system;
@@ -95,7 +83,6 @@
     
     mkNixosSystem = {system, user, hostname, ... }@mkSystemInputs:
       let
-        params = mkCommon { inherit system user hostname; };
         hostOptions = (import mkSystemInputs.hostOptionsPath) { 
           config = mkSystemInputs.flakeInputs.config;
           lib = nixpkgs.lib;
@@ -109,41 +96,47 @@
           (mkNixosConfig {inherit system hostOptions; })
           home-manager.nixosModules.home-manager
           (mkHomeManagerConfig { inherit user system hostOptions; })
-          # { _module.args = { inherit params mkSystemInputs; }; }
         ];
-      };
-
+      }
+    ;
       
   in {
     imports = [
       ./configurations
     ];
 
-    hardwareConfigsGenerator = { cfg, ... }: let
-      hw = cfg.hardware;
-    in {
-      monitors = import ./configurations/hardware/monitors/presets/${hw.monitors.active}.nix;
-    };
+    hardwareConfigsGenerator = { cfg, ... }: 
+      let
+        hw = cfg.hardware;
+      in {
+        monitors = import ./configurations/hardware/monitors/presets/${hw.monitors.active}.nix;
+      }
+    ;
 
-    styleConfigsGenerator = { cfg, ... } : let
-      style = cfg.style;
-    in {
-      themes = import ./configurations/style/themes/presets/${style.themes.active}.nix;
-      cursors = import ./configurations/style/cursors/presets/${style.cursors.active}.nix;
-    };
+    styleConfigsGenerator = { cfg, ... } : 
+      let
+        style = cfg.style;
+      in {
+        themes = import ./configurations/style/themes/presets/${style.themes.active}.nix;
+        cursors = import ./configurations/style/cursors/presets/${style.cursors.active}.nix;
+        fonts = import ./configurations/style/fonts/presets/${style.fonts.active}.nix;
+      }
+    ;
 
-    softwareConfigsGenerator = {cfg, ... }: let
-      sw = cfg.software;
-    in {
-      defaults = import ./configurations/software/defaults/presets/${sw.defaults.active}.nix;
-      developpement = import ./configurations/software/developpement/presets/${sw.developpement.active}.nix;
-      shortcuts = import ./configurations/software/shortcuts/presets/${sw.shortcuts.active}.nix;
-      launchers = import ./configurations/software/launchers/presets/${sw.launchers.active}.nix;
-      modules = {
-        eww.enable = false;
-        walker.enable = true;
-      };
-    };
+    softwareConfigsGenerator = {cfg, ... }: 
+      let
+        sw = cfg.software;
+      in {
+        defaults = import ./configurations/software/defaults/presets/${sw.defaults.active}.nix;
+        developpement = import ./configurations/software/developpement/presets/${sw.developpement.active}.nix;
+        shortcuts = import ./configurations/software/shortcuts/presets/${sw.shortcuts.active}.nix;
+        launchers = import ./configurations/software/launchers/presets/${sw.launchers.active}.nix;
+        modules = {
+          eww.enable = false;
+          walker.enable = true;
+        };
+      }
+    ;
 
     darwinConfigurations = {
     #   "mac-m1" = mkDarwinSystem {

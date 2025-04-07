@@ -16,9 +16,24 @@
       packages = with pkgs; [
         ## Hyprland must have 
         # eww
-        walker
-        gitui
+        hyprpaper  ## Wallpaper manager
+        hyprlock   ## Lock screen
+        hyprsysteminfo ## System hyprland GUI info
+        walker     ## App launcher
+        grim       ## Screenshot utils
+        slurp      ## Screenshot utils
+        satty      ## Screenshot tool
 
+
+        ## Pipewire utils
+        easyeffects
+
+        ## Games
+        obs-studio 
+        
+        ## TUI APP
+        fastfetch
+        gitui
         htop
         btop
         zenith
@@ -26,12 +41,18 @@
         git
         vim
         neovim
+
+        ## Terminals
         kitty
         ghostty
+
+        ## File Explorer
         nautilus
         thunderbird
+        
         bruno
-        fastfetch
+        
+        ## IDEs
         vscodium
       ];
     };

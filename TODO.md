@@ -7,10 +7,15 @@
 - - https://github.com/abenz1267/walker/issues/279
 - extra XDG Portals
 - - https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/
-## Missing parts
 - Pipewire 
 - - https://github.com/wwmm/easyeffects
-- HyprIdle / Hyprlock / Hyprpaper
+## Missing parts
+- HyprIdle / Hyprlock / Hyprpaper / >WLeave|Wlogout
+- - HyprPaper : Wallpaper engine (DONE)
+- - HyprLock : the lock screen displayed (Installed To Configure)
+- - WLeave : A logout screen with lock/hibernate/shutdown/reboot (TO DO)
+- - - https://github.com/AMNatty/wleave/
+- - HyprIdle : Idle daemon that hibernate/sleeps the computer after X seconds (To D)
 - Notifications
 - OSD 
 - - https://github.com/System64fumo/syshud
@@ -70,6 +75,7 @@
 
 
 ## About / Refs
+- https://github.com/nwg-piotr/nwg-shell
 - Awesome Hyprland
 - - https://github.com/hyprland-community/awesome-hyprland
 - Nix Config ideas to see

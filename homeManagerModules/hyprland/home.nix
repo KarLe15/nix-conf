@@ -16,6 +16,9 @@ let
 in
 {
   stylix.targets.hyprland.enable = true;
+  ## INFO :: The stylix module enables a systemD module and the uwsm is enabled with sddm and hyprland so the hyprpaper is loaded
+  stylix.targets.hyprpaper.enable = true;
+  stylix.targets.hyprlock.enable = true;
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = false;

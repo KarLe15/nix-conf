@@ -3,6 +3,7 @@ let
     theme = styleConfigs.themes.apply {inherit pkgs; };
     cursor = styleConfigs.cursors.apply {inherit pkgs; };
     fonts = styleConfigs.fonts.apply {inherit pkgs; };
+    wallpaper = styleConfigs.wallpaper.apply {inherit pkgs; };
 in {
     stylix.base16Scheme = theme.base16-schemes-yaml;
     stylix.fonts = with pkgs; {
@@ -29,4 +30,6 @@ in {
         name = cursor.default.exact-name;
         size = cursor.default.size;
     };
+    
+    stylix.image = wallpaper.default.path;
 }

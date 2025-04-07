@@ -146,6 +146,7 @@
         themes = import ./configurations/style/themes/presets/${style.themes.active}.nix;
         cursors = import ./configurations/style/cursors/presets/${style.cursors.active}.nix;
         fonts = import ./configurations/style/fonts/presets/${style.fonts.active}.nix;
+        wallpaper = import ./configurations/style/wallpapers/presets/${style.wallpaper.active}.nix;
       }
     ;
 

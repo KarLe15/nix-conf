@@ -2,6 +2,7 @@
     
     imports = [
       ./hyprland
+      ./hyprlock
       ./ghostty
       ./eww
       ./walker
@@ -18,6 +19,7 @@
         # eww
         hyprpaper  ## Wallpaper manager
         hyprlock   ## Lock screen
+        wleave     ## Logout Screen In Rust 
         hyprsysteminfo ## System hyprland GUI info
         walker     ## App launcher
         grim       ## Screenshot utils

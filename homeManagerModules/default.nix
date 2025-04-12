@@ -1,8 +1,10 @@
 {config, lib, pkgs, inputs, ... } : {
     
     imports = [
+      ./catppuccin
       ./hyprland
       ./hyprlock
+      ./wlogout
       ./ghostty
       ./eww
       ./walker
@@ -19,7 +21,7 @@
         # eww
         hyprpaper  ## Wallpaper manager
         hyprlock   ## Lock screen
-        wleave     ## Logout Screen In Rust 
+        wleave     ## Logout Screen In Rust  (Using wlogout configuration)
         hyprsysteminfo ## System hyprland GUI info
         walker     ## App launcher
         grim       ## Screenshot utils

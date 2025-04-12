@@ -12,8 +12,8 @@
 ## Missing parts
 - HyprIdle / Hyprlock / Hyprpaper / >WLeave|Wlogout
 - - HyprPaper : Wallpaper engine (DONE)
-- - HyprLock : the lock screen displayed (Installed To Configure)
-- - WLeave : A logout screen with lock/hibernate/shutdown/reboot (TO DO)
+- - HyprLock : the lock screen displayed (DONE Basics) 
+- - WLeave : A logout screen with lock/hibernate/shutdown/reboot (Done with issue on icons when run via hyprland)
 - - - https://github.com/AMNatty/wleave/
 - - HyprIdle : Idle daemon that hibernate/sleeps the computer after X seconds (To D)
 - Notifications

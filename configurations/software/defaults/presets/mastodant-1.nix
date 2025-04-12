@@ -20,6 +20,16 @@
       name = "ThunderBird";
       package = pkgs.thunderbird-latest-unwrapped;
     };
+    logout = {
+      command = "wleave -kf > /tmp/karim.txt";
+      name = "WLeave";
+      package = pkgs.wleave;
+    };
+    lockscreen = {
+      command = "hyprlock";
+      name = "Hyprlock";
+      package = pkgs.hyprlock;
+    };
   };
 
   autostart = [

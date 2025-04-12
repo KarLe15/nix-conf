@@ -14,6 +14,8 @@
     };
     
     stylix.url = "github:danth/stylix";
+    ## Use Catpuccin for not available modules on stylix
+    catppuccin.url = "github:catppuccin/nix";
 
     hyprland.url = "github:hyprwm/Hyprland";
 
@@ -30,7 +32,7 @@
 
   };
 
-  outputs = { self, nixpkgs, nixpkgs-darwin, darwin, home-manager, stylix, hyprland, base16utils, ... }@flakeInputs :
+  outputs = { self, nixpkgs, nixpkgs-darwin, darwin, home-manager, stylix, catppuccin, hyprland, base16utils, ... }@flakeInputs :
   let 
     mkHomeManagerConfig = { user, system, hostOptions, ... }@mkHomeManagerConfigInputs: {
       ## INFO :: To use the same NixPkgs Instance from Nixos and HomeManager to ensure sync :: https://nix-community.github.io/home-manager/index.xhtml#sec-install-nixos-module
@@ -43,6 +45,7 @@
         imports = [
           ./homeManagerModules
           base16utils.homeManagerModule
+          catppuccin.homeModules.catppuccin
           ## TODO :: 06/04/2024 :: Home-Manager module not merged into home-manager repo 
           ## Using Custom Home-manager module defined by KarLe
           # walker.homeManagerModules.default 

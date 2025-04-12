@@ -33,6 +33,14 @@ rec {
       command = "0";
       dispatcher-type = "fullscreen";
     }
+    ## ===========================<  Locking Commands  >==========================
+    {
+      description = "Logout Screen";
+      mod1 = secondary;
+      key = "L";
+      command = defaults.logout.command;
+      dispatcher-type = "exec";
+    }
     ## ===========================<  Launchers Manage  >==========================
     {
       description = "FullScreen Active Window (True full screen (without BAR))";

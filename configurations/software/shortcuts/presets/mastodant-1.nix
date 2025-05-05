@@ -3,7 +3,7 @@ rec {
   mod-shift = "ALT_SHIFT";
   secondary = "SUPER";
   secondary-shift = "SUPER_SHIFT";
-  shortcuts-definition = {defaults, developpement, launchers, ...}@programs: [
+  shortcuts-definition = {defaults, developpement, launchers, pkgs, ...}@programs: [
     ## ===========================<     WM Commands    >==========================
     {
       description = "Close Active Window";
@@ -11,6 +11,7 @@ rec {
       key = "Q";
       command = "";
       dispatcher-type = "killactive";
+      env = "";
     }
     {
       description = "Force Close Active Window";
@@ -18,6 +19,7 @@ rec {
       key = "Q";
       command = "";
       dispatcher-type = "forcekillactive";
+      env = "";
     }
     {
       description = "FullScreen Active Window (False full screen (with BAR))";
@@ -25,6 +27,7 @@ rec {
       key = "F";
       command = "1";
       dispatcher-type = "fullscreen";
+      env = "";
     }
     {
       description = "FullScreen Active Window (True full screen (without BAR))";
@@ -32,6 +35,7 @@ rec {
       key = "F";
       command = "0";
       dispatcher-type = "fullscreen";
+      env = "";
     }
     ## ===========================<  Locking Commands  >==========================
     {
@@ -40,14 +44,17 @@ rec {
       key = "L";
       command = defaults.logout.command;
       dispatcher-type = "exec";
+      # FIXME :: 05/05/2025 :: Add this to fix Wlogout / Wleave issue with icons
+      env = defaults.logout.env;
     }
     ## ===========================<  Launchers Manage  >==========================
     {
-      description = "FullScreen Active Window (True full screen (without BAR))";
+      description = "Application launcher";
       mod1 = mod;
       key = "Space";
       command = launchers.applications.command;
       dispatcher-type = "exec";
+      env = "";
     }
     ## ===========================<  Default programs  >==========================
     {
@@ -56,6 +63,7 @@ rec {
       key = "E";
       command = defaults.file-explorer.command;
       dispatcher-type = "exec";
+      env = "";
     }
     {
       description = "Open Terminal";
@@ -63,6 +71,7 @@ rec {
       key = "T";
       command = defaults.terminal.command;
       dispatcher-type = "exec";
+      env = "";
     }
     {
       description = "Open Browser";
@@ -70,6 +79,7 @@ rec {
       key = "B";
       command = defaults.browser.command;
       dispatcher-type = "exec";
+      env = "";
     }
   ];
 }

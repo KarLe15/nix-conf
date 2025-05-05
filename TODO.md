@@ -11,12 +11,12 @@
 - - https://github.com/wwmm/easyeffects
 ## Missing parts
 - HyprIdle / Hyprlock / Hyprpaper / >WLeave|Wlogout
-- - HyprPaper : Wallpaper engine (DONE)
-- - HyprLock : the lock screen displayed (DONE Basics) 
-- - WLeave : A logout screen with lock/hibernate/shutdown/reboot 
-- - - (Done with issue on icons when run via hyprland) // hyprctl dispatch exec "GDK_PIXBUF_MODULE_FILE=/nix/store/nnbp7fjmka7fijjsn35pfflh4qb4303r-librsvg-2.59.2/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache uwsm app -- wleave"
-- - - Issue with Suspend and Hiberbate (It load back immediatly) (Corrected with kernel params + USB)
-- - - https://github.com/AMNatty/wleave/
+- - HyprPaper (DONE) : Wallpaper engine (DONE)
+- - HyprLock (DONE) : the lock screen displayed (DONE Basics) 
+- - WLeave (DONE) : A logout screen with lock/hibernate/shutdown/reboot 
+- - - (DONE) (Done with issue on icons when run via hyprland) // hyprctl dispatch exec "GDK_PIXBUF_MODULE_FILE=/nix/store/nnbp7fjmka7fijjsn35pfflh4qb4303r-librsvg-2.59.2/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache uwsm app -- wleave"
+- - - (DONE) Issue with Suspend and Hiberbate (It load back immediatly) (Corrected with kernel params + USB)
+- - - (DONE) https://github.com/AMNatty/wleave/
 - - HyprIdle : Idle daemon that hibernate/sleeps the computer after X seconds (To D)
 - https://gitlab.com/Zaney/zaneyos/
 - Notifications

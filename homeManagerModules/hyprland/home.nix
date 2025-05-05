@@ -5,7 +5,7 @@ let
   defaults = softwareConfigs.defaults.apply { inherit pkgs; };
   launchers = softwareConfigs.launchers.apply { inherit pkgs; };
   developpement = softwareConfigs.developpement.apply { inherit pkgs; };
-  shortcuts-impl = softwareConfigs.shortcuts.shortcuts-definition { inherit defaults developpement launchers ; };
+  shortcuts-impl = softwareConfigs.shortcuts.shortcuts-definition { inherit defaults developpement launchers pkgs ; };
   autostart-services = 
         softwareConfigs.defaults.autostart 
     ++  softwareConfigs.launchers.autostart 
@@ -40,7 +40,9 @@ in
       ## Shortcuts definition
       bind = (
         map (shortcut: 
-          if shortcut.command != null && shortcut.command != "" && shortcut.dispatcher-type == "exec" then 
+          if shortcut.command != null && shortcut.command != "" && shortcut.dispatcher-type == "exec" && shortcut.env != "" then 
+            "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, ${shortcut.env} uwsm app -- ${shortcut.command}"
+          else if shortcut.command != null && shortcut.command != "" && shortcut.dispatcher-type == "exec" then
             "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, uwsm app -- ${shortcut.command}"
           else 
             "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, ${shortcut.command}"

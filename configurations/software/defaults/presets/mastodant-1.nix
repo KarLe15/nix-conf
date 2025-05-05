@@ -21,9 +21,11 @@
       package = pkgs.thunderbird-latest-unwrapped;
     };
     logout = {
-      command = "wleave -kf > /tmp/karim.txt";
+      command = "wleave -kf";
       name = "WLeave";
       package = pkgs.wleave;
+      # FIXME :: 05/05/2025 :: Add this to fix Wlogout / Wleave issue with icons
+      env = "GDK_PIXBUF_MODULE_FILE=${pkgs.librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache";
     };
     lockscreen = {
       command = "hyprlock";

@@ -15,7 +15,7 @@
 [
   ## Left Monitor
   {
-    name = "DP-1";
+    name = "DP-3";
     width = 1920;
     height = 1080;
     refreshRate = 60;
@@ -34,7 +34,7 @@
   }
   ## Right Monitor
   {
-    name = "DP-3";
+    name = "DP-1";
     width = 1920;
     height = 1080;
     refreshRate = 60;

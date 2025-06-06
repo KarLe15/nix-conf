@@ -4,6 +4,7 @@
       ./catppuccin
       ./hyprland
       ./hyprlock
+      ./hypridle
       ./wlogout
       ./ghostty
       ./eww
@@ -21,6 +22,7 @@
         # eww
         hyprpaper  ## Wallpaper manager
         hyprlock   ## Lock screen
+        hypridle
         wleave     ## Logout Screen In Rust  (Using wlogout configuration)
         hyprsysteminfo ## System hyprland GUI info
         walker     ## App launcher

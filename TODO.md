@@ -9,7 +9,6 @@
 - - https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/
 - Pipewire 
 - - https://github.com/wwmm/easyeffects
-## Missing parts
 - HyprIdle / Hyprlock / Hyprpaper / >WLeave|Wlogout
 - - HyprPaper (DONE) : Wallpaper engine (DONE)
 - - HyprLock (DONE) : the lock screen displayed (DONE Basics) 
@@ -17,11 +16,8 @@
 - - - (DONE) (Done with issue on icons when run via hyprland) // hyprctl dispatch exec "GDK_PIXBUF_MODULE_FILE=/nix/store/nnbp7fjmka7fijjsn35pfflh4qb4303r-librsvg-2.59.2/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache uwsm app -- wleave"
 - - - (DONE) Issue with Suspend and Hiberbate (It load back immediatly) (Corrected with kernel params + USB)
 - - - (DONE) https://github.com/AMNatty/wleave/
-- - HyprIdle : Idle daemon that hibernate/sleeps the computer after X seconds (To D)
-- See around 
-- - https://github.com/JaKooLit/NixOS-Hyprland/
-- - https://github.com/richen604/hydenix
-- https://gitlab.com/Zaney/zaneyos/
+- - HyprIdle (DONE) : Idle daemon that hibernate/sleeps the computer after X seconds (To D)
+## Missing parts
 - Notifications
 - OSD 
 - - https://github.com/System64fumo/syshud
@@ -69,6 +65,12 @@
 - Gaming (Steam / Drivers / Emulation)
 - - https://emudeck.github.io/
 - - https://github.com/alyraffauf/bazznix/blob/master/nixosModules/apps/podman/default.nix
+- HyprIdle during games
+- - https://www.reddit.com/r/hyprland/comments/1enu1lc/hypridle_ignoring_mpv/
+- See around 
+- - https://github.com/JaKooLit/NixOS-Hyprland/
+- - https://github.com/richen604/hydenix
+- - https://gitlab.com/Zaney/zaneyos/
 ## Nice to have
 - https://github.com/nix-community/disko
 - Plug/unplug screen

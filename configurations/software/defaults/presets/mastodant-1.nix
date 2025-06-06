@@ -32,6 +32,11 @@
       name = "Hyprlock";
       package = pkgs.hyprlock;
     };
+    idlemanager = {
+      command = "hypridle";
+      name = "HyprIdle";
+      package = pkgs.hypridle;
+    };
   };
 
   autostart = [

@@ -6,6 +6,7 @@
       ./hyprlock
       ./hypridle
       ./swaync
+      ./avizo
       ./wlogout
       ./ghostty
       ./eww
@@ -27,6 +28,7 @@
         wleave     ## Logout Screen In Rust  (Using wlogout configuration)
         hyprsysteminfo ## System hyprland GUI info
         swaynotificationcenter   ## Notifications
+        avizo                   ## Sound / brightness notifications
         walker     ## App launcher
         grim       ## Screenshot utils
         slurp      ## Screenshot utils

@@ -162,6 +162,7 @@
         shortcuts = import ./configurations/software/shortcuts/presets/${sw.shortcuts.active}.nix;
         launchers = import ./configurations/software/launchers/presets/${sw.launchers.active}.nix;
         powermanagement = import ./configurations/software/powermanagement/presets/${sw.powermanagement.active}.nix;
+        multimedia = import ./configurations/software/multimedia/presets/${sw.multimedia.active}.nix;
         modules = {
           eww.enable = false;
           walker.enable = true;

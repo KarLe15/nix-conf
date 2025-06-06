@@ -18,11 +18,12 @@
 - - - (DONE) https://github.com/AMNatty/wleave/
 - - HyprIdle (DONE) : Idle daemon that hibernate/sleeps the computer after X seconds (To D)
 - Notifications
-## Missing parts
 - OSD 
+- - Choice Avizo with custom shortcuts
 - - https://github.com/System64fumo/syshud
 - - https://github.com/heyjuvi/avizo
 - - https://github.com/ErikReider/SwayOSD
+## Missing parts
 - Secrets Management
 - - https://github.com/yaxitech/ragenix
 - - https://github.com/alyraffauf/secrets

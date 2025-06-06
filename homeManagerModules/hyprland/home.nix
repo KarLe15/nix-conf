@@ -5,7 +5,8 @@ let
   defaults = softwareConfigs.defaults.apply { inherit pkgs; };
   launchers = softwareConfigs.launchers.apply { inherit pkgs; };
   developpement = softwareConfigs.developpement.apply { inherit pkgs; };
-  shortcuts-impl = softwareConfigs.shortcuts.shortcuts-definition { inherit defaults developpement launchers pkgs ; };
+  multimedia = softwareConfigs.multimedia.apply { inherit pkgs; };
+  shortcuts-impl = softwareConfigs.shortcuts.shortcuts-definition { inherit defaults developpement launchers pkgs multimedia ; };
   autostart-services = 
         softwareConfigs.defaults.autostart 
     ++  softwareConfigs.launchers.autostart 

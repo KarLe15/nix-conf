@@ -14,6 +14,7 @@
   software.shortcuts.active = "mastodant-1";
   software.launchers.active = "walker";
   software.powermanagement.active = "systemD";
+  software.multimedia.active = "avizo";
 
   ## ===============================<   stylix   >==========================================
   stylix.targets.qt.platform = lib.mkForce "qtct";

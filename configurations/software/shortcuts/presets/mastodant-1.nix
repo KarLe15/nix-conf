@@ -3,7 +3,7 @@ rec {
   mod-shift = "ALT_SHIFT";
   secondary = "SUPER";
   secondary-shift = "SUPER_SHIFT";
-  shortcuts-definition = {defaults, developpement, launchers, pkgs, ...}@programs: [
+  shortcuts-definition = {defaults, developpement, launchers, multimedia, pkgs, ...}@programs: [
     ## ===========================<     WM Commands    >==========================
     {
       description = "Close Active Window";
@@ -42,6 +42,31 @@ rec {
       mod1 = mod-shift;
       key = "N";
       command = defaults.notification-center.command;
+      dispatcher-type = "exec";
+      env = "";
+    }
+    ## ===========================<  MultiMedia commands  >=======================
+    {
+      description = "Increase the Volume";
+      mod1 = "";
+      key = "XF86AudioRaiseVolume";
+      command = multimedia.increaseVolume.command;
+      dispatcher-type = "exec";
+      env = "";
+    }
+    {
+      description = "Lower the Volume";
+      mod1 = "";
+      key = "XF86AudioLowerVolume";
+      command = multimedia.lowerVolume.command;
+      dispatcher-type = "exec";
+      env = "";
+    }
+    {
+      description = "Mute / Unmute the Volume";
+      mod1 = "";
+      key = "XF86AudioPlay";
+      command = multimedia.toggleVolume.command;
       dispatcher-type = "exec";
       env = "";
     }

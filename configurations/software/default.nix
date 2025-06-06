@@ -5,5 +5,6 @@
     ./shortcuts
     ./launchers
     ./powermanagement
+    ./multimedia
   ];
 }

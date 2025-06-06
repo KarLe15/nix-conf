@@ -18,6 +18,9 @@
 - - - (DONE) Issue with Suspend and Hiberbate (It load back immediatly) (Corrected with kernel params + USB)
 - - - (DONE) https://github.com/AMNatty/wleave/
 - - HyprIdle : Idle daemon that hibernate/sleeps the computer after X seconds (To D)
+- See around 
+- - https://github.com/JaKooLit/NixOS-Hyprland/
+- - https://github.com/richen604/hydenix
 - https://gitlab.com/Zaney/zaneyos/
 - Notifications
 - OSD 

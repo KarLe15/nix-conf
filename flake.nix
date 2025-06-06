@@ -161,6 +161,7 @@
         developpement = import ./configurations/software/developpement/presets/${sw.developpement.active}.nix;
         shortcuts = import ./configurations/software/shortcuts/presets/${sw.shortcuts.active}.nix;
         launchers = import ./configurations/software/launchers/presets/${sw.launchers.active}.nix;
+        powermanagement = import ./configurations/software/powermanagement/presets/${sw.powermanagement.active}.nix;
         modules = {
           eww.enable = false;
           walker.enable = true;

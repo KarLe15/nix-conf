@@ -4,5 +4,6 @@
     ./developpement
     ./shortcuts
     ./launchers
+    ./powermanagement
   ];
 }

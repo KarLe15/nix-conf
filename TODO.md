@@ -17,8 +17,8 @@
 - - - (DONE) Issue with Suspend and Hiberbate (It load back immediatly) (Corrected with kernel params + USB)
 - - - (DONE) https://github.com/AMNatty/wleave/
 - - HyprIdle (DONE) : Idle daemon that hibernate/sleeps the computer after X seconds (To D)
-## Missing parts
 - Notifications
+## Missing parts
 - OSD 
 - - https://github.com/System64fumo/syshud
 - - https://github.com/heyjuvi/avizo
@@ -67,6 +67,10 @@
 - - https://github.com/alyraffauf/bazznix/blob/master/nixosModules/apps/podman/default.nix
 - HyprIdle during games
 - - https://www.reddit.com/r/hyprland/comments/1enu1lc/hypridle_ignoring_mpv/
+- Notifications :
+- - Style notifications for spacing 
+- - Add sound for all notifications
+- - Add special sound for Discord / Slack notifications
 - See around 
 - - https://github.com/JaKooLit/NixOS-Hyprland/
 - - https://github.com/richen604/hydenix

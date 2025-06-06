@@ -20,6 +20,11 @@
       name = "ThunderBird";
       package = pkgs.thunderbird-latest-unwrapped;
     };
+    notification-center = {
+      command = "swaync-client -t";
+      name = "Open notification Center";
+      package = pkgs.swaynotificationcenter;
+    };
     logout = {
       command = "wleave -kf";
       name = "WLeave";

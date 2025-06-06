@@ -37,6 +37,14 @@ rec {
       dispatcher-type = "fullscreen";
       env = "";
     }
+    {
+      description = "Open Notification Center";
+      mod1 = mod-shift;
+      key = "N";
+      command = defaults.notification-center.command;
+      dispatcher-type = "exec";
+      env = "";
+    }
     ## ===========================<  Locking Commands  >==========================
     {
       description = "Logout Screen";

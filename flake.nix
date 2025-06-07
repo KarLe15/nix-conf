@@ -12,6 +12,10 @@
       url = "github:lnl7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
+
+    ragenix = {
+      url = "github:yaxitech/ragenix";
+    };
     
     stylix.url = "github:danth/stylix";
     ## Use Catpuccin for not available modules on stylix
@@ -32,7 +36,7 @@
 
   };
 
-  outputs = { self, nixpkgs, nixpkgs-darwin, darwin, home-manager, stylix, catppuccin, hyprland, base16utils, ... }@flakeInputs :
+  outputs = { self, nixpkgs, nixpkgs-darwin, darwin, home-manager, ragenix, stylix, catppuccin, hyprland, base16utils, ... }@flakeInputs :
   let 
     mkHomeManagerConfig = { user, system, hostOptions, ... }@mkHomeManagerConfigInputs: {
       ## INFO :: To use the same NixPkgs Instance from Nixos and HomeManager to ensure sync :: https://nix-community.github.io/home-manager/index.xhtml#sec-install-nixos-module
@@ -46,6 +50,7 @@
           ./homeManagerModules
           base16utils.homeManagerModule
           catppuccin.homeModules.catppuccin
+          ragenix.homeManagerModules.default
           ## TODO :: 06/04/2024 :: Home-Manager module not merged into home-manager repo 
           ## Using Custom Home-manager module defined by KarLe
           # walker.homeManagerModules.default 
@@ -58,9 +63,10 @@
       };
     };
 
-    mkCommonOsConfig = { system, hostOptions , ... }@mkCommonOsConfigInput: {
+    mkCommonOsConfig = { system, hostOptions, ragenix, ragenixKeyPath, ... }@mkCommonOsConfigInput: {
       imports = [ ./nixCommonModules ];
       _module.args = {
+        inherit system ragenix ragenixKeyPath;
         hardwareConfigs = self.hardwareConfigsGenerator { cfg = hostOptions; };
         styleConfigs = self.styleConfigsGenerator { cfg = hostOptions; };
         softwareConfigs = self.softwareConfigsGenerator { cfg = hostOptions; };
@@ -84,12 +90,13 @@
     ## INFO :: Example :: modules that defines utils / configurations to be available in all nixOS / nixDarwin modules
     commonConfigurationModules = [
       base16utils.nixosModule
+      ragenix.nixosModules.default
       ./configurations
     ];
     
 
 
-    # mkDarwinSystem = {system, user, hostname, ... }@mkDarwinSystemInputs: 
+    # mkDarwinSystem = {system, user, hostname, ragenix, ragenixKeyPath, ... }@mkDarwinSystemInputs: 
     #   let
     #     hostOptions = (import mkDarwinSystemInputs.hostOptionsPath) { 
     #       config = mkDarwinSystemInputs.flakeInputs.config;
@@ -101,7 +108,10 @@
     #     modules = commonConfigurationModules ++ [
     #       mkDarwinSystemInputs.hostConfigPath
     #       mkDarwinSystemInputs.stylix.darwinModules.stylix
-    #       (mkCommonOsConfig {inherit system hostOptions; })
+    #       (mkCommonOsConfig {
+    #          inherit system hostOptions ragenixKeyPath;
+    #          ragenix = mkNixOsSystemInputs.flakeInputs.ragenix;  
+    #        })
     #       (mkNixDarwinConfig {inherit system hostOptions; })
     #       home-manager.darwinModules.home-manager
     #       (mkHomeManagerConfig { inherit user system hostOptions; })
@@ -109,7 +119,7 @@
     #   }
     # ;
     
-    mkNixosSystem = {system, user, hostname, ... }@mkNixOsSystemInputs:
+    mkNixosSystem = {system, user, hostname, ragenixKeyPath, ... }@mkNixOsSystemInputs:
       let
         hostOptions = (import mkNixOsSystemInputs.hostOptionsPath) { 
           config = mkNixOsSystemInputs.flakeInputs.config;
@@ -121,7 +131,11 @@
         modules = commonConfigurationModules ++ [
           mkNixOsSystemInputs.hostConfigPath
           mkNixOsSystemInputs.stylix.nixosModules.stylix
-          (mkCommonOsConfig {inherit system hostOptions; })
+          (mkCommonOsConfig {
+            inherit system hostOptions ragenixKeyPath;
+            ragenix = mkNixOsSystemInputs.flakeInputs.ragenix;
+
+          })
           (mkNixosConfig {
             inherit system hostOptions;
             hyprland = mkNixOsSystemInputs.flakeInputs.hyprland;
@@ -185,6 +199,7 @@
         hostOptionsPath = ./hosts/mastodant-1/options.nix;
         system = "x86_64-linux";
         user = "karim";
+        ragenixKeyPath = "/home/karim/.ssh/id_agenix_ed25519";
         hostname = "karle";
       };
     };

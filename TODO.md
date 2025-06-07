@@ -23,10 +23,10 @@
 - - https://github.com/System64fumo/syshud
 - - https://github.com/heyjuvi/avizo
 - - https://github.com/ErikReider/SwayOSD
-## Missing parts
-- Secrets Management
+- Secrets Management Used ragenix (Done with backup)
 - - https://github.com/yaxitech/ragenix
 - - https://github.com/alyraffauf/secrets
+## Missing parts
 - Authentication Agent 
 - - https://wiki.hyprland.org/Hypr-Ecosystem/hyprpolkitagent/
 - Git config
@@ -77,6 +77,9 @@
 - - https://github.com/richen604/hydenix
 - - https://gitlab.com/Zaney/zaneyos/
 ## Nice to have
+- Upscaler : Image scaller 
+- Bottles : Game launcher (Wine apps)
+- ADWSteamGTK : Apply Adwaita theme to steam app
 - https://github.com/nix-community/disko
 - Plug/unplug screen
 - - https://git.sr.ht/~emersion/kanshi
@@ -85,7 +88,8 @@
 - https://github.com/ckaznable/hyprnavi?tab=readme-ov-file
 - https://github.com/alyraffauf/wallpapers
 
-
+https://github.com/LuckyTurtleDev/crab-hole
+https://www.kismetwireless.net/docs/readme/intro/passive_capture/
 
 ## About / Refs
 - https://github.com/nwg-piotr/nwg-shell

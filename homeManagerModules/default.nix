@@ -5,6 +5,7 @@
       ./hyprland
       ./hyprlock
       ./hypridle
+      ./hyprpolkitagent
       ./swaync
       ./avizo
       ./wlogout
@@ -20,23 +21,27 @@
     home = {
       stateVersion = "24.11";
       packages = with pkgs; [
-        ## Hyprland must have 
+        
         # eww
-        hyprpaper  ## Wallpaper manager
-        hyprlock   ## Lock screen
-        hypridle
-        wleave     ## Logout Screen In Rust  (Using wlogout configuration)
-        hyprsysteminfo ## System hyprland GUI info
-        swaynotificationcenter   ## Notifications
-        avizo                   ## Sound / brightness notifications
-        walker     ## App launcher
-        grim       ## Screenshot utils
-        slurp      ## Screenshot utils
-        satty      ## Screenshot tool
+        ## Hyprland must have 
+        hyprpaper                 ## Wallpaper manager
+        hyprlock                  ## Lock screen
+        hypridle                  ## Idle Manager
+        hyprpolkitagent           ## Polkit agent (GUI root access)
+        wleave                    ## Logout Screen In Rust  (Using wlogout configuration)
+        hyprsysteminfo            ## System hyprland GUI info
+        swaynotificationcenter    ## Notifications
+        avizo                     ## Sound / brightness notifications
+        walker                    ## App launcher
+        
+        ## Screenshotting
+        grim                      ## Screenshot utils
+        slurp                     ## Screenshot utils
+        satty                     ## Screenshot tool
 
 
         ## Pipewire utils
-        easyeffects
+        easyeffects               ## Manage Inputs / Output for audio
 
         ## Games
         obs-studio 

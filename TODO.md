@@ -26,11 +26,10 @@
 - Secrets Management Used ragenix (Done with backup)
 - - https://github.com/yaxitech/ragenix
 - - https://github.com/alyraffauf/secrets
-## Missing parts
 - Authentication Agent 
 - - https://wiki.hyprland.org/Hypr-Ecosystem/hyprpolkitagent/
 - Git config
-- SDDM setup
+## Missing parts
 - Status bar
 - - https://github.com/jasper-clarke/hypr-ws-switcher
 - - https://github.com/KZDKM/Hyprspace
@@ -43,8 +42,6 @@
 - - https://github.com/flameshot-org/flameshot
 - - https://github.com/gabm/satty
 - - nix-shell -p obs-studio grim slurp satty
-- Screen sharing
-- - https://gist.github.com/brunoanc/2dea6ddf6974ba4e5d26c3139ffb7580
 - Clipboard Manager
 - - https://github.com/sentriz/cliphist
 - CLI utilities 
@@ -60,6 +57,10 @@
 - - firefox
 - - zen browser
 - Docker / Libvirt / kvm / Qemu
+- Screen sharing
+- - https://gist.github.com/brunoanc/2dea6ddf6974ba4e5d26c3139ffb7580
+- SDDM setup
+- Setup options / properties from Configurations / hosts for home-manager
 - Cachix https://wiki.hyprland.org/Nix/Cachix/
 - Nix LSP
 - - https://github.com/oxalica/nil
@@ -77,6 +78,8 @@
 - - https://github.com/richen604/hydenix
 - - https://gitlab.com/Zaney/zaneyos/
 ## Nice to have
+- Git scripts to clone/Create repository for specific account
+- Git script to switch repos from accounts (.git manipulation) 
 - Upscaler : Image scaller 
 - Bottles : Game launcher (Wine apps)
 - ADWSteamGTK : Apply Adwaita theme to steam app

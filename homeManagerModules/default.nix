@@ -12,11 +12,39 @@
       ./ghostty
       ./eww
       ./walker
+      ./git-accounts
     ];
 
     stylix.targets.gitui.enable = true;
     stylix.autoEnable = true;
 
+    programs.git-multi-account = {
+      enable = true;
+      git-accounts = [
+        {
+          username = "KarLe15";
+          email = "leffadkarim97@live.fr";
+          key = "/home/karim/.ssh/id_github_perso_ed25519";
+          dns-alias = "github-perso";
+          dns-origin = "github.com";
+        }
+        {
+          username = "KarLe15";
+          email = "leffadkarim97@live.fr";
+          key = "/home/karim/.ssh/id_gitlab_perso_ed25519";
+          dns-alias = "gitlab-perso";
+          dns-origin = "gitlab.com";
+        }
+        {
+          username = "KarLe15";
+          email = "leffadkarim97@live.fr";
+          key = "/home/karim/.ssh/id_gitlab_taneflit_ed25519";
+          dns-alias = "gitlab-taneflit";
+          dns-origin = "gitlab.com";
+        }
+      ];
+    };
+    
     xdg.enable = true;
     home = {
       stateVersion = "24.11";

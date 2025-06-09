@@ -1,18 +1,19 @@
-{inputs, pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, ... } : 
+{inputs, pkgs, lib, config, customConfigs, ... } : 
 let 
-  activeMonitorConfig = hardwareConfigs.monitors;
-  cursor = styleConfigs.cursors.apply { inherit pkgs; };
-  defaults = softwareConfigs.defaults.apply { inherit pkgs; };
-  launchers = softwareConfigs.launchers.apply { inherit pkgs; };
-  developpement = softwareConfigs.developpement.apply { inherit pkgs; };
-  multimedia = softwareConfigs.multimedia.apply { inherit pkgs; };
-  shortcuts-impl = softwareConfigs.shortcuts.shortcuts-definition { inherit defaults developpement launchers pkgs multimedia ; };
+  activeMonitorConfig = customConfigs.hardwareConfigs.monitors;
+  workspaces = customConfigs.styleConfigs.workspaces.apply { inherit pkgs; };
+  cursor = customConfigs.styleConfigs.cursors.apply { inherit pkgs; };
+  defaults = customConfigs.softwareConfigs.defaults.apply { inherit pkgs; };
+  launchers = customConfigs.softwareConfigs.launchers.apply { inherit pkgs; };
+  developpement = customConfigs.softwareConfigs.developpement.apply { inherit pkgs; };
+  multimedia = customConfigs.softwareConfigs.multimedia.apply { inherit pkgs; };
+  shortcuts-impl = customConfigs.softwareConfigs.shortcuts.shortcuts-definition { inherit defaults developpement launchers pkgs multimedia ; };
   autostart-services = 
-        softwareConfigs.defaults.autostart 
-    ++  softwareConfigs.launchers.autostart 
-    ++  softwareConfigs.developpement.autostart
-    ++  styleConfigs.themes.autostart
-    ++  styleConfigs.cursors.autostart
+        customConfigs.softwareConfigs.defaults.autostart 
+    ++  customConfigs.softwareConfigs.launchers.autostart 
+    ++  customConfigs.softwareConfigs.developpement.autostart
+    ++  customConfigs.styleConfigs.themes.autostart
+    ++  customConfigs.styleConfigs.cursors.autostart
   ;
 in
 {
@@ -23,7 +24,6 @@ in
     enable = true;
     systemd.enable = false;
     settings = {
-      # "$mod" = "ALT";
 
       monitor = map (m: 
         "${m.name}, ${toString m.width}x${toString m.height}@${toString m.refreshRate}, ${toString m.position.x}x${toString m.position.y}, ${toString m.scale}"
@@ -48,7 +48,19 @@ in
           else 
             "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, ${shortcut.command}"
         ) shortcuts-impl
-      );
+      ) ++
+      ## Add workspace shortcut 
+      lib.flatten (
+        map (workspace:
+          (map (key: [
+                "${workspace.mod}, ${key}, workspace, ${toString workspace.id}"
+                "${workspace.mod-shift}, ${key}, movetoworkspacesilent , ${toString workspace.id}"
+                ]
+            ) 
+            workspace.shortcut)
+        ) workspaces.workspaces_defined
+      )
+      ;
       
       input = {
         "kb_layout" = "fr";

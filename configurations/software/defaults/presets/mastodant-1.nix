@@ -10,6 +10,11 @@
       name = "Ghostty";
       package = pkgs.ghostty;
     };
+    terminal-editor = {
+      command = "nvim";
+      name = "NeoVim";
+      package = pkgs.neovim;
+    };
     file-explorer = {
       command = "nautilus";
       name = "Nautilus";
@@ -41,6 +46,11 @@
       command = "hypridle";
       name = "HyprIdle";
       package = pkgs.hypridle;
+    };
+    audiomanager = {
+      command = "easyeffects";
+      name = "EasyEeffects";
+      package = pkgs.easyeffects;
     };
   };
 

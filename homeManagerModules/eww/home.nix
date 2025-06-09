@@ -1,6 +1,6 @@
-{inputs, pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, ... }:
+{inputs, pkgs, lib, config, customConfigs, ... }:
 let
-  cfg = softwareConfigs.modules.eww;
+  cfg = customConfigs.softwareConfigs.modules.eww;
 in {
   imports = [
   ];

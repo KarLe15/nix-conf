@@ -5,5 +5,7 @@
     ./cursors
     ./icons
     ./themes
+    ./status-bars
+    ./workspaces
   ];
 }

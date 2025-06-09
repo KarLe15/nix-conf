@@ -1,4 +1,4 @@
-{config, lib, pkgs, hardwareConfigs, styleConfigs, ... } : {
+{config, lib, pkgs, customConfigs, ... } : {
     imports = [
     ];
 }

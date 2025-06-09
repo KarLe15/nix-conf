@@ -2,6 +2,7 @@
   imports = [
     ./defaults
     ./developpement
+    ./git-accounts
     ./shortcuts
     ./launchers
     ./powermanagement

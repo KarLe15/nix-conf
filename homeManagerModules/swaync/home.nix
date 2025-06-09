@@ -1,7 +1,4 @@
-{inputs, pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, ... } : 
-let 
-  cursor = styleConfigs.cursors.apply { inherit pkgs; };
-in
+{inputs, pkgs, lib, config, customConfigs, ... } :
 {
   stylix.targets.swaync = {
     enable = true;

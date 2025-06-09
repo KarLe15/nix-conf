@@ -38,6 +38,14 @@ rec {
       env = "";
     }
     {
+      description = "Toggle Floating";
+      mod1 = secondary;
+      key = "Space";
+      command = "";
+      dispatcher-type = "togglefloating";
+      env = "";
+    }
+    {
       description = "Open Notification Center";
       mod1 = mod-shift;
       key = "N";
@@ -93,7 +101,7 @@ rec {
     {
       description = "Open File Explorer";
       mod1 = mod;
-      key = "E";
+      key = "Return";
       command = defaults.file-explorer.command;
       dispatcher-type = "exec";
       env = "";

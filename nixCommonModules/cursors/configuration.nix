@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... } : {
+{ pkgs, lib, ... } : {
   environment.systemPackages = with pkgs; [
     ## TODO :: 04/04/2025 :: Change this to be more reflecting of the reel config
     apple-cursor

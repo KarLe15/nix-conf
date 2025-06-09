@@ -1,8 +1,7 @@
-{inputs, pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, ... } : 
+{inputs, pkgs, lib, config, customConfigs, ... } : 
 let 
-  cursor = styleConfigs.cursors.apply { inherit pkgs; };
-  defaultPrograms = softwareConfigs.defaults.apply { inherit pkgs; };
-  powermanagement = softwareConfigs.powermanagement.apply { inherit pkgs; };
+  defaultPrograms = customConfigs.softwareConfigs.defaults.apply { inherit pkgs; };
+  powermanagement = customConfigs.softwareConfigs.powermanagement.apply { inherit pkgs; };
 in
 {
   services.hypridle = {

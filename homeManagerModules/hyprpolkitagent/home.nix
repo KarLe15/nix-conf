@@ -1,12 +1,5 @@
-{inputs, pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, ... } : 
-let 
-  cursor = styleConfigs.cursors.apply { inherit pkgs; };
-in
+{inputs, pkgs, lib, config, customConfigs, ... } : 
 {
-  stylix.targets.hyprlock = {
-    enable = true;
-    useWallpaper = false;
-  };
   services.hyprpolkitagent = {
     enable = true;
     package = pkgs.hyprpolkitagent;

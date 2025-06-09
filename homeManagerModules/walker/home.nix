@@ -1,7 +1,7 @@
-{pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, ... } :
+{pkgs, lib, config, customConfigs, ... } :
 let
-  cfg = softwareConfigs.modules.walker;
-  system-theme = styleConfigs.themes.apply {inherit pkgs; };
+  cfg = customConfigs.softwareConfigs.modules.walker;
+  system-theme = customConfigs.styleConfigs.themes.apply {inherit pkgs; };
   base16-theme = config.lib.base16.mkSchemeAttrs system-theme.base16-schemes-yaml;
   theme-name = "karle-theme";
 in  {

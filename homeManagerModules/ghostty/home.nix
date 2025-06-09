@@ -1,6 +1,6 @@
 
 
-{inputs, pkgs, lib, config, hardwareConfigs, styleConfigs, softwareConfigs, ... } : 
+{inputs, pkgs, lib, config, customConfigs, ... } : 
 let 
 in
 {

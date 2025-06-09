@@ -1,4 +1,4 @@
-{config, lib, pkgs, hardwareConfigs, styleConfigs, hyprland,  ... }@inputs : {
+{config, lib, pkgs, customConfigs, hyprland,  ... }@inputs : {
     imports = [
     ];
 }

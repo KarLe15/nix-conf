@@ -1,9 +1,9 @@
-{ pkgs, lib, config, styleConfigs, ... }@inputs : 
+{ pkgs, lib, config, customConfigs, ... }@inputs : 
 let 
-    theme = styleConfigs.themes.apply {inherit pkgs; };
-    cursor = styleConfigs.cursors.apply {inherit pkgs; };
-    fonts = styleConfigs.fonts.apply {inherit pkgs; };
-    wallpaper = styleConfigs.wallpaper.apply {inherit pkgs; };
+    theme = customConfigs.styleConfigs.themes.apply {inherit pkgs; };
+    cursor = customConfigs.styleConfigs.cursors.apply {inherit pkgs; };
+    fonts = customConfigs.styleConfigs.fonts.apply {inherit pkgs; };
+    wallpaper = customConfigs.styleConfigs.wallpaper.apply {inherit pkgs; };
 in {
     stylix.base16Scheme = theme.base16-schemes-yaml;
     stylix.fonts = with pkgs; {

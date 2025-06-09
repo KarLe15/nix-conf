@@ -38,11 +38,13 @@
 - - https://github.com/Alexays/Waybar           (Solution 2)
 - - https://github.com/vars1ty/HybridBar        (Archived)
 - - https://github.com/LBCrion/sfwbar           (S* expression defined status bar)
-## Missing parts
 - Screenshots 
 - - https://github.com/flameshot-org/flameshot
 - - https://github.com/gabm/satty
 - - nix-shell -p obs-studio grim slurp satty
+## Missing parts
+- Setup WIndow Rule and Workspace rule
+- - Setup navigation shortcuts with vim bindings
 - Clipboard Manager
 - - https://github.com/sentriz/cliphist
 - Setup Shell (nushell / fish)

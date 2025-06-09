@@ -61,7 +61,32 @@ in
         ) workspaces.workspaces_defined
       )
       ;
-      
+
+      ## https://wiki.hyprland.org/0.48.0/Configuring/Binds/#mouse-binds
+      bindm = [
+        "ALT, mouse:272, movewindow"
+        "ALT, mouse:273, resizewindow"
+      ];
+      windowrule = [
+        "float, class:com.gabm.satty"
+        "decorate on, class:com.gabm.satty"
+        "bordersize 40, class:com.gabm.satty"
+      ];
+
+      ## https://wiki.hyprland.org/0.48.0/Configuring/Workspace-Rules/
+      workspace = [
+          "1, monitor:DP-3"
+          "4, monitor:DP-3"
+          "7, monitor:DP-3"
+          "2, monitor:DP-1"
+          "5, monitor:DP-1"
+          "8, monitor:DP-1"
+          "3, monitor:HDMI-A-2"
+          "6, monitor:HDMI-A-2"
+          "9, monitor:HDMI-A-2"
+      ];
+
+
       input = {
         "kb_layout" = "fr";
         "numlock_by_default" = "true";

@@ -122,5 +122,13 @@ rec {
       dispatcher-type = "exec";
       env = "";
     }
+    {
+      description = "Take Screenshot and modify";
+      mod1 = "";
+      key = "mouse:277";
+      dispatcher-type = "exec";
+      command = ''$(grim -g "$(slurp)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
+      env = "";
+    }
   ];
 }

@@ -10,6 +10,7 @@
       ./avizo
       ./wlogout
       ./ghostty
+      ./waybar
       ./eww
       ./walker
       ./git-accounts
@@ -57,6 +58,7 @@
         hypridle                  ## Idle Manager
         hyprpolkitagent           ## Polkit agent (GUI root access)
         wleave                    ## Logout Screen In Rust  (Using wlogout configuration)
+        waybar                    ## Status bar
         hyprsysteminfo            ## System hyprland GUI info
         swaynotificationcenter    ## Notifications
         avizo                     ## Sound / brightness notifications

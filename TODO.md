@@ -29,21 +29,23 @@
 - Authentication Agent 
 - - https://wiki.hyprland.org/Hypr-Ecosystem/hyprpolkitagent/
 - Git config
-## Missing parts
-- Status bar
+- Status bar (Choice Waybar)
+- - Start configuration done
 - - https://github.com/jasper-clarke/hypr-ws-switcher
-- - https://github.com/KZDKM/Hyprspace
-- - https://github.com/elkowar/eww
-- - https://github.com/JakeStanger/ironbar
-- - https://github.com/Alexays/Waybar
-- - https://github.com/vars1ty/HybridBar
-- - https://github.com/LBCrion/sfwbar  (S* expression defined status bar)
+- - https://github.com/KZDKM/Hyprspace          (Cool Feature but not what I want)
+- - https://github.com/elkowar/eww              (Too complexe to start)
+- - https://github.com/JakeStanger/ironbar      (Solution 1)  (Not taken due to missing exemples)
+- - https://github.com/Alexays/Waybar           (Solution 2)
+- - https://github.com/vars1ty/HybridBar        (Archived)
+- - https://github.com/LBCrion/sfwbar           (S* expression defined status bar)
+## Missing parts
 - Screenshots 
 - - https://github.com/flameshot-org/flameshot
 - - https://github.com/gabm/satty
 - - nix-shell -p obs-studio grim slurp satty
 - Clipboard Manager
 - - https://github.com/sentriz/cliphist
+- Setup Shell (nushell / fish)
 - CLI utilities 
 - - fzf
 - - ripgrep
@@ -65,10 +67,17 @@
 - Nix LSP
 - - https://github.com/oxalica/nil
 - Gaming (Steam / Drivers / Emulation)
+- - https://github.com/erffy/zig-waybar-contrib?tab=readme-ov-file
 - - https://emudeck.github.io/
 - - https://github.com/alyraffauf/bazznix/blob/master/nixosModules/apps/podman/default.nix
 - HyprIdle during games
 - - https://www.reddit.com/r/hyprland/comments/1enu1lc/hypridle_ignoring_mpv/
+- Game mode for game optimization
+- - https://github.com/Alexays/Waybar/wiki/Module:-Gamemode
+- Bluetooth
+- - Add bluetooth control
+- - Add controil in waybar
+- - https://github.com/Alexays/Waybar/wiki/Module:-Bluetooth
 - Notifications :
 - - Style notifications for spacing 
 - - Add sound for all notifications

@@ -1,0 +1,180 @@
+* {
+    font-family: "CaskaydiaCove Nerd Font", "Font Awesome 6 Free", "Font Awesome 6 Free Solid";
+    font-size: 16px;
+    border-radius: 0;
+    min-height: 0;
+    border: none;
+    font-weight: bold;
+  }
+  
+  #workspaces{
+    background-color: rgba(24, 25, 38, 1.0);          /* catppuccin  Crust  */
+    border: none;
+    box-shadow: none;
+  }
+  
+    
+  #window,
+  #clock,
+  #bluetooth,
+  #wireplumber,
+  #memory,
+  #cpu,
+  #network,
+  #systemd-failed-units,
+  #custom-openhome, 
+  #custom-openshared
+  {
+    border-radius: 4px;                                 /* Default border-radius */
+    margin: 6px 3px;                                    /* Default Margin */
+    padding: 6px 12px;
+    background-color: rgba(30, 32, 48, 1.0);          /* catppuccin  Mantle  */
+    color: rgba(24, 25, 38, 1.0);                     /* catppuccin  Crust  */
+  }
+
+
+  #waybar {
+    background-color: rgba(24, 25, 38, 1.0);          /* catppuccin  Crust  */
+    transition-property: background-color;
+    transition-duration: 0.5s;
+  }
+
+  #waybar.hidden {
+    opacity: 0.5;
+  }
+
+  #window{
+    background-color: rgba(125, 196, 228, 1.0);       /* catppuccin  Sapphire  */
+  }
+
+  #network{
+    background-color: rgba(245, 169, 127, 1.0);       /* catppuccin  Peach  */
+  }
+
+/* Middle Part */
+ 
+  #workspaces button {
+    all: initial;
+    min-width: 0;
+    box-shadow: inset 0 -3px transparent;
+    padding: 6px 18px;
+    margin: 6px 3px;                                    /* Default Margin */
+    border-radius: 4px;
+    color: rgba(183, 189, 248, 0.8);                  /* catppuccin Lavender with alpha */
+    background-color: rgba(54, 58, 79, 0.8);          /* catppuccin Surface0 with alpha */
+  }
+  
+  #workspaces button.empty {
+    color: rgba(183, 189, 248, 0.18);                 /* catppuccin Lavender with alpha */
+    background-color: rgba(54, 58, 79, 0.18);         /* catppuccin Surface0 with alpha */
+  }
+
+  #workspaces button.active {
+    color: rgba(54, 58, 79, 0.88);                    /* catppuccin Surface0 with alpha */
+    background-color: rgba(183, 189, 248, 0.88);      /* catppuccin Lavender with alpha */
+  }
+  
+  #workspaces button.empty.active {
+    color: rgba(54, 58, 79, 0.60);                    /* catppuccin Surface0 with alpha */
+    background-color: rgba(183, 189, 248, 0.60);      /* catppuccin Lavender with alpha */
+  }
+
+
+
+  #workspaces button:hover {
+    box-shadow: inherit;
+    text-shadow: inherit;
+    color:  rgba(54, 58, 79, 0.75);                   /* catppuccin Surface0 with alpha */
+    background-color: rgba(183, 189, 248, 0.75);      /* catppuccin Lavender with alpha */
+  }
+
+
+  #workspaces button.empty:hover {
+    box-shadow: inherit;
+    text-shadow: inherit;
+    color:  rgba(54, 58, 79, 0.69);                   /* catppuccin Surface0 with alpha */
+    background-color: rgba(183, 189, 248, 0.69);      /* catppuccin Lavender with alpha */
+  }
+
+
+/* Right Part */
+
+  #bluetooth{
+    background-color:rgb(138, 173, 244);              /* catppuccin blue */
+  }
+
+
+  #cpu {
+    background-color: rgba(244, 219, 214, 0.4);       /* catppuccin Rosewater */
+  }
+
+  #cpu.warning {
+    background-color: rgba(245, 169, 127, 0.8);       /* catppuccin  Peach  */
+  }
+
+
+  #cpu.critical {
+    background-color: rgba(237, 135, 150, 1.0);       /* catppuccin  Red  */
+  }
+
+  #memory{
+    background-color: rgba(244, 219, 214, 0.4);       /* catppuccin  Rosewater  */
+  }
+
+  #memory.warning {
+    background-color: rgba(245, 169, 127, 0.8);       /* catppuccin  Peach  */
+  }
+
+
+  #memory.critical {
+    background-color: rgba(237, 135, 150, 1.0);       /* catppuccin  Red  */
+  }
+
+
+  #clock {
+    background-color: rgba(198, 160, 246, 0.7);       /* catppuccin  Mauve  */
+  }
+  #systemd-failed-units {
+    color: rgba(36, 39, 58, 1.0);                     /* catppuccin  Base  */
+    border-radius: 4px;
+    margin: 6px 3px;                                    /* Default Margin */
+    padding: 8px 16px;
+  }
+  #systemd-failed-units.ok {
+    background-color: rgba(166, 218, 149, 1.0);       /* catppuccin  Green  */
+    
+  }
+  #systemd-failed-units.degraded {
+    background-color: rgba(237, 135, 150, 1.0);       /* catppuccin  Red  */
+  }
+  
+
+  #custom-openhome, #custom-openshared {
+    background-color: rgba(244, 219, 214, 0.4);       /* catppuccin  Rosewater  */
+    margin: 6px 16px;
+  }
+  #custom-openhome:hover, #custom-openshared:hover {
+    background-color: rgba(244, 219, 214, 0.8);       /* catppuccin  Rosewater  */
+  }
+
+
+  #wireplumber{
+    background-color: rgba(145, 215, 227, 1.0);       /* catppuccin  Sky  */
+  }
+  #wireplumber.muted {
+    background-color: rgba(145, 215, 227, 0.3);       /* catppuccin  Sky  */
+  }
+
+
+  tooltip {
+    border-radius: 8px;
+    padding: 16px;
+    background-color: rgba(24, 25, 38, 1.0);          /* catppuccin  Crust  */
+    color: rgba(184, 192, 224, 0.9);                  /* catppuccin  SubText1  */
+  }
+  
+  tooltip label {
+    padding: 5px;
+    background-color: rgba(24, 25, 38, 1.0);          /* catppuccin  Crust  */
+    color: rgba(184, 192, 224, 0.9);                  /* catppuccin  SubText1  */
+  }

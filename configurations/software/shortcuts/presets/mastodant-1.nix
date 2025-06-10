@@ -46,6 +46,22 @@ rec {
       env = "";
     }
     {
+      description = "Display Special workspace";
+      mod1 = mod;
+      key = "twosuperior";
+      command = "";
+      dispatcher-type = "togglespecialworkspace";
+      env = "";
+    }
+    {
+      description = "Move Special workspace";
+      mod1 = mod-shift;
+      key = "twosuperior";
+      command = "special";
+      dispatcher-type = "movetoworkspacesilent";
+      env = "";
+    }
+    {
       description = "Open Notification Center";
       mod1 = mod-shift;
       key = "N";

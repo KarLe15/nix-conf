@@ -42,36 +42,74 @@
 - - https://github.com/flameshot-org/flameshot
 - - https://github.com/gabm/satty
 - - nix-shell -p obs-studio grim slurp satty
-## Missing parts
 - Setup WIndow Rule and Workspace rule
 - - Setup navigation shortcuts with vim bindings
+## Missing parts
 - Clipboard Manager
 - - https://github.com/sentriz/cliphist
 - Setup Shell (nushell / fish)
 - CLI utilities 
+- - nushell
+- - bat
+- - zellij
+- - lsd / eza
+- - zoxide
+- - fd-find
+- - kondo
+- - tokei
+- - yazi
 - - fzf
 - - ripgrep
 - - fd
 - - bat
 - - eza
 - - starship
-- - nushell
+- - delta
+- Some Aliases : 
+```
+# ls Command
+alias ls='eza -lhF --icons -RT -L1 --hyperlink --group-directories-first --time-style="+%Y-%m-%d %H:%M" -m --git -rs size'
+# OLD with color scale
+# alias ls='eza -lhF --color-scale --icons -RT -L1 --hyperlink --group-directories-first --time-style="+%Y-%m-%d %H:%M" -Um --git -rs size'
+alias ll='ls -a'
+
+alias gitui='gitui -t macchiato.ron'
+
+# Cat command
+alias cat='bat'
+alias cata='cat -A'
+
+# find command
+# this alias is unset cause of the fd api is not compatible with find api
+# Need find api for setup of sdkman
+# alias find='fd'
+
+
+# grep command
+alias grep='rg'
+```
+- Applications : 
+- - Slack 
+- - Discord
+- - Idea
+- - Bitwarden
+- - VLC
+- - Spotify
 - Browser configs 
 - - brave
 - - firefox
 - - zen browser
 - Docker / Libvirt / kvm / Qemu
-- Screen sharing
-- - https://gist.github.com/brunoanc/2dea6ddf6974ba4e5d26c3139ffb7580
 - SDDM setup
-- Setup options / properties from Configurations / hosts for home-manager
-- Cachix https://wiki.hyprland.org/Nix/Cachix/
 - Nix LSP
-- - https://github.com/oxalica/nil
 - Gaming (Steam / Drivers / Emulation)
 - - https://github.com/erffy/zig-waybar-contrib?tab=readme-ov-file
 - - https://emudeck.github.io/
 - - https://github.com/alyraffauf/bazznix/blob/master/nixosModules/apps/podman/default.nix
+- - https://github.com/oxalica/nil
+- Screen sharing
+- - https://gist.github.com/brunoanc/2dea6ddf6974ba4e5d26c3139ffb7580
+- Cachix https://wiki.hyprland.org/Nix/Cachix/
 - HyprIdle during games
 - - https://www.reddit.com/r/hyprland/comments/1enu1lc/hypridle_ignoring_mpv/
 - Game mode for game optimization

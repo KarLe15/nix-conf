@@ -5,7 +5,8 @@ in
   stylix.targets.waybar.enable = false;
   programs = lib.mkIf enabled {
     waybar = let 
-      workspaces = customConfigs.styleConfigs.workspaces.apply { inherit pkgs; };
+      monitors = customConfigs.hardwareConfigs.monitors.apply { inherit pkgs; };
+      workspaces = customConfigs.styleConfigs.workspaces.apply { inherit pkgs monitors; };
       default-programs = customConfigs.softwareConfigs.defaults.apply { inherit pkgs; };
       multimedia-programs = customConfigs.softwareConfigs.multimedia.apply { inherit pkgs; };
       status-bar = customConfigs.styleConfigs.status-bars.apply {inherit workspaces default-programs multimedia-programs pkgs;};

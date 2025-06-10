@@ -1,7 +1,7 @@
 {inputs, pkgs, lib, config, customConfigs, ... } : 
 let 
-  activeMonitorConfig = customConfigs.hardwareConfigs.monitors;
-  workspaces = customConfigs.styleConfigs.workspaces.apply { inherit pkgs; };
+  activeMonitorConfig = customConfigs.hardwareConfigs.monitors.apply { inherit pkgs; };
+  workspaces = customConfigs.styleConfigs.workspaces.apply { monitors = activeMonitorConfig; inherit pkgs; };
   cursor = customConfigs.styleConfigs.cursors.apply { inherit pkgs; };
   defaults = customConfigs.softwareConfigs.defaults.apply { inherit pkgs; };
   launchers = customConfigs.softwareConfigs.launchers.apply { inherit pkgs; };
@@ -15,6 +15,13 @@ let
     ++  customConfigs.styleConfigs.themes.autostart
     ++  customConfigs.styleConfigs.cursors.autostart
   ;
+
+  mapDirectionToHyprland = direction: {
+    Left =      "l";
+    Right=      "r";
+    Up =        "u";
+    Down =      "d";
+  }.${direction} or (throw "Unknown direction for Hyprland command: ${direction}");
 in
 {
   stylix.targets.hyprland.enable = true;
@@ -27,7 +34,7 @@ in
 
       monitor = map (m: 
         "${m.name}, ${toString m.width}x${toString m.height}@${toString m.refreshRate}, ${toString m.position.x}x${toString m.position.y}, ${toString m.scale}"
-      ) activeMonitorConfig;
+      ) activeMonitorConfig.definition;
       
       ## Startup Scripts
       "exec-once" = [
@@ -59,6 +66,17 @@ in
             ) 
             workspace.shortcut)
         ) workspaces.workspaces_defined
+      ) ++
+      ## Workspace/Window navigation
+      lib.flatten (
+        map (nav:
+          (map (key: [
+                  "${nav.mod}, ${key}, movefocus, ${mapDirectionToHyprland nav.direction}"
+                  "${nav.mod-shift}, ${key}, movewindow, ${mapDirectionToHyprland nav.direction}"
+                ]
+          ) 
+          nav.shortcut)
+        ) workspaces.navigation
       )
       ;
 
@@ -74,16 +92,11 @@ in
       ];
 
       ## https://wiki.hyprland.org/0.48.0/Configuring/Workspace-Rules/
-      workspace = [
-          "1, monitor:DP-3"
-          "4, monitor:DP-3"
-          "7, monitor:DP-3"
-          "2, monitor:DP-1"
-          "5, monitor:DP-1"
-          "8, monitor:DP-1"
-          "3, monitor:HDMI-A-2"
-          "6, monitor:HDMI-A-2"
-          "9, monitor:HDMI-A-2"
+      workspace = (
+        map (ws: "${toString ws.id}, monitor:${ws.monitor}") workspaces.workspaces_defined
+      ) ++ [
+        "special:special, bordersize:40, gapsout:40"
+
       ];
 
 

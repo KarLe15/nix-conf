@@ -45,27 +45,51 @@
 
         ## Pipewire utils
         easyeffects               ## Manage Inputs / Output for audio
+        overskride                ## Bluetooth App 
+
+        ## PDF viewer 
+        zathura
+        sioyek
+
 
         ## Games
         obs-studio 
         
+        ## Image + Design
+        gimp
+        inkscape
+
+        ## File explorer
+        xfce.thunar
+        xfce.thunar-volman
+        xfce.thunar-archive-plugin
+        xfce.thunar-media-tags-plugin
+        nautilus
+        nemo
+        libsForQt5.dolphin
+        libsForQt5.dolphin-plugins
+
         ## TUI APP
         fastfetch
         gitui
+        
+        ## Monitoring
         htop
         btop
         zenith
+
         ripgrep
         git
+        ## terminal editors
         vim
         neovim
+        helix
 
         ## Terminals
         kitty
         ghostty
 
-        ## File Explorer
-        nautilus
+        # Email managers
         thunderbird
         
         bruno

@@ -56,8 +56,14 @@
         timezones = clock_config.all_timezones;
     };
 
-    ## TODO implement
-    buildBluetoothModule = bluetooth_config: {};
+    # bluetooth_config : 
+    # {
+    #   on-click-middle = "oversike";
+    # }
+    #
+    buildBluetoothModule = bluetooth_config: {
+      on-click-middle = bluetooth_config.on-click-middle;
+    };
 
     buildCpuModule = cpu_config: {
         interval = 15;

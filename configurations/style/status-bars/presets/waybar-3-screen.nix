@@ -51,7 +51,9 @@
           {
             type    = "bluetooth";
             id      = "bluetooth";
-            config  = {};
+            config  = {
+              on-click-middle = "overskride";
+            };
           }  
           {
             type    = "wireplumber";
@@ -113,11 +115,6 @@
                   id      = "wireplumber";
                   config  =  wireplumber_config;
                 }
-                {
-                  type    = "bluetooth";
-                  id      = "bluetooth";
-                  config  = {};
-                }
               ];
             };
           }
@@ -170,7 +167,9 @@
           {
             type    = "bluetooth";
             id      = "bluetooth";
-            config  = {};
+            config  = {
+              on-click-middle = "overskride";
+            };
           }
           {
             type    = "wireplumber";

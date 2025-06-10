@@ -113,6 +113,14 @@ rec {
       dispatcher-type = "exec";
       env = "";
     }
+    {
+      description = "Clipboard launcher";
+      mod1 = mod;
+      key = "V";
+      command = launchers.clipboard.command;
+      dispatcher-type = "exec";
+      env = "";
+    }
     ## ===========================<  Default programs  >==========================
     {
       description = "Open File Explorer";

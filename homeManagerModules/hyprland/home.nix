@@ -89,6 +89,14 @@ in
         "float, class:com.gabm.satty"
         "decorate on, class:com.gabm.satty"
         "bordersize 40, class:com.gabm.satty"
+        ## Dialog to save / load file
+        "center 1, class:Xdg-desktop-portal-gtk"
+        "rounding 0, class:Xdg-desktop-portal-gtk"
+        "noborder, class:Xdg-desktop-portal-gtk"
+        ## VSCodium dialogs
+        "center 1, class:Codium"
+        "noanim, class:Codium"
+        
       ];
 
       ## https://wiki.hyprland.org/0.48.0/Configuring/Workspace-Rules/

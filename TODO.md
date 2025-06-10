@@ -47,6 +47,8 @@
 ## Missing parts
 - Clipboard Manager
 - - https://github.com/sentriz/cliphist
+- Rofi
+- - Customize the rofi config to be more nixos
 - Setup Shell (nushell / fish)
 - CLI utilities 
 - - nushell

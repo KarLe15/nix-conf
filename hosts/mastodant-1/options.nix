@@ -15,7 +15,7 @@
   software.developpement.active = "opensource";
   software.git-accounts.active = "standard";
   software.shortcuts.active = "mastodant-1";
-  software.launchers.active = "walker";
+  software.launchers.active = "rofi";
   software.powermanagement.active = "systemD";
   software.multimedia.active = "avizo";
 

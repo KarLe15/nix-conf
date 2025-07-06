@@ -9,11 +9,20 @@
       ./options.nix
       ./programs.nix
       ./users.nix
+      ./filesystems.nix
     ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.supportedFilesystems = {
+    btrfs = true;
+    zfs = true;
+    xfs = true;
+    ext4 = true;
+  };
+  services.zfs.autoScrub.enable = true;
 
   # Power management for Suspend / Listed by Claude
   boot.kernelParams = [

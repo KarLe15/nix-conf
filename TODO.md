@@ -1,3 +1,34 @@
+## Storage solution
+### Drive 1 : 
+- For a 1TB hard drive SSD for pgp-encrypted archived for important data 
+strategy: 
+- - use LVM to create a virtial storage (1 HD now but with more hardrives later)
+- - create an XFS FS in the full LVM
+- - Do this all manually then adapt it to the NixOS config
+- - Next step is to add it as a disko module (More advanced and better)
+
+commands : 
+```shell
+sudo pvcreate /dev/sdc
+sudo vgcreate archives-vg /dev/sdc
+sudo lvcreate -l 100%FREE -n archives-lv archives-vg
+sudo mkfs.xfs /dev/archives-vg/archives-lv
+```
+### Drive 2 : 
+- For a mirroring 2 drives of 500GB SSD used for important files / PDF / Images 
+strategy:
+- - use ZFS mirroring 
+- - Do this all manually then adapt it to the NixOS config
+- - Next step is to add it as a disko module (More advanced and better)
+### Drive 3 : 
+- For code/repo data + XFS large files (Movies / media)
+strategy: 
+- - Create 2 partitions 1 for Media the other for code / repo
+- - 1 partition with btrfs for repos + 1 subvolume per repo
+- - 1 partition with XFS for media data
+- - Create a tool to manage btrfs repos (Copy / store / describe)
+- - Create an MCP server with the tool to later build a IA tool to generate tests for it  
+
 ## DONE
 - Global Font Setting
 - SystemD startup 
@@ -44,11 +75,12 @@
 - - nix-shell -p obs-studio grim slurp satty
 - Setup WIndow Rule and Workspace rule
 - - Setup navigation shortcuts with vim bindings
-## Missing parts
 - Clipboard Manager
 - - https://github.com/sentriz/cliphist
+## Missing parts
 - Rofi
 - - Customize the rofi config to be more nixos
+- Clean TODOs
 - Setup Shell (nushell / fish)
 - CLI utilities 
 - - nushell

@@ -151,7 +151,17 @@ rec {
       mod1 = "";
       key = "mouse:277";
       dispatcher-type = "exec";
+      ## TODO :: 2025-06-10 :: Change this to be modular on a screenshot config standalone
       command = ''$(grim -g "$(slurp)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
+      env = "";
+    }
+    {
+      description = "Take fullscreen Screenshot and modify";
+      mod1 = "SHIFT";
+      key = "mouse:277";
+      dispatcher-type = "exec";
+      ## TODO :: 2025-06-10 :: Change this to be modular on a screenshot config standalone
+      command = ''$(grim -g "$(slurp -o)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
       env = "";
     }
   ];

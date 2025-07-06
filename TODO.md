@@ -77,51 +77,27 @@ strategy:
 - - Setup navigation shortcuts with vim bindings
 - Clipboard Manager
 - - https://github.com/sentriz/cliphist
+- Setup Shell (nushell / fish)
+- CLI utilities 
+- - lsd / eza
+- - starship
 ## Missing parts
 - Rofi
 - - Customize the rofi config to be more nixos
 - Clean TODOs
-- Setup Shell (nushell / fish)
+- Setup default programs by explorer
 - CLI utilities 
 - - nushell
 - - bat
 - - zellij
-- - lsd / eza
 - - zoxide
-- - fd-find
 - - kondo
 - - tokei
 - - yazi
 - - fzf
 - - ripgrep
 - - fd
-- - bat
-- - eza
-- - starship
 - - delta
-- Some Aliases : 
-```
-# ls Command
-alias ls='eza -lhF --icons -RT -L1 --hyperlink --group-directories-first --time-style="+%Y-%m-%d %H:%M" -m --git -rs size'
-# OLD with color scale
-# alias ls='eza -lhF --color-scale --icons -RT -L1 --hyperlink --group-directories-first --time-style="+%Y-%m-%d %H:%M" -Um --git -rs size'
-alias ll='ls -a'
-
-alias gitui='gitui -t macchiato.ron'
-
-# Cat command
-alias cat='bat'
-alias cata='cat -A'
-
-# find command
-# this alias is unset cause of the fd api is not compatible with find api
-# Need find api for setup of sdkman
-# alias find='fd'
-
-
-# grep command
-alias grep='rg'
-```
 - Applications : 
 - - Slack 
 - - Discord

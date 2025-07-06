@@ -3,7 +3,8 @@
     karim = {
       isNormalUser = true;
       description = "Karim";
-      extraGroups = [ "networkmanager" "wheel" ];
+      extraGroups = [ "networkmanager" "wheel" "users" ];
+      shell = pkgs.fish;
     };
   };
 }

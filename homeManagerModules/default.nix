@@ -15,6 +15,8 @@
       ./walker
       ./rofi
       ./git-accounts
+      ./fish
+      ./starship
     ];
 
     stylix.targets.gitui.enable = true;
@@ -146,6 +148,23 @@
         
         ## IDEs
         vscodium
+
+        nushell
+        fish
+        bat
+        zellij
+        eza
+        lsd
+        fd
+        # clean repositories
+        kondo
+        tokei
+        yazi
+        fzf
+        ripgrep
+        starship
+        delta
+        
       ];
     };
     

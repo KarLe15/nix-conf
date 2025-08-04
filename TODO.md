@@ -81,23 +81,23 @@ strategy:
 - CLI utilities 
 - - lsd / eza
 - - starship
+- - kondo
+- - tokei
+- - bat
+- - yazi
 ## Missing parts
 - Rofi
 - - Customize the rofi config to be more nixos
 - Clean TODOs
 - Setup default programs by explorer
 - CLI utilities 
-- - nushell
-- - bat
-- - zellij
-- - zoxide
-- - kondo
-- - tokei
-- - yazi
 - - fzf
 - - ripgrep
 - - fd
 - - delta
+- - nushell
+- - zellij
+- - zoxide
 - Applications : 
 - - Slack 
 - - Discord

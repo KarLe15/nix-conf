@@ -17,9 +17,14 @@
       ./git-accounts
       ./fish
       ./starship
+      ./zellij
     ];
 
     stylix.targets.gitui.enable = true;
+    stylix.targets.bat.enable = true;
+    programs.bat.enable = true;
+    stylix.targets.yazi.enable = true;
+    programs.yazi.enable = true;
     stylix.autoEnable = true;
     ## Try remove blur shadow on gtk dialogs
     stylix.targets.gtk = {

@@ -170,6 +170,8 @@
         starship
         delta
         
+
+        slack
       ];
     };
     

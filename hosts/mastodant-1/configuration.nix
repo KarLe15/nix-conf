@@ -2,12 +2,15 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./kernel.nix
+      ./custom-hardware.nix
       ./services-configuration.nix
       ./locales.nix
       ./networks.nix
       ./security.nix
       ./options.nix
       ./programs.nix
+      ./gaming.nix
       ./users.nix
       ./filesystems.nix
     ];
@@ -24,13 +27,7 @@
   };
   services.zfs.autoScrub.enable = true;
 
-  # Power management for Suspend / Listed by Claude
-  boot.kernelParams = [
-    "acpi_sleep=nonvs" 
-    "acpi_osi=Linux"
-    "acpi.ec_no_wakeup=1"
-    "mem_sleep_default=deep"
-  ];
+  
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

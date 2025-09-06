@@ -12,12 +12,14 @@
       ./ghostty
       ./waybar
       ./eww
-      ./walker
+      ./zen-browser
+      # ./walker
       ./rofi
       ./git-accounts
       ./fish
       ./starship
       ./zellij
+      ./jetbrains
     ];
 
     stylix.targets.gitui.enable = true;
@@ -73,7 +75,7 @@
     
     xdg.enable = true;
     home = {
-      stateVersion = "24.11";
+      stateVersion = "25.05";
       packages = with pkgs; [
         
         # eww
@@ -104,6 +106,7 @@
         easyeffects               ## Manage Inputs / Output for audio
         overskride                ## Bluetooth App 
 
+        bitwarden
         ## PDF viewer 
         zathura
         sioyek
@@ -169,7 +172,8 @@
         ripgrep
         starship
         delta
-        
+        devenv
+        direnv
 
         slack
       ];

@@ -34,11 +34,23 @@
       url = "github:SenchoPens/base16.nix";
     };
 
+    nix-jetbrains-plugins = {
+      url = "github:theCapypara/nix-jetbrains-plugins";
+    };
+
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      # IMPORTANT: we're using "libgbm" and is only available in unstable so ensure
+      # to have it up-to-date or simply don't specify the nixpkgs input
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs = { 
     self, nixpkgs, nixpkgs-darwin, darwin, home-manager, 
     ragenix, stylix, catppuccin, hyprland, base16utils, 
+    nix-jetbrains-plugins, zen-browser,
     ... 
   }@flakeInputs :
     let 
@@ -56,13 +68,14 @@
             base16utils.homeManagerModule
             catppuccin.homeModules.catppuccin
             ragenix.homeManagerModules.default
+            zen-browser.homeModules.twilight-official
             ## TODO :: 06/04/2024 :: Home-Manager module not merged into home-manager repo 
             ## Using Custom Home-manager module defined by KarLe
             # walker.homeManagerModules.default 
           ];
         };
         home-manager.extraSpecialArgs =  {
-          inherit customConfigs;
+          inherit system customConfigs nix-jetbrains-plugins nixpkgs;
         };
       };
 

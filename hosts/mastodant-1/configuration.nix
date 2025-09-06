@@ -13,6 +13,7 @@
       ./gaming.nix
       ./users.nix
       ./filesystems.nix
+      ./developpement.nix
     ];
 
   # Bootloader.

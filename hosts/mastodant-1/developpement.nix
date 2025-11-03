@@ -1,10 +1,16 @@
 { config, lib, pkgs, modulesPath, ... }: {
   virtualisation = {
     containers.enable = true;
-    podman = {
+    oci-containers = {
+      backend = "podman";
+    };
+    docker = {
       enable = true;
-      dockerCompat = true;
-      defaultNetwork.settings.dns_enabled = true;
+    };
+    podman = let podmanEnabled = false; in {
+      enable = podmanEnabled;
+      dockerCompat = podmanEnabled;
+      defaultNetwork.settings.dns_enabled = podmanEnabled;
     };
   };
 

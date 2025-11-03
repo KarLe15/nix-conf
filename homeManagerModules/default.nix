@@ -176,6 +176,7 @@
         direnv
 
         slack
+        discord
       ];
     };
     

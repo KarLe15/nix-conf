@@ -115,7 +115,7 @@ rec {
     }
     {
       description = "Clipboard launcher";
-      mod1 = mod;
+      mod1 = mod-shift;
       key = "V";
       command = launchers.clipboard.command;
       dispatcher-type = "exec";
@@ -124,7 +124,7 @@ rec {
     ## ===========================<  Default programs  >==========================
     {
       description = "Open File Explorer";
-      mod1 = mod;
+      mod1 = mod-shift;
       key = "Return";
       command = defaults.file-explorer.command;
       dispatcher-type = "exec";

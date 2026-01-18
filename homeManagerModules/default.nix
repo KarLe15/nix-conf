@@ -157,6 +157,8 @@
         ## IDEs
         vscodium
 
+        mongodb-compass
+
         nushell
         fish
         bat

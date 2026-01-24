@@ -1,5 +1,5 @@
 {
-  apply = {pkgs, ...}@inputs: { 
+  apply = {pkgs, ...}@inputs: {
     # Use DZ font for Dotted Zero (Diff between 0 and O)
     mono = {
       group-name = "Meslo";
@@ -19,7 +19,7 @@
     emoji = {
       group-name = "Noto Emoji";
       exact-name = "Noto Color Emoji";
-      package = pkgs.noto-fonts-emoji;
+      package = pkgs.noto-fonts-color-emoji;
     };
   };
 

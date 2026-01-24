@@ -8,7 +8,7 @@
   };
   programs.rofi = {
     enable = true;
-    package = pkgs.rofi-wayland;
+    package = pkgs.rofi;
     ## Change this to be fully managed with Nix
     # theme = lib.mkDefault ./theme.rasi;
   };

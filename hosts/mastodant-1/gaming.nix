@@ -21,7 +21,7 @@
     radeontop                # AMD GPU monitoring
     gpu-viewer               # GPU information viewer
     amdgpu_top               # Better AMD GPU monitor
-    
+
     # Vulkan tools
     vulkan-tools
     vulkan-loader
@@ -45,7 +45,7 @@
     atlauncher              # Modded Minecraft launcher
 
   ];
-  
+
   # Udev rules for controllers and gaming peripherals
   services.udev.packages = with pkgs; [
     game-devices-udev-rules  # Controller support
@@ -58,7 +58,8 @@
   # Fonts for games (some games need Windows fonts)
   fonts.packages = with pkgs; [
     corefonts              # Microsoft fonts
-    vistafonts             # Vista fonts
+    ## Update 2026-01-24 :: vistafonts -> vista-fonts
+    vista-fonts             # Vista fonts
     liberation_ttf         # Liberation fonts
   ];
 
@@ -82,7 +83,7 @@
       };
     };
   };
-  
+
   # Steam
   programs.steam = {
     enable = true;

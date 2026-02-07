@@ -44,12 +44,21 @@
     prismlauncher           # Minecraft launcher
     atlauncher              # Modded Minecraft launcher
 
+
+    ## 2026-01-27 :: Steam wrapper for disabling Steam SDL controller
+    # Issue on Nixos Steam for SDL
+    (pkgs.writeShellScriptBin "steam" ''
+      export SDL_JOYSTICK_HIDAPI=0
+      exec ${pkgs.steam}/bin/steam "$@"
+    '')
   ];
 
   # Udev rules for controllers and gaming peripherals
   services.udev.packages = with pkgs; [
     game-devices-udev-rules  # Controller support
+    steam-devices-udev-rules             # Steam udev rules
   ];
+  hardware.steam-hardware.enable = true;
 
   # Enable Xbox controller support
   hardware.xone.enable = true;           # Xbox One/Series controllers

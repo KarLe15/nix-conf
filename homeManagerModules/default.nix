@@ -116,6 +116,7 @@
         ## Pipewire utils
         easyeffects # # Manage Inputs / Output for audio
         overskride # # Bluetooth App
+        hyprpwcenter
 
         bitwarden-desktop
         ## PDF viewer
@@ -194,14 +195,23 @@
         delta
         devenv
         direnv
+        witr # Tool to get information for port
 
         slack
-        discord
+
+        vesktop
       ];
       unstablePackages =
         # builtins.trace "HomeManagerModue Unstable Packages content: ${(builtins.toJSON (builtins.attrNames unstable-nixpkgs ))}"
       [
+        # Ollama
+        unstable-nixpkgs.ollama-rocm ## AMD acceleration for Ollama
+        # Other Impl GPU acceleration
+        # ollama-vulkan
+        # ollama-cpu
+        # ollama-cuda
         ## LLM tools :
+        unstable-nixpkgs.opencode
         unstable-nixpkgs.claude-code
         unstable-nixpkgs.claude-monitor
         unstable-nixpkgs.spec-kit # Spec driven developpment # https://github.com/github/spec-kit

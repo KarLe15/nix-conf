@@ -1,5 +1,5 @@
 {
-  apply = {pkgs, default-programs, multimedia-programs, workspaces, ... }@inputs: 
+  apply = {pkgs, default-programs, multimedia-programs, workspaces, ... }@inputs:
   let
     workspaces_data = {
       workspaces = workspaces.workspaces_defined;
@@ -14,7 +14,7 @@
       all_timezones = ["Europe/Paris" "Africa/Algiers"];
       default_timezone = "Europe/Paris";
     };
-  in 
+  in
   {
     style-file = ../assets/style.css;
     bars = [
@@ -54,7 +54,7 @@
             config  = {
               on-click-middle = "overskride";
             };
-          }  
+          }
           {
             type    = "wireplumber";
             id      = "wireplumber";
@@ -94,7 +94,7 @@
                   type    = "image";
                   id      = "image#utils-display";
                   config  = {
-                    path = ../assets/stargate-animated.png;
+                    path = ../assets/stargate-animated.jpg;
                     size = 96;
                   };
                 }
@@ -132,7 +132,7 @@
             config  = {
               avatar_path = ../assets/profile_oneill.jpg ;
               size = 48;
-            }; 
+            };
           }
           {
             type    = "custom";

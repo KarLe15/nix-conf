@@ -7,7 +7,7 @@
     legendary-gl              # Epic Games CLI
 
     ## === Wine Ecosystem ===
-    wineWowPackages.staging   # Wine staging with 32/64-bit
+    wineWow64Packages.staging   # Wine staging with 32/64-bit
     winetricks               # Wine configuration utility
     protontricks             # Proton prefix management
 
@@ -39,7 +39,7 @@
     appimage-run            # Run AppImages
     piper                   # Gaming mouse configuration
     solaar                  # Logitech device manager
-
+    # nexusmods-app-unfree    # Mod Manager (mainly for skyrim)
     ## === Additional Launchers ===
     prismlauncher           # Minecraft launcher
     atlauncher              # Modded Minecraft launcher
@@ -53,6 +53,9 @@
     '')
   ];
 
+  # nixpkgs.config.permittedInsecurePackages = [
+  #   "nexusmods-app-unfree-0.21.1"
+  # ];
   # Udev rules for controllers and gaming peripherals
   services.udev.packages = with pkgs; [
     game-devices-udev-rules  # Controller support

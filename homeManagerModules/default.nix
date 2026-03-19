@@ -37,7 +37,10 @@
   stylix.targets.bat.enable = true;
   programs.bat.enable = true;
   stylix.targets.yazi.enable = true;
-  programs.yazi.enable = true;
+  programs.yazi = {
+    enable = true;
+    shellWrapperName = "y";
+  };
   stylix.autoEnable = true;
   ## Try remove blur shadow on gtk dialogs
   stylix.targets.gtk = {

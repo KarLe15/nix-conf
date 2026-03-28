@@ -1,24 +1,10 @@
 { lib, ... }: {
-  ## ===============================<  HARDWARE  >==========================================
-  hardware.monitors.active = "mastodant-3-screens";
-
-  ## ===============================<    STYLE   >==========================================
-  style.themes.active = "catppuccin-macchiato";
-  style.cursors.active = "Bibata";
-  style.fonts.active = "mac-like";
-  style.wallpaper.active = "standard";
-  style.statusbar.active = "waybar-3-screen";
-  style.workspaces.active = "standard-3-screen";
-
-  ## ===============================<  Software  >==========================================
-  software.defaults.active = "mastodant-1";
-  software.developpement.active = "opensource";
-  software.git-accounts.active = "standard";
-  software.shortcuts.active = "mastodant-1";
-  software.launchers.active = "rofi";
-  software.powermanagement.active = "systemD";
-  software.multimedia.active = "avizo";
+  ## Select machine archetype profile.
+  ## All preset selectors and feature flags are provided by the profile.
+  ## Override individual options below only when this machine differs.
+  profile.active = "desktop-amd";
 
   ## ===============================<   stylix   >==========================================
+  ## Machine-specific override — qtct is required for proper Qt theming on this host.
   stylix.targets.qt.platform = lib.mkForce "qtct";
 }

@@ -3,9 +3,30 @@
   ];
   options.software.powermanagement = {
     active = lib.mkOption {
-      type = lib.types.str;
+      # Add new values here when adding a preset to ./presets/
+      type = lib.types.enum [
+        "systemD"
+      ];
       default = "systemD";
-      description = "Active set of powermanagement tools";
+      description = ''
+        Active power management preset name. Defines shutdown/reboot/suspend/hibernate
+        commands consumed by hypridle and wleave.
+
+        The selected preset must export:
+          apply :: { pkgs } -> {
+            commands :: {
+              shutdown  :: PowerCommandDef;
+              reboot    :: PowerCommandDef;
+              suspend   :: PowerCommandDef;
+              hibernate :: PowerCommandDef;
+            };
+            programs :: [ pkg ];   # optional extra packages to install
+          }
+
+        PowerCommandDef :: {
+          command :: str;
+        }
+      '';
     };
   };
 }

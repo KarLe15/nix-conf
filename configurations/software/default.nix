@@ -1,5 +1,6 @@
 { lib, ... } : {
   imports = [
+    ./modules
     ./defaults
     ./developpement
     ./git-accounts

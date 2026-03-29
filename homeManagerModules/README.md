@@ -39,7 +39,6 @@ They do **not** declare NixOS options for preset selection — that is handled b
 | [`jetbrains`](jetbrains/) | stub | JetBrains IDEs — flake input ready, not yet wired |
 | [`wlogout`](wlogout/) | inactive | Legacy power menu (replaced by wleave) |
 | [`eww`](eww/) | disabled | Widget system — imported but disabled |
-| [`walker`](walker/) | disabled | Alternative app launcher — commented out in default.nix |
 
 ---
 

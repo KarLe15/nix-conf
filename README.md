@@ -65,8 +65,7 @@ config/
 │   ├── zen-browser/               # Zen browser
 │   ├── brave/                     # Brave browser
 │   ├── catppuccin/                # Catppuccin theme fallback
-│   ├── jetbrains/                 # JetBrains IDEs (stub)
-│   └── walker/                    # App launcher alternative (disabled)
+│   └── jetbrains/                 # JetBrains IDEs (stub)
 │
 ├── configurations/                # Pure-data preset library
 │   ├── hardware/monitors/         # Monitor layouts

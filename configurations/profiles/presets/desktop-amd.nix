@@ -25,11 +25,13 @@
   software.powermanagement.active   = "systemD";
   software.multimedia.active        = "avizo";
   software.shell.active             = "standard";
+  software.wayland-desktop.active   = "standard";
 
   ## Feature flags
   # # Themes
   software.modules.catppuccin.enable      = true;
   # Window Manager
+  software.modules.wayland-desktop.enable = true;
   software.modules.waybar.enable          = true;
   software.modules.swaync.enable          = true;
   software.modules.avizo.enable           = true;
@@ -41,7 +43,6 @@
   software.modules.wleave.enable          = true;
   # App search
   software.modules.rofi.enable            = true;
-  software.modules.walker.enable          = false;
   # IDE
   software.modules.jetbrains.enable       = true;
   software.modules.zed.enable             = true;

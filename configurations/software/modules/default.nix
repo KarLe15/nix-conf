@@ -7,13 +7,6 @@
         description = "Enable the Waybar status bar Home Manager module.";
       };
     };
-    walker = {
-      enable = lib.mkOption {
-        type    = lib.types.bool;
-        default = false;
-        description = "Enable the Walker app launcher Home Manager module.";
-      };
-    };
     git-accounts = {
       enable = lib.mkOption {
         type    = lib.types.bool;
@@ -145,6 +138,13 @@
         type    = lib.types.bool;
         default = false;
         description = "Enable the Hyprland compositor Home Manager module.";
+      };
+    };
+    wayland-desktop = {
+      enable = lib.mkOption {
+        type    = lib.types.bool;
+        default = false;
+        description = "Enable the Wayland desktop utilities module (wallpaper, clipboard, screenshots).";
       };
     };
   };

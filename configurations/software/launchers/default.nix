@@ -6,7 +6,6 @@
       # Add new values here when adding a preset to ./presets/
       type = lib.types.enum [
         "rofi"
-        "walker"
       ];
       default = "rofi";
       description = ''

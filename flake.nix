@@ -24,11 +24,6 @@
     hyprland.url = "github:hyprwm/Hyprland";
 
 
-    # walker = {
-    #   url = "github:abenz1267/walker";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     # Base 16 utils from base16 yaml to Nix Set
     base16utils = {
       url = "github:SenchoPens/base16.nix";
@@ -71,7 +66,6 @@
             zen-browser.homeModules.twilight-official
             ## TODO :: 06/04/2024 :: Home-Manager module not merged into home-manager repo
             ## Using Custom Home-manager module defined by KarLe
-            # walker.homeManagerModules.default
           ];
         };
         home-manager.extraSpecialArgs =  {

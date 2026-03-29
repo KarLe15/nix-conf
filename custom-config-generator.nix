@@ -65,12 +65,14 @@ let
       shell = wrapPreset types.shellOutputType
         (import ./configurations/software/shell/presets/${sw.shell.active}.nix);
 
+      wayland-desktop = wrapPreset types.waylandDesktopOutputType
+        (import ./configurations/software/wayland-desktop/presets/${sw.wayland-desktop.active}.nix);
+
       ## Feature flags — now read from host NixOS options (software.modules.*)
       ## rather than being hardcoded here.
       modules = {
         inherit (sw.modules)
           waybar
-          walker
           git-accounts
           ghostty
           catppuccin
@@ -89,7 +91,8 @@ let
           jetbrains
           starship
           fish
-          hyprland;
+          hyprland
+          wayland-desktop;
       };
     };
 

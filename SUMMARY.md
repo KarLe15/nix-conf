@@ -158,7 +158,7 @@ Located in `homeManagerModules/`. Each module follows `default.nix → home.nix`
 
 ### Global Packages (selected)
 
-**Wayland ecosystem**: hyprpaper, waybar, walker, rofi, wleave, avizo, swaynotificationcenter
+**Wayland ecosystem**: hyprpaper, waybar, rofi, wleave, avizo, swaynotificationcenter
 **Clipboard/Screenshot**: cliphist, wl-clipboard, grim, slurp, satty
 **Audio**: easyeffects, overskride
 **Editors**: neovim, helix, vscodium, zed-editor

@@ -9,5 +9,6 @@
     ./powermanagement
     ./multimedia
     ./shell
+    ./wayland-desktop
   ];
 }

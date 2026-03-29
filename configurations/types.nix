@@ -24,7 +24,8 @@ let
   powermgmt     = import ./software/powermanagement/types.nix { inherit lib; };
   developpement = import ./software/developpement/types.nix  { inherit lib; };
   gitAccounts   = import ./software/git-accounts/types.nix   { inherit lib; };
-  shell         = import ./software/shell/types.nix          { inherit lib; };
+  shell           = import ./software/shell/types.nix            { inherit lib; };
+  waylandDesktop  = import ./software/wayland-desktop/types.nix { inherit lib; };
 in
   monitors
   // themes
@@ -38,3 +39,4 @@ in
   // developpement
   // gitAccounts
   // shell
+  // waylandDesktop

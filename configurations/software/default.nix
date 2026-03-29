@@ -8,5 +8,6 @@
     ./launchers
     ./powermanagement
     ./multimedia
+    ./shell
   ];
 }

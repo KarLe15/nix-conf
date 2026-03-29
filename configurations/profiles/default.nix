@@ -58,7 +58,6 @@ in
     ## Feature flags
     software.modules.waybar.enable       = lib.mkDefault profile.software.modules.waybar.enable;
     software.modules.git-accounts.enable = lib.mkDefault profile.software.modules.git-accounts.enable;
-    software.modules.eww.enable          = lib.mkDefault profile.software.modules.eww.enable;
     software.modules.walker.enable       = lib.mkDefault profile.software.modules.walker.enable;
   };
 }

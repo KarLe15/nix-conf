@@ -1,9 +1,10 @@
 
 
-{inputs, pkgs, lib, config, customConfigs, ... } :
+{ inputs, pkgs, lib, config, customConfigs, ... }:
 let
-in
-{
+  cfg = customConfigs.softwareConfigs.modules.starship;
+in {
+  config = lib.mkIf cfg.enable {
   stylix.targets.starship.enable = true;
   programs.starship = {
     enable = true;
@@ -162,5 +163,6 @@ in
         format = "[ $symbol $context ]($style) $path";
       };
     };
+  };
   };
 }

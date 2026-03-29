@@ -1,7 +1,7 @@
-
-
-{system, inputs, pkgs, nixpkgs, lib, config, customConfigs, nix-jetbrains-plugins, ... } :
+{ system, inputs, pkgs, nixpkgs, lib, config, customConfigs, nix-jetbrains-plugins, ... }:
 let
+  cfg = customConfigs.softwareConfigs.modules.jetbrains;
+
   themePlugins = [
     "com.github.catppuccin.jetbrains"
     "izhangzhihao.rainbow.brackets"
@@ -12,28 +12,23 @@ let
   ];
   utilsPlugins = [
     "String Manipulation"
-    # "com.intellij.mermaid"
     "com.intellij.tasks"
     "com.github.jk1.ytplugin"
     "nix-idea"
   ];
   allCommonPlugins = themePlugins ++ utilsPlugins;
-  IdeaPlugins = [
+  ideaPlugins = allCommonPlugins ++ [
     "Lombook Plugin"
     "com.anthropic.code.plugin"
   ];
-
-in
-{
-  ## Update 2026-01-24 :
-  # nix-jetbrains-plugins: `lib.x86_64-linux.buildIdeWithPlugins` is deprecated. Please switch to `lib.buildIdeWithPlugins`. Note the new function expects `pkgs` instead of `pkgs.jetbrains`
-  # 'jetbrains.idea-ultimate' has been renamed to/replaced by 'jetbrains.idea'
-  home.packages = with nix-jetbrains-plugins.lib; [
-    (buildIdeWithPlugins pkgs "idea" (allCommonPlugins ++ IdeaPlugins))
-    (buildIdeWithPlugins pkgs "rust-rover" allCommonPlugins)
-    (buildIdeWithPlugins pkgs "webstorm" allCommonPlugins)
-    (buildIdeWithPlugins pkgs "goland" allCommonPlugins)
-    (buildIdeWithPlugins pkgs "clion" allCommonPlugins)
-  ];
-
+in {
+  config = lib.mkIf cfg.enable {
+    home.packages = with nix-jetbrains-plugins.lib; [
+      (buildIdeWithPlugins pkgs "idea"       ideaPlugins)
+      (buildIdeWithPlugins pkgs "rust-rover" allCommonPlugins)
+      (buildIdeWithPlugins pkgs "webstorm"   allCommonPlugins)
+      (buildIdeWithPlugins pkgs "goland"     allCommonPlugins)
+      (buildIdeWithPlugins pkgs "clion"      allCommonPlugins)
+    ];
+  };
 }

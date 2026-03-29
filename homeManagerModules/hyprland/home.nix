@@ -1,5 +1,6 @@
-{inputs, pkgs, lib, config, customConfigs, ... } :
+{ inputs, pkgs, lib, config, customConfigs, ... }:
 let
+  cfg = customConfigs.softwareConfigs.modules.hyprland;
   activeMonitorConfig = customConfigs.hardwareConfigs.monitors.apply { inherit pkgs; };
   workspaces = customConfigs.styleConfigs.workspaces.apply { monitors = activeMonitorConfig; inherit pkgs; };
   cursor = customConfigs.styleConfigs.cursors.apply { inherit pkgs; };
@@ -22,8 +23,8 @@ let
     Up =        "u";
     Down =      "d";
   }.${direction} or (throw "Unknown direction for Hyprland command: ${direction}");
-in
-{
+in {
+  config = lib.mkIf cfg.enable {
   stylix.targets.hyprland.enable = true;
   ## INFO :: The stylix module enables a systemD module and the uwsm is enabled with sddm and hyprland so the hyprpaper is loaded
   stylix.targets.hyprpaper.enable = true;
@@ -123,5 +124,6 @@ in
       };
 
     };
+  };
   };
 }

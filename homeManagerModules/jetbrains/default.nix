@@ -1,8 +1,3 @@
-{inputs, pkgs, lib, ... } : {
-    imports = [
-        ./home.nix
-        ./theme.nix
-        ./plugin.nix
-        ./ide.nix
-    ];
+{ inputs, pkgs, lib, customConfigs, ... }: {
+  imports = [ ./plugin.nix ];
 }

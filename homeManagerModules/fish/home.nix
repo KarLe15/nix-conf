@@ -1,25 +1,17 @@
-
-
-{inputs, pkgs, lib, config, customConfigs, ... } : 
-let 
-in
-{
-  programs.direnv = {
-    enableFishIntegration = true;
-  };
-  programs.fish = {
-    enable = true;
-    interactiveShellInit = ''
-      # Initialize starship
-      starship init fish | source
-      
-      # Set fish as login shell
-      set -U fish_greeting ""
-    '';
-    shellAliases = {
-      ls = "eza -lhF --icons -RT -L1 --hyperlink --group-directories-first --time-style=\"+%Y-%m-%d %H:%M\" -m --git -rs size";
-      ll = "ls -a";
-      cat = "bat";
+{ inputs, pkgs, lib, config, customConfigs, ... }:
+let
+  cfg   = customConfigs.softwareConfigs.modules.fish;
+  shell = customConfigs.softwareConfigs.shell.apply { inherit pkgs; };
+in {
+  config = lib.mkIf cfg.enable {
+    programs.direnv.enableFishIntegration = true;
+    programs.fish = {
+      enable = true;
+      interactiveShellInit = ''
+        ${shell.defaultPrompt.initCommand.fish}
+        set -U fish_greeting ""
+      '';
+      shellAliases = shell.aliases;
     };
   };
 }

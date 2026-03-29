@@ -62,14 +62,34 @@ let
       git-accounts = wrapPreset types.gitAccountsOutputType
         (import ./configurations/software/git-accounts/presets/${sw.git-accounts.active}.nix);
 
+      shell = wrapPreset types.shellOutputType
+        (import ./configurations/software/shell/presets/${sw.shell.active}.nix);
+
       ## Feature flags — now read from host NixOS options (software.modules.*)
       ## rather than being hardcoded here.
       modules = {
         inherit (sw.modules)
           waybar
-          eww
           walker
-          git-accounts;
+          git-accounts
+          ghostty
+          catppuccin
+          hypridle
+          wleave
+          zed
+          rofi
+          swaync
+          avizo
+          brave
+          zen-browser
+          hyprlock
+          hyprpolkitagent
+          zellij
+          wlogout
+          jetbrains
+          starship
+          fish
+          hyprland;
       };
     };
 

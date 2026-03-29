@@ -27,7 +27,6 @@ config/
 ├── flake.nix                      # Flake entrypoint — defines nixosConfigurations outputs
 ├── flake.lock                     # Pinned input versions
 ├── custom-config-generator.nix    # Preset resolver: maps preset names → Nix data
-├── nix-config-generator.nix       # (unused)
 │
 ├── hosts/                         # Per-machine NixOS system-level config
 │   └── mastodant-1/               # AMD desktop
@@ -67,7 +66,6 @@ config/
 │   ├── brave/                     # Brave browser
 │   ├── catppuccin/                # Catppuccin theme fallback
 │   ├── jetbrains/                 # JetBrains IDEs (stub)
-│   ├── eww/                       # Widget system (disabled)
 │   └── walker/                    # App launcher alternative (disabled)
 │
 ├── configurations/                # Pure-data preset library
@@ -121,8 +119,10 @@ and `customConfigs.softwareConfigs`.
 ### Adding a New Domain
 
 1. Create `configurations/<domain>/default.nix` declaring a NixOS option `<domain>.<name>.active`
-2. Add an import to `configurations/default.nix`
-3. Add the resolution in `custom-config-generator.nix`
+2. Create `configurations/<domain>/types.nix` defining the output type for this domain (import shared primitives from `configurations/lib/types.nix` as needed)
+3. Add the import of the new `types.nix` to `configurations/types.nix` (the flat aggregator)
+4. Add an import to `configurations/default.nix`
+5. Add a `wrapPreset` resolution in `custom-config-generator.nix`
 
 ---
 

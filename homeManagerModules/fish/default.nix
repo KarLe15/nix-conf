@@ -1,5 +1,3 @@
-{inputs, pkgs, lib, ... } : {
-    imports = [
-        ./home.nix
-    ];
+{ inputs, pkgs, lib, customConfigs, ... }: {
+  imports = [ ./home.nix ];
 }

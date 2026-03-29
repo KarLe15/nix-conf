@@ -20,7 +20,6 @@
     ./wleave
     ./ghostty
     ./waybar
-    ./eww
     ./zen-browser
     ./brave
     # ./walker
@@ -93,7 +92,6 @@
     packages = let
       stablePackages = with pkgs; [
 
-        # eww
         ## Hyprland must have
         hyprpaper # # Wallpaper manager
         hyprlock # # Lock screen

@@ -1,15 +1,13 @@
-{inputs, pkgs, lib, config, customConfigs, ... } :
-{
-  stylix.targets.rofi = {
-    enable = true;
-  };
-  home.file = {
-    ".config/rofi/theme.rasi".text = builtins.readFile ./theme.rasi;
-  };
-  programs.rofi = {
-    enable = true;
-    package = pkgs.rofi;
-    ## Change this to be fully managed with Nix
-    # theme = lib.mkDefault ./theme.rasi;
+{ inputs, pkgs, lib, config, customConfigs, ... }:
+let
+  cfg = customConfigs.softwareConfigs.modules.rofi;
+in {
+  config = lib.mkIf cfg.enable {
+    stylix.targets.rofi.enable = true;
+    home.file.".config/rofi/theme.rasi".text = builtins.readFile ./theme.rasi;
+    programs.rofi = {
+      enable  = true;
+      package = pkgs.rofi;
+    };
   };
 }

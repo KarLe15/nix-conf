@@ -99,6 +99,33 @@ Each preset file exports an `apply` function (`{ pkgs, ... }: { ... }`) and an `
 | `software/powermanagement` | `systemD` — systemctl commands |
 | `software/multimedia` | `avizo` — volumectl commands |
 
+### Type System (`configurations/`)
+
+Preset output types are co-located with their domain and aggregated through a single file:
+
+```
+configurations/
+├── lib/
+│   └── types.nix            # Shared primitives: packageType, appDefType, appDefWithEnvType
+├── types.nix                # Flat aggregator — single import point for custom-config-generator.nix
+├── hardware/monitors/
+│   └── types.nix            # monitorDefType, monitorsOutputType
+├── style/
+│   ├── fonts/types.nix      # fontDefType, fontsOutputType
+│   ├── cursors/types.nix    # cursorDefType, cursorsOutputType
+│   ├── themes/types.nix     # themesOutputType
+│   └── wallpapers/types.nix # wallpaperOutputType
+└── software/
+    ├── defaults/types.nix        # defaultsOutputType
+    ├── launchers/types.nix       # launcherDefType, launchersOutputType
+    ├── multimedia/types.nix      # mediaCommandType, multimediaOutputType
+    ├── powermanagement/types.nix # powerCommandType, powermanagementOutputType
+    ├── developpement/types.nix   # developpementOutputType
+    └── git-accounts/types.nix   # gitAccountDefType, gitAccountsOutputType
+```
+
+`custom-config-generator.nix` imports only `configurations/types.nix`. Each domain `types.nix` imports shared primitives from `lib/types.nix` as needed. Type validation happens via `wrapPreset` which runs the preset return value through `lib.evalModules` against its declared output type at evaluation time.
+
 ---
 
 ## Home Manager Modules
@@ -128,7 +155,6 @@ Located in `homeManagerModules/`. Each module follows `default.nix → home.nix`
 | `zellij` | Terminal multiplexer (stylix-themed) |
 | `zed` | Editor (nix/toml/rust extensions, direnv, stylix-themed) |
 | `jetbrains` | JetBrains IDEs (stub — `nix-jetbrains-plugins` flake ready) |
-| `eww` | Widget system (disabled) |
 
 ### Global Packages (selected)
 
@@ -217,7 +243,6 @@ Configured in `hosts/mastodant-1/gaming.nix`:
 - `hyprland-windowsrules.md` documents window rule syntax
 - `git-scripts-accounts.md` documents multi-account git workflow
 - Branch `feature/add-zed-editor` is currently active (Zed editor integration)
-- The `eww` widget system module exists but is disabled
 - JetBrains module is a stub (`home.nix` is empty) despite the flake input being present
 
 ---
@@ -227,5 +252,4 @@ Configured in `hosts/mastodant-1/gaming.nix`:
 - **Darwin support**: Full scaffold exists but is commented out; enabling it would be straightforward
 - **JetBrains**: Flake input present, module stub exists — needs wiring
 - **`nixosModules/` and `nixDarwinModules/`**: Both empty stubs
-- **`eww`**: Disabled module
 - **Multi-host**: Preset system is designed for multi-machine use but only one host exists

@@ -11,14 +11,6 @@ let
       addKeysToAgent = "yes";
     };
   };
-  generateSSHBlockAsString = gitConfig: ''
-     Host ${gitConfig.dns-alias}
-        HostName ${gitConfig.dns-origin}
-        User git
-        IdentityFile ${gitConfig.key}
-        IdentitiesOnly yes
-        AddKeysToAgent yes
-  '';
 in
 {
   config = lib.mkIf enabled {

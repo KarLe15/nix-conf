@@ -181,5 +181,6 @@ Secrets are managed with [ragenix](https://github.com/yaxitech/ragenix):
 
 - [`SUMMARY.md`](SUMMARY.md) — Full project analysis
 - [`docs/ENHANCEMENT-PROFILES.md`](docs/ENHANCEMENT-PROFILES.md) — Proposed profile/feature system
+- [`docs/QUICKSHELL-SHELL.md`](docs/QUICKSHELL-SHELL.md) — Quickshell desktop shell plan & progress
 - [`homeManagerModules/README.md`](homeManagerModules/README.md) — Module index
 - [`TODO.md`](TODO.md) — Active development notes

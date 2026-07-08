@@ -147,5 +147,12 @@
         description = "Enable the Wayland desktop utilities module (wallpaper, clipboard, screenshots).";
       };
     };
+    quickshell = {
+      enable = lib.mkOption {
+        type    = lib.types.bool;
+        default = false;
+        description = "Enable the Quickshell (QtQuick/QML) desktop shell Home Manager module.";
+      };
+    };
   };
 }

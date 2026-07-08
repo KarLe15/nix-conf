@@ -30,6 +30,7 @@
     ./zed
     ./jetbrains
     ./wayland-desktop
+    ./quickshell
   ];
 
   stylix.targets.gitui.enable = true;

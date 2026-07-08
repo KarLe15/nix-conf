@@ -23,6 +23,12 @@
 
     hyprland.url = "github:hyprwm/Hyprland";
 
+    ## Quickshell :: QtQuick/QML Wayland desktop shell (upstream flake, follows nixpkgs)
+    quickshell = {
+      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
 
     # Base 16 utils from base16 yaml to Nix Set
     base16utils = {
@@ -45,7 +51,7 @@
   outputs = {
     self, nixpkgs, nixpkgs-darwin, darwin, home-manager,
     ragenix, stylix, catppuccin, hyprland, base16utils,
-    nix-jetbrains-plugins, zen-browser,
+    nix-jetbrains-plugins, zen-browser, quickshell,
     ...
   }@flakeInputs :
     let
@@ -71,6 +77,8 @@
         home-manager.extraSpecialArgs =  {
           inherit system customConfigs nix-jetbrains-plugins nixpkgs;
           unstable-nixpkgs = mkHomeManagerConfigInputs.unstable-nixpkgs;
+          ## Quickshell package built from the upstream flake input for this system.
+          quickshell-pkg = quickshell.packages.${system}.default;
         };
       };
 

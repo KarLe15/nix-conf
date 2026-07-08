@@ -33,6 +33,8 @@
   # Window Manager
   software.modules.wayland-desktop.enable = true;
   software.modules.waybar.enable          = true;
+  # Quickshell desktop shell (coexists with waybar; launch manually with `qs`)
+  software.modules.quickshell.enable      = true;
   software.modules.swaync.enable          = true;
   software.modules.avizo.enable           = true;
   software.modules.hypridle.enable        = true;

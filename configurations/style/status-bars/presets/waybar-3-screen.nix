@@ -176,16 +176,16 @@
             id      = "wireplumber";
             config  =  wireplumber_config;
           }
-          {
-            type    = "cpu";
-            id      = "cpu";
-            config  = {};
-          }
-          {
-            type    = "memory";
-            id      = "memory";
-            config  = {};
-          }
+          # {
+          #   type    = "cpu";
+          #   id      = "cpu";
+          #   config  = {};
+          # }
+          # {
+          #   type    = "memory";
+          #   id      = "memory";
+          #   config  = {};
+          # }
         ];
       }
       {

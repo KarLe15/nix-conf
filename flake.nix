@@ -168,6 +168,9 @@
               unstable-nixpkgs = import mkNixOsSystemInputs.flakeInputs.nixpkgs {
                 inherit system;
                 config.allowUnfree = true;
+                overlays = [
+                  # (import ./overlays/claude-code/2_1_91) # Removed as the version of claude is new available
+                ];
               };
             })
           ];

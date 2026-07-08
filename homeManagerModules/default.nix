@@ -20,7 +20,7 @@
     ./wleave
     ./ghostty
     ./waybar
-    ./zen-browser
+    # ./zen-browser # removed due to compilation error
     ./brave
     ./rofi
     ./git-accounts
@@ -118,6 +118,7 @@
         slack
 
         vesktop
+        vlc
       ];
       unstablePackages = [
         # Ollama

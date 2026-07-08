@@ -10,7 +10,7 @@
     wineWow64Packages.staging   # Wine staging with 32/64-bit
     winetricks               # Wine configuration utility
     protontricks             # Proton prefix management
-
+    protonup-qt
     ## === Performance & Monitoring ===
     mangohud                 # FPS/performance overlay
     goverlay                 # MangoHud GUI configuration
@@ -103,5 +103,11 @@
     extraCompatPackages = with pkgs; [
       proton-ge-bin  # Community Proton with extra fixes
     ];
+    package = pkgs.steam.override {
+      extraPkgs = (pkgs: with pkgs; [
+        gamemode
+        # Add other required packages here (e.g., python3 for some games)
+      ]);
+    };
   };
 }

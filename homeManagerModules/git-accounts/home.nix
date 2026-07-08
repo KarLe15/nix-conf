@@ -1,14 +1,16 @@
-{inputs, pkgs, lib, config, customConfigs, ... } : 
-let 
+{inputs, pkgs, lib, config, customConfigs, ... } :
+let
   enabled = customConfigs.softwareConfigs.modules.git-accounts.enable;
-  generateSSHBlock = gitConfig: ''
-     Host ${gitConfig.dns-alias}
-        HostName ${gitConfig.dns-origin}
-        User git
-        IdentityFile ${gitConfig.key}
-        IdentitiesOnly yes
-        AddKeysToAgent yes
-  '';
+  generateSSHBlock = gitConfig: {
+    name = gitConfig.dns-alias;
+    value = {
+      hostname = gitConfig.dns-origin;
+      user = "git";
+      identityFile = gitConfig.key;
+      identitiesOnly = true;
+      addKeysToAgent = "yes";
+    };
+  };
 in
 {
   config = lib.mkIf enabled {
@@ -16,15 +18,34 @@ in
       default-programs = customConfigs.softwareConfigs.defaults.apply {inherit pkgs; };
       cfg = customConfigs.softwareConfigs.git-accounts.apply {
         inherit pkgs default-programs;
-      }; 
+      };
     in {
       ssh = {
+        ##=========================================================
+        ## Update 2026-01-24 :
+        #   - Convert the generation `generateSSHBlock` from generating String into typesafe Nix
+        #
+        #   - Explicitly add the usage of default behaviour on SSH
+        #     Host *
+        #       ServerAliveInterval 60
+        #       ServerAliveCountMax 3
+        ##=========================================================
         enable = true;
-        extraConfig = lib.concatMapStrings generateSSHBlock cfg.git-accounts;
+        enableDefaultConfig = false;
+        matchBlocks =
+          (builtins.listToAttrs (map generateSSHBlock cfg.git-accounts))
+          // {
+            "*" = {
+              serverAliveInterval = 60;
+              serverAliveCountMax = 3;
+            };
+          };
+
       };
       git = {
         enable = true;
-        extraConfig = {
+        ## Update 2026-01-24 :: programs.git.extraConfig -> programs.git.settings
+        settings = {
           init = {
             defaultBranch = "main";
             templateDir = "~/.git-template";

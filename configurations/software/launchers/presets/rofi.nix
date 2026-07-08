@@ -4,13 +4,13 @@
       ## TODO :: 2025-06-10 :: change this to more reliable config
       command = "rofi -show drun -theme /home/karim/.config/rofi/theme.rasi";
       name = "Rofi launcher with theme";
-      package = pkgs.rofi-wayland;
+      package = pkgs.rofi;
     };
     clipboard = {
       ## TODO :: 2025-06-10 :: change this to more reliable config
       command = " cliphist list | rofi -dmenu -theme /home/karim/.config/rofi/theme.rasi | cliphist decode | wl-copy";
       name = "Rofi launcher with theme";
-      package = pkgs.rofi-wayland;
+      package = pkgs.rofi;
     };
   };
   autostart = [
@@ -19,4 +19,3 @@
     "wl-paste --type image --watch cliphist store"
   ];
 }
-

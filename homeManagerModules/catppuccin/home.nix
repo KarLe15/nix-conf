@@ -1,7 +1,9 @@
-{inputs, pkgs, lib, config, catpuccin, customConfigs, ... } : 
-let 
-  cursor = customConfigs.styleConfigs.cursors.apply { inherit pkgs; };
-in
-{
-  catppuccin.flavor = "macchiato";
+{ inputs, pkgs, lib, config, customConfigs, ... }:
+let
+  cfg    = customConfigs.softwareConfigs.modules.catppuccin;
+  themes = customConfigs.styleConfigs.themes.apply { inherit pkgs; };
+in {
+  config = lib.mkIf cfg.enable {
+    catppuccin.flavor = themes.flavor;
+  };
 }

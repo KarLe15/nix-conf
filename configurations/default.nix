@@ -3,5 +3,6 @@
     ./hardware
     ./style
     ./software
+    ./profiles
   ];
 }

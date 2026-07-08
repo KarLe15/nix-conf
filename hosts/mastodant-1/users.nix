@@ -3,11 +3,11 @@
     karim = {
       isNormalUser = true;
       description = "Karim";
-      extraGroups = [ "networkmanager" "wheel" "users" "docker"];
+      extraGroups = [ "networkmanager" "wheel" "users" "docker" "input"];
       shell = pkgs.fish;
     };
   };
-  ## Add Karim as trusted user for cachix usage, 
+  ## Add Karim as trusted user for cachix usage,
   ## Required for devenv to work properly
   nix.settings.trusted-users = [ "root" "karim" ];
 }

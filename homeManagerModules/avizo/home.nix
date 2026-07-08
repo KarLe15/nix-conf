@@ -1,18 +1,18 @@
-{inputs, pkgs, lib, config, customConfigs, ... } : 
-{
-  stylix.targets.avizo = {
-    enable = true;
-  };
-  services.avizo = {
-    enable = true;
-    package = pkgs.avizo;
-    settings = {
-      default = {
-        time = 1.0;
+{ inputs, pkgs, lib, config, customConfigs, ... }:
+let
+  cfg = customConfigs.softwareConfigs.modules.avizo;
+in {
+  config = lib.mkIf cfg.enable {
+    stylix.targets.avizo.enable = true;
+    services.avizo = {
+      enable  = true;
+      package = pkgs.avizo;
+      settings.default = {
+        time     = 1.0;
         y-offset = 0.5;
-        fade-in = 0.1;
+        fade-in  = 0.1;
         fade-out = 0.2;
-        padding = 10;
+        padding  = 10;
       };
     };
   };

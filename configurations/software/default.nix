@@ -1,5 +1,6 @@
 { lib, ... } : {
   imports = [
+    ./modules
     ./defaults
     ./developpement
     ./git-accounts
@@ -7,5 +8,7 @@
     ./launchers
     ./powermanagement
     ./multimedia
+    ./shell
+    ./wayland-desktop
   ];
 }

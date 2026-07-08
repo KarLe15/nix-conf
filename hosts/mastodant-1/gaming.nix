@@ -7,10 +7,10 @@
     legendary-gl              # Epic Games CLI
 
     ## === Wine Ecosystem ===
-    wineWowPackages.staging   # Wine staging with 32/64-bit
+    wineWow64Packages.staging   # Wine staging with 32/64-bit
     winetricks               # Wine configuration utility
     protontricks             # Proton prefix management
-
+    protonup-qt
     ## === Performance & Monitoring ===
     mangohud                 # FPS/performance overlay
     goverlay                 # MangoHud GUI configuration
@@ -21,7 +21,7 @@
     radeontop                # AMD GPU monitoring
     gpu-viewer               # GPU information viewer
     amdgpu_top               # Better AMD GPU monitor
-    
+
     # Vulkan tools
     vulkan-tools
     vulkan-loader
@@ -39,17 +39,29 @@
     appimage-run            # Run AppImages
     piper                   # Gaming mouse configuration
     solaar                  # Logitech device manager
-
+    # nexusmods-app-unfree    # Mod Manager (mainly for skyrim)
     ## === Additional Launchers ===
     prismlauncher           # Minecraft launcher
     atlauncher              # Modded Minecraft launcher
 
+
+    ## 2026-01-27 :: Steam wrapper for disabling Steam SDL controller
+    # Issue on Nixos Steam for SDL
+    (pkgs.writeShellScriptBin "steam" ''
+      export SDL_JOYSTICK_HIDAPI=0
+      exec ${pkgs.steam}/bin/steam "$@"
+    '')
   ];
-  
+
+  # nixpkgs.config.permittedInsecurePackages = [
+  #   "nexusmods-app-unfree-0.21.1"
+  # ];
   # Udev rules for controllers and gaming peripherals
   services.udev.packages = with pkgs; [
     game-devices-udev-rules  # Controller support
+    steam-devices-udev-rules             # Steam udev rules
   ];
+  hardware.steam-hardware.enable = true;
 
   # Enable Xbox controller support
   hardware.xone.enable = true;           # Xbox One/Series controllers
@@ -58,7 +70,8 @@
   # Fonts for games (some games need Windows fonts)
   fonts.packages = with pkgs; [
     corefonts              # Microsoft fonts
-    vistafonts             # Vista fonts
+    ## Update 2026-01-24 :: vistafonts -> vista-fonts
+    vista-fonts             # Vista fonts
     liberation_ttf         # Liberation fonts
   ];
 
@@ -82,7 +95,7 @@
       };
     };
   };
-  
+
   # Steam
   programs.steam = {
     enable = true;
@@ -90,5 +103,11 @@
     extraCompatPackages = with pkgs; [
       proton-ge-bin  # Community Proton with extra fixes
     ];
+    package = pkgs.steam.override {
+      extraPkgs = (pkgs: with pkgs; [
+        gamemode
+        # Add other required packages here (e.g., python3 for some games)
+      ]);
+    };
   };
 }

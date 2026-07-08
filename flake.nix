@@ -16,18 +16,13 @@
     ragenix = {
       url = "github:yaxitech/ragenix";
     };
-    
+
     stylix.url = "github:danth/stylix";
     ## Use Catpuccin for not available modules on stylix
     catppuccin.url = "github:catppuccin/nix";
 
     hyprland.url = "github:hyprwm/Hyprland";
 
-
-    # walker = {
-    #   url = "github:abenz1267/walker";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
 
     # Base 16 utils from base16 yaml to Nix Set
     base16utils = {
@@ -47,13 +42,13 @@
 
   };
 
-  outputs = { 
-    self, nixpkgs, nixpkgs-darwin, darwin, home-manager, 
-    ragenix, stylix, catppuccin, hyprland, base16utils, 
+  outputs = {
+    self, nixpkgs, nixpkgs-darwin, darwin, home-manager,
+    ragenix, stylix, catppuccin, hyprland, base16utils,
     nix-jetbrains-plugins, zen-browser,
-    ... 
+    ...
   }@flakeInputs :
-    let 
+    let
 
       mkHomeManagerConfig = { user, system, customConfigs, ... }@mkHomeManagerConfigInputs: {
         ## INFO :: To use the same NixPkgs Instance from Nixos and HomeManager to ensure sync :: https://nix-community.github.io/home-manager/index.xhtml#sec-install-nixos-module
@@ -69,13 +64,13 @@
             catppuccin.homeModules.catppuccin
             ragenix.homeManagerModules.default
             zen-browser.homeModules.twilight-official
-            ## TODO :: 06/04/2024 :: Home-Manager module not merged into home-manager repo 
+            ## TODO :: 06/04/2024 :: Home-Manager module not merged into home-manager repo
             ## Using Custom Home-manager module defined by KarLe
-            # walker.homeManagerModules.default 
           ];
         };
         home-manager.extraSpecialArgs =  {
           inherit system customConfigs nix-jetbrains-plugins nixpkgs;
+          unstable-nixpkgs = mkHomeManagerConfigInputs.unstable-nixpkgs;
         };
       };
 
@@ -107,12 +102,12 @@
         ragenix.nixosModules.default
         ./configurations
       ];
-      
 
 
-      # mkDarwinSystem = {system, user, hostname, ragenix, ragenixKeyPath, ... }@mkDarwinSystemInputs: 
+
+      # mkDarwinSystem = {system, user, hostname, ragenix, ragenixKeyPath, ... }@mkDarwinSystemInputs:
       #   let
-      #     hostOptions = (import mkDarwinSystemInputs.hostOptionsPath) { 
+      #     hostOptions = (import mkDarwinSystemInputs.hostOptionsPath) {
       #       config = mkDarwinSystemInputs.flakeInputs.config;
       #       lib = mkDarwinSystemInputs.flakeInputs.nixpkgs.lib;
       #     };
@@ -124,7 +119,7 @@
       #       mkDarwinSystemInputs.stylix.darwinModules.stylix
       #       (mkCommonOsConfig {
       #          inherit system ragenixKeyPath;
-      #          ragenix = mkNixOsSystemInputs.flakeInputs.ragenix;  
+      #          ragenix = mkNixOsSystemInputs.flakeInputs.ragenix;
       #        })
       #       (mkNixDarwinConfig {inherit system; })
       #       home-manager.darwinModules.home-manager
@@ -132,10 +127,10 @@
       #     ];
       #   }
       # ;
-      
+
       mkNixosSystem = {system, user, hostname, ragenixKeyPath, ... }@mkNixOsSystemInputs:
         let
-          hostOptions = (import mkNixOsSystemInputs.hostOptionsPath) { 
+          hostOptions = (import mkNixOsSystemInputs.hostOptionsPath) {
             config = mkNixOsSystemInputs.flakeInputs.config;
             lib = mkNixOsSystemInputs.flakeInputs.nixpkgs.lib;
           };
@@ -144,12 +139,12 @@
           # Built options/config resolved with host options
           # theses options will be sent to homeManager / NixOs / NixDarwin / Common modules
           ## ===========================================================================
-          customConfigs = let 
+          customConfigs = let
             configUtils = (import ./custom-config-generator.nix) {
               config = mkNixOsSystemInputs.flakeInputs.config;
               lib = mkNixOsSystemInputs.flakeInputs.nixpkgs.lib;
-            }; 
-          in 
+            };
+          in
             configUtils.buildCustomConfig {cfg = hostOptions;}
           ;
         in
@@ -168,11 +163,20 @@
               hyprland = mkNixOsSystemInputs.flakeInputs.hyprland;
             })
             home-manager.nixosModules.home-manager
-            (mkHomeManagerConfig { inherit user system customConfigs; })
+            (mkHomeManagerConfig {
+              inherit user system customConfigs;
+              unstable-nixpkgs = import mkNixOsSystemInputs.flakeInputs.nixpkgs {
+                inherit system;
+                config.allowUnfree = true;
+                overlays = [
+                  # (import ./overlays/claude-code/2_1_91) # Removed as the version of claude is new available
+                ];
+              };
+            })
           ];
         }
       ;
-        
+
     in {
       darwinConfigurations = {
       #   "mac-m1" = mkDarwinSystem {

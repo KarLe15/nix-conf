@@ -1,9 +1,10 @@
 
 
-{inputs, pkgs, lib, config, customConfigs, ... } : 
-let 
-in
-{
+{ inputs, pkgs, lib, config, customConfigs, ... }:
+let
+  cfg = customConfigs.softwareConfigs.modules.starship;
+in {
+  config = lib.mkIf cfg.enable {
   stylix.targets.starship.enable = true;
   programs.starship = {
     enable = true;
@@ -51,12 +52,12 @@ in
       cmd_duration = {
         show_milliseconds = false;
         min_time = 1500;
-        format = "[](fg:base08)[took $duration](bold fg:base04 bg:base08)[](fg:base08)";
+        format = "[](fg:base08)[took $duration](bold fg:white bg:base08)[](fg:base08)";
       };
       username = {
         show_always = true;
-        style_user = "bold fg:base04 bg:base16";
-        style_root = "bold fg:base04 bg:base16";
+        style_user = "bold fg:white bg:base16";
+        style_root = "bold fg:white bg:base16";
         format = "[ $user ]($style)";
         disabled = false;
       };
@@ -65,7 +66,7 @@ in
         disabled = false;
       };
       directory = {
-        style = "bold fg:base04 bg:base08";
+        style = "bold fg:white bg:base08";
         format = "[   $path ]($style)";
         truncate_to_repo = true;
         truncation_length = 3;
@@ -80,16 +81,16 @@ in
       time = {
         disabled = false;
         time_format = "%R"; # Hour:Minute Format
-        style = "bold fg:base04 bg:base16";
+        style = "bold fg:white bg:base16";
         format = "[ 🕙 $time ]($style)";
       };
       git_branch = {
         symbol = "";
-        style = "bold fg:base04 bg:base09";
+        style = "bold fg:black bg:base09";
         format = "[ $symbol $branch ]($style)";
       };
       git_status = {
-        style = "bold fg:base04 bg:bright-yellow";
+        style = "bold fg:black bg:bright-yellow";
         modified = " ✏️ ";
         deleted = " 🗑️ ";
         untracked = " 🐾\${count} ";
@@ -100,60 +101,60 @@ in
         format = "[$conflicted$untracked$modified$deleted$ahead_behind]($style)";
       };
       git_metrics = {
-        added_style = "fg:base04 bg:bright-yellow bold green";
+        added_style = "fg:black bg:bright-yellow bold green";
         deleted_style = "bg:bright-yellow bold red";
         format = "[ +$added]($added_style)[ -$deleted]($deleted_style)[ ](bg:bright-yellow)";
         disabled = true;
       };
       git_state = {
-        style = "bold fg:base04 bg:bright-yellow";
+        style = "bold fg:black bg:bright-yellow";
         format = "[ $all_status$ahead_behind ]($style)";
       };
       golang = {
         symbol = " ";
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       gradle = {
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       haskell = {
         symbol = " ";
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       java = {
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       julia = {
         symbol = " ";
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       nodejs = {
         symbol = " ";
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       rust = {
         symbol = " ";
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       scala = {
         symbol = " ";
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       c = {
         symbol = " ";
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       python = {
-        style = "bold fg:base04 bg:base07";
+        style = "bold fg:black bg:base07";
         format = "[ $symbol ($version) ]($style)";
       };
       docker_context = {
@@ -162,5 +163,6 @@ in
         format = "[ $symbol $context ]($style) $path";
       };
     };
+  };
   };
 }

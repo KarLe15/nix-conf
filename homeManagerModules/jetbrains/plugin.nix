@@ -1,7 +1,7 @@
+{ system, inputs, pkgs, nixpkgs, lib, config, customConfigs, nix-jetbrains-plugins, ... }:
+let
+  cfg = customConfigs.softwareConfigs.modules.jetbrains;
 
-
-{system, inputs, pkgs, nixpkgs, lib, config, customConfigs, nix-jetbrains-plugins, ... } : 
-let 
   themePlugins = [
     "com.github.catppuccin.jetbrains"
     "izhangzhihao.rainbow.brackets"
@@ -12,24 +12,23 @@ let
   ];
   utilsPlugins = [
     "String Manipulation"
-    # "com.intellij.mermaid"
     "com.intellij.tasks"
     "com.github.jk1.ytplugin"
     "nix-idea"
   ];
   allCommonPlugins = themePlugins ++ utilsPlugins;
-  IdeaPlugins = [
+  ideaPlugins = allCommonPlugins ++ [
     "Lombook Plugin"
+    "com.anthropic.code.plugin"
   ];
-
-in
-{
-  home.packages = with nix-jetbrains-plugins.lib.${system}; [
-    (buildIdeWithPlugins pkgs.jetbrains "idea-ultimate" (allCommonPlugins ++ IdeaPlugins))
-    (buildIdeWithPlugins pkgs.jetbrains "rust-rover" allCommonPlugins)
-    (buildIdeWithPlugins pkgs.jetbrains "webstorm" allCommonPlugins)
-    (buildIdeWithPlugins pkgs.jetbrains "goland" allCommonPlugins)
-    (buildIdeWithPlugins pkgs.jetbrains "clion" allCommonPlugins)
-  ];
-
+in {
+  config = lib.mkIf cfg.enable {
+    home.packages = with nix-jetbrains-plugins.lib; [
+      (buildIdeWithPlugins pkgs "idea"       ideaPlugins)
+      (buildIdeWithPlugins pkgs "rust-rover" allCommonPlugins)
+      (buildIdeWithPlugins pkgs "webstorm"   allCommonPlugins)
+      (buildIdeWithPlugins pkgs "goland"     allCommonPlugins)
+      (buildIdeWithPlugins pkgs "clion"      allCommonPlugins)
+    ];
+  };
 }

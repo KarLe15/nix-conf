@@ -1,5 +1,6 @@
-{inputs, pkgs, lib, config, customConfigs, ... } : 
-let 
+{ inputs, pkgs, lib, config, customConfigs, ... }:
+let
+  cfg = customConfigs.softwareConfigs.modules.hyprland;
   activeMonitorConfig = customConfigs.hardwareConfigs.monitors.apply { inherit pkgs; };
   workspaces = customConfigs.styleConfigs.workspaces.apply { monitors = activeMonitorConfig; inherit pkgs; };
   cursor = customConfigs.styleConfigs.cursors.apply { inherit pkgs; };
@@ -8,9 +9,9 @@ let
   developpement = customConfigs.softwareConfigs.developpement.apply { inherit pkgs; };
   multimedia = customConfigs.softwareConfigs.multimedia.apply { inherit pkgs; };
   shortcuts-impl = customConfigs.softwareConfigs.shortcuts.shortcuts-definition { inherit defaults developpement launchers pkgs multimedia ; };
-  autostart-services = 
-        customConfigs.softwareConfigs.defaults.autostart 
-    ++  customConfigs.softwareConfigs.launchers.autostart 
+  autostart-services =
+        customConfigs.softwareConfigs.defaults.autostart
+    ++  customConfigs.softwareConfigs.launchers.autostart
     ++  customConfigs.softwareConfigs.developpement.autostart
     ++  customConfigs.styleConfigs.themes.autostart
     ++  customConfigs.styleConfigs.cursors.autostart
@@ -22,8 +23,8 @@ let
     Up =        "u";
     Down =      "d";
   }.${direction} or (throw "Unknown direction for Hyprland command: ${direction}");
-in
-{
+in {
+  config = lib.mkIf cfg.enable {
   stylix.targets.hyprland.enable = true;
   ## INFO :: The stylix module enables a systemD module and the uwsm is enabled with sddm and hyprland so the hyprpaper is loaded
   stylix.targets.hyprpaper.enable = true;
@@ -32,38 +33,38 @@ in
     systemd.enable = false;
     settings = {
 
-      monitor = map (m: 
+      monitor = map (m:
         "${m.name}, ${toString m.width}x${toString m.height}@${toString m.refreshRate}, ${toString m.position.x}x${toString m.position.y}, ${toString m.scale}"
       ) activeMonitorConfig.definition;
-      
+
       ## Startup Scripts
       "exec-once" = [
         "hyprctl setcursor ${toString cursor.default.exact-name} ${toString cursor.default.size}"
       ] ++ autostart-services;
-      
+
       general = {
         "gaps_out" = "10,3,5,3";
       };
-      
+
       ## Shortcuts definition
       bind = (
-        map (shortcut: 
-          if shortcut.command != null && shortcut.command != "" && shortcut.dispatcher-type == "exec" && shortcut.env != "" then 
+        map (shortcut:
+          if shortcut.command != null && shortcut.command != "" && shortcut.dispatcher-type == "exec" && shortcut.env != "" then
             "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, ${shortcut.env} uwsm app -- ${shortcut.command}"
           else if shortcut.command != null && shortcut.command != "" && shortcut.dispatcher-type == "exec" then
             "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, uwsm app -- ${shortcut.command}"
-          else 
+          else
             "${shortcut.mod1}, ${shortcut.key}, ${shortcut.dispatcher-type}, ${shortcut.command}"
         ) shortcuts-impl
       ) ++
-      ## Add workspace shortcut 
+      ## Add workspace shortcut
       lib.flatten (
         map (workspace:
           (map (key: [
                 "${workspace.mod}, ${key}, workspace, ${toString workspace.id}"
                 "${workspace.mod-shift}, ${key}, movetoworkspacesilent , ${toString workspace.id}"
                 ]
-            ) 
+            )
             workspace.shortcut)
         ) workspaces.workspaces_defined
       ) ++
@@ -74,7 +75,7 @@ in
                   "${nav.mod}, ${key}, movefocus, ${mapDirectionToHyprland nav.direction}"
                   "${nav.mod-shift}, ${key}, movewindow, ${mapDirectionToHyprland nav.direction}"
                 ]
-          ) 
+          )
           nav.shortcut)
         ) workspaces.navigation
       )
@@ -86,17 +87,18 @@ in
         "ALT, mouse:273, resizewindow"
       ];
       windowrule = [
-        "float, class:com.gabm.satty"
-        "decorate on, class:com.gabm.satty"
-        "bordersize 40, class:com.gabm.satty"
+        "float on, center on, no_initial_focus on, decorate on, border_size 40, match:class com.gabm.satty"
         ## Dialog to save / load file
-        "center 1, class:Xdg-desktop-portal-gtk"
-        "rounding 0, class:Xdg-desktop-portal-gtk"
-        "noborder, class:Xdg-desktop-portal-gtk"
+        "center on, rounding 0, border_size 0, match:class Xdg-desktop-portal-gtk"
+        ## Brave Upload
+        # classes :
+        #   - Main Window 'brave-browser'
+        #   - Popups   'brave'
+        # # 1084 653  Value tested on screen
+        "float on, center on, no_initial_focus on, max_size 1084 653, match:class brave"
         ## VSCodium dialogs
-        "center 1, class:Codium"
-        "noanim, class:Codium"
-        
+        "float on, center on, no_initial_focus on, max_size 1084 653, no_anim on, match:class codium, match:title Open.*"
+
       ];
 
       ## https://wiki.hyprland.org/0.48.0/Configuring/Workspace-Rules/
@@ -112,15 +114,16 @@ in
         "kb_layout" = "fr";
         "numlock_by_default" = "true";
       };
-      
+
       misc =  {
 
       };
-      
+
       cursor = {
 
       };
-        
+
     };
+  };
   };
 }

@@ -36,6 +36,8 @@ PanelWindow {
     }
 
     Clock {
+        // Ultrawide (hub) carries the full date; the side screens show time only.
+        compact: !bar.isHub
         anchors.left: parent.left
         anchors.leftMargin: 14
         anchors.verticalCenter: parent.verticalCenter

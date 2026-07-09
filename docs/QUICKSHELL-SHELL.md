@@ -110,7 +110,7 @@ homeManagerModules/quickshell/
 | **3. System module** | Adaptive system module + hover animation. Per `System Module Hover`. | waybar | Not started |
 | **4. Notifications** | Notification stack. Per `Notifications`. | swaync | Not started |
 | **5. Launcher / dock** | Notch launcher + stargate dock. Per `Notch Launcher`, `App Launcher`. | rofi | Not started |
-| **6. Widgets** | Calendar, system widget, side drawer, wallpaper picker. | — | Not started |
+| **6. Widgets** | Calendar (**done** — clock-triggered month popover, per-screen clock format), system widget, side drawer, wallpaper picker. | — | Calendar done; rest not started |
 | **7. Migrate** | Add autostart (systemd user service / Hyprland `exec-once`); disable each old module once its Quickshell replacement is solid. | waybar/swaync/rofi | Not started |
 
 ---
@@ -169,6 +169,12 @@ workspace.
 - **PanelWindow rendering + live Hyprland/volume data** need the real desktop — can't
   be exercised headlessly (no Wayland/layer-shell, no Hyprland socket). Everything
   up to window creation is validated.
+- **Calendar popover (`CalendarPopup`)**: the `PopupWindow` positioning + click-to-open
+  need the live compositor; only the `CalendarView` body (grid, today/weekend/
+  other-month, ISO weeks, nav) is validated headlessly. The clock format is
+  per-screen: the hub (ultrawide) shows time + date, side screens show time only,
+  driven by `bar.isHub`. Outside-click-to-close and hover-to-open are not wired
+  (click the clock again to close).
 - **System module** polls `/proc/stat`, `thermal_zone0`, and `wpctl` every 2s. The
   thermal-zone path and `wpctl` availability are the likely per-machine tweaks.
 - **Per-monitor roles**: the *routing* is now wired — `Config.roles` maps each

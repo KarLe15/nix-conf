@@ -10,7 +10,9 @@ widgets) is being ported to QML step by step.
 **Stage 2 — status bar (current).** Ships the "Screen Bars · Filled" direction: a
 solid Crust top bar on every monitor with three zones —
 
-- **left**: a clock island (glyph · `HH:mm` · date),
+- **left**: a clock island (glyph · `HH:mm` · date) — the ultrawide (hub) shows the
+  full time + date, the side screens show time only; clicking it drops a month
+  calendar popover (Calendar Widget · 7b),
 - **center**: the full 1–9 workspace strip (id · `:` · Nerd Font glyph), with live
   occupancy from Hyprland and click-to-switch — the **focused** workspace (where
   input focus is) is highlighted, consistently across every bar,
@@ -56,7 +58,9 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 | `home.nix` | Installs the package, generates `Theme.qml` + `Config.qml`, writes the QML tree |
 | `qml/shell.qml` | Entry point — one `Bar` per screen via `Variants` |
 | `qml/Bar.qml` | Per-monitor `PanelWindow` (solid bar, three zones) |
-| `qml/widgets/Clock.qml` | Left clock island |
+| `qml/widgets/Clock.qml` | Left clock island + calendar trigger (`compact` = time only) |
+| `qml/widgets/CalendarPopup.qml` | `PopupWindow` anchored under the clock |
+| `qml/widgets/CalendarView.qml` | Month calendar body (Monday-first, today/weekend/other-month states) |
 | `qml/widgets/Workspaces.qml` | Center workspace pills (Hyprland-driven) |
 | `qml/widgets/SystemModule.qml` | Right system pills (CPU/temp + volume) |
 

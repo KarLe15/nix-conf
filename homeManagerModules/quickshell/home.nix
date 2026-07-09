@@ -73,6 +73,11 @@ let
         readonly property string fontUi:   "${fonts.sansSerif.exact-name}"
         readonly property string fontMono: "${fonts.mono.exact-name}"
 
+        // ---- Localisation ----
+        // Date/time strings render in this locale (the host sets LC_TIME=fr_FR),
+        // rather than Qt's default from LANG (en_US). Change here to switch language.
+        readonly property string locale: "fr_FR"
+
         // ---- Metrics ----
         // The Screen Bars mockup is drawn at ~0.573x (1972px depicting a 3440px
         // monitor), so its literal px are scaled up ~1.75x here to match the design's

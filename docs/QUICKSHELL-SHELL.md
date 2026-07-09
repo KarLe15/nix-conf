@@ -107,7 +107,7 @@ homeManagerModules/quickshell/
 |---|---|---|---|
 | **1. Scaffold** | Flake input + module + enable flag + minimal `shell.qml` (per-monitor top bar with a centered clock pill). Proves wiring, theme/font injection, multi-monitor `Variants`. | — | **Done** |
 | **2. Status bar** | Workspace pills + clock + basic system module, refactored into `widgets/` components fed by `monitors` + `workspaces` presets. Per the `Screen Bars` mockup (solid Crust bar, filled pills). | waybar | **Done** |
-| **3. System module** | Adaptive system module + hover animation. Per `System Module Hover`. | waybar | Not started |
+| **3. System module** | Adaptive context pill (gaming/llm/container/standard) + click-to-open unified panel. Per `System Widget`. Bespoke per-context panel bodies + hover animation still to come. | waybar | **Done (first cut)** |
 | **4. Notifications** | Notification stack. Per `Notifications`. | swaync | Not started |
 | **5. Launcher / dock** | Notch launcher + stargate dock. Per `Notch Launcher`, `App Launcher`. | rofi | Not started |
 | **6. Widgets** | Calendar (**done** — clock-triggered month popover, per-screen clock format), system widget, side drawer, wallpaper picker. | — | Calendar done; rest not started |

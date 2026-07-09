@@ -16,7 +16,10 @@ solid Crust top bar on every monitor with three zones —
 - **center**: the full 1–9 workspace strip (id · `:` · Nerd Font glyph), with live
   occupancy from Hyprland and click-to-switch — the **focused** workspace (where
   input focus is) is highlighted, consistently across every bar,
-- **right**: a basic system module (CPU · temp, and volume).
+- **right**: the adaptive system module — a context-colored pill (precedence
+  gaming → llm → container → standard) showing the top context's headline metric;
+  click it for a panel of CPU/MEM/GPU meters, net, a context hero line, and systemd
+  status.
 
 Colored, filled, dark-on-accent pills, matched to the machine's Catppuccin flavor.
 Workspace ids/glyphs come from the repo's own `workspaces` + `monitors` presets (the
@@ -62,7 +65,9 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 | `qml/widgets/CalendarPopup.qml` | `PopupWindow` anchored under the clock |
 | `qml/widgets/CalendarView.qml` | Month calendar body (Monday-first, today/weekend/other-month states) |
 | `qml/widgets/Workspaces.qml` | Center workspace pills (Hyprland-driven) |
-| `qml/widgets/SystemModule.qml` | Right system pills (CPU/temp + volume) |
+| `qml/widgets/SystemModule.qml` | Adaptive system pill (context detection + pollers) + panel trigger |
+| `qml/widgets/SystemPanel.qml` | `PopupWindow` anchored under the system pill |
+| `qml/widgets/SystemPanelView.qml` | Unified system panel body (CPU/MEM/GPU meters, NET, context hero, systemd) |
 
 Colors are hardcoded per flavor in `home.nix` (mirroring the approach in
 `configurations/style/status-bars/assets/style.css`) so Quickshell and Waybar render

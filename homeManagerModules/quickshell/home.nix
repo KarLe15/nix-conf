@@ -140,6 +140,7 @@ in
       "quickshell/shell.qml".source = ./qml/shell.qml;
       "quickshell/Bar.qml".source   = ./qml/Bar.qml;
       "quickshell/widgets".source   = ./qml/widgets;
+      "quickshell/scripts".source   = ./scripts;
     };
   };
 }

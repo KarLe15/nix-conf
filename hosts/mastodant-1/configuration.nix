@@ -34,6 +34,13 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # bitwarden-desktop currently depends on electron-39, EOL as of nixpkgs
+  # d4079514. Upstream bump is scheduled for 2026-07-23; remove this entry
+  # once the input is updated past that date.
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-39.8.10"
+  ];
+
   # List services that you want to enable:
 
   # This value determines the NixOS release from which the default

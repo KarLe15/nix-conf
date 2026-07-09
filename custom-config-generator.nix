@@ -92,7 +92,8 @@ let
           starship
           fish
           hyprland
-          wayland-desktop;
+          wayland-desktop
+          quickshell;
       };
     };
 

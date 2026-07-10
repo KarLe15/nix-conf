@@ -48,9 +48,13 @@ PanelWindow {
         screenName: bar.modelData.name
     }
 
-    SystemModule {
+    Row {
         anchors.right: parent.right
         anchors.rightMargin: 14
         anchors.verticalCenter: parent.verticalCenter
+        spacing: 8
+
+        SystemModule {}
+        VolumeBluetooth {}
     }
 }

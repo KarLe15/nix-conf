@@ -19,7 +19,9 @@ solid Crust top bar on every monitor with three zones —
 - **right**: the adaptive system module — a context-colored pill (precedence
   gaming → llm → container → standard) showing the top context's headline metric;
   click it for a panel of CPU/MEM/GPU meters, net, a context hero line, and systemd
-  status.
+  status. Beside it, the **volume + Bluetooth** pill (Pipewire volume/mute +
+  connected BlueZ device); click for a control popover (output, volume slider,
+  Bluetooth toggle + device list with connect/battery/scan).
 
 Colored, filled, dark-on-accent pills, matched to the machine's Catppuccin flavor.
 Workspace ids/glyphs come from the repo's own `workspaces` + `monitors` presets (the
@@ -67,7 +69,11 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 | `qml/widgets/Workspaces.qml` | Center workspace pills (Hyprland-driven) |
 | `qml/widgets/SystemModule.qml` | Adaptive system pill (context detection + pollers) + panel trigger |
 | `qml/widgets/SystemPanel.qml` | `PopupWindow` anchored under the system pill |
-| `qml/widgets/SystemPanelView.qml` | Unified system panel body (CPU/MEM/GPU meters, NET, context hero, systemd) |
+| `qml/widgets/SystemPanelView.qml` | Adaptive system panel body (per-context: procs / model cards / container list / sparklines) |
+| `qml/widgets/Sparkline.qml` | Canvas area+line chart (gaming panel) |
+| `qml/widgets/VolumeBluetooth.qml` | Volume + Bluetooth bar pill (Pipewire + BlueZ) + panel trigger |
+| `qml/widgets/VolumeBtPanel.qml` | `PopupWindow` anchored under the volume pill |
+| `qml/widgets/VolumeBtPanelView.qml` | Audio + Bluetooth control body (output, volume slider, BT toggle + device list) |
 
 Colors are hardcoded per flavor in `home.nix` (mirroring the approach in
 `configurations/style/status-bars/assets/style.css`) so Quickshell and Waybar render

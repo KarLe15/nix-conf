@@ -181,6 +181,7 @@ in
       "quickshell/Theme.qml".text     = themeQml;
       "quickshell/Config.qml".text    = configQml;
       "quickshell/Popovers.qml".source = ./qml/Popovers.qml;
+      "quickshell/Sys.qml".source     = ./qml/Sys.qml;
       "quickshell/shell.qml".source   = ./qml/shell.qml;
       "quickshell/Bar.qml".source   = ./qml/Bar.qml;
       "quickshell/widgets".source   = ./qml/widgets;

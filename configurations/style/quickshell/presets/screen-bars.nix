@@ -58,8 +58,7 @@
         center = [ { w = "workspaces"; } ];
         right = [
           { w = "stub"; icon = "f108"; label = "LLM my face"; color = "red"; dashed = true; }
-          { w = "stub"; icon = "f062"; label = "1.2M"; color = "sky"; }
-          { w = "stub"; icon = "f063"; label = "8.4M"; color = "green"; }
+          { w = "network"; }                                                   # upload + download rates
         ];
       };
       other = {                                              # any unmapped monitor

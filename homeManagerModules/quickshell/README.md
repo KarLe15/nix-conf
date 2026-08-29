@@ -65,6 +65,7 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 | `qml/shell.qml` | Entry point — one `Bar` per screen via `Variants` |
 | `qml/Bar.qml` | Per-monitor `PanelWindow` — three zones, each a `Repeater` over `Config.barLayout[role]` |
 | `qml/Popovers.qml` | Singleton coordinating popover dismissal (one-at-a-time + Hyprland focus-grab click-outside) |
+| `qml/Sys.qml` | Singleton — single source of truth for system metrics/context (one poller set, shared by all bars); widgets are pure views over it |
 | `qml/widgets/WidgetSlot.qml` | Dispatches one layout entry (`{ w, … }`) to its widget, or a `StubPill` fallback |
 | `qml/widgets/StubPill.qml` | Static design stub pill (icon/label/palette-color from layout data) for not-yet-built widgets |
 | `qml/widgets/Avatar.qml` | User-identity avatar — profile photo (`Config.profileImage`) masked into a disc (code screen) |
@@ -72,7 +73,7 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 | `qml/widgets/CalendarPopup.qml` | `PopupWindow` anchored under the clock |
 | `qml/widgets/CalendarView.qml` | Month calendar body (Monday-first, today/weekend/other-month states) |
 | `qml/widgets/Workspaces.qml` | Center workspace pills (Hyprland-driven) |
-| `qml/widgets/SystemModule.qml` | Adaptive system pill (context detection + pollers) + panel trigger |
+| `qml/widgets/SystemModule.qml` | Adaptive system pill — pure view over `Sys` (context-colored) + panel trigger |
 | `qml/widgets/SystemPanel.qml` | `PopupWindow` anchored under the system pill |
 | `qml/widgets/SystemPanelView.qml` | Adaptive system panel body (per-context: procs / model cards / container list / sparklines) |
 | `qml/widgets/Sparkline.qml` | Canvas area+line chart (gaming panel) |

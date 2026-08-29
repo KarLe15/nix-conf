@@ -1,46 +1,19 @@
 import QtQuick
-import Quickshell.Io
 import "root:/"
 
 // CPU + GPU temperature pill (Screen Bars · code screen). A peach dark-on-accent
-// pill showing the CPU (k10temp) and GPU (amdgpu) package temperatures, read from
-// hwmon every 2s. Fixed-width degree slots so it doesn't jitter as a reading moves
-// between two and three digits.
+// pill showing the CPU (k10temp) and GPU (amdgpu) package temperatures. A pure view
+// over the shared Sys singleton — no polling of its own. Fixed-width degree slots so
+// it doesn't jitter as a reading moves between two and three digits.
 Rectangle {
     id: root
-    property int cpuTemp: 0
-    property int gpuTemp: 0
+    readonly property int cpuTemp: Sys.cpuTemp
+    readonly property int gpuTemp: Sys.gpuTemp
 
     radius: Theme.pillRadius
     color: Theme.peach
     implicitHeight: Theme.pillHeight
     implicitWidth: pillRow.implicitWidth + 20
-
-    // Poll the two hwmon sensors (same sources as SystemModule's metrics probe).
-    Process {
-        id: proc
-        running: false
-        command: ["sh", "-c",
-            "cput=0; gput=0; for h in /sys/class/hwmon/hwmon*; do "
-          + "n=$(cat \"$h/name\" 2>/dev/null); case \"$n\" in "
-          + "k10temp) v=$(cat \"$h/temp1_input\" 2>/dev/null); [ -n \"$v\" ] && cput=$((v/1000));; "
-          + "amdgpu) v=$(cat \"$h/temp1_input\" 2>/dev/null); [ -n \"$v\" ] && gput=$((v/1000));; "
-          + "esac; done; echo \"$cput $gput\""]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const p = this.text.trim().split(/\s+/);
-                root.cpuTemp = parseInt(p[0]) || 0;
-                root.gpuTemp = parseInt(p[1]) || 0;
-            }
-        }
-    }
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: proc.running = true
-    }
 
     // Widest degree reading, for constant-width number slots.
     TextMetrics {

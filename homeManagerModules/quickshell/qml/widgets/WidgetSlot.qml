@@ -20,6 +20,7 @@ Loader {
         case "workspaces": return workspacesC;
         case "system":     return systemC;
         case "systemp":    return sysTempC;
+        case "network":    return networkC;
         case "volume":     return volumeC;
         case "avatar":     return avatarC;
         case "action":     return actionC;
@@ -31,6 +32,7 @@ Loader {
     Component { id: workspacesC; Workspaces { screenName: slot.screenName } }
     Component { id: systemC;     SystemModule {} }
     Component { id: sysTempC;    SysTemp {} }
+    Component { id: networkC;    Network {} }
     Component { id: volumeC;     VolumeBluetooth {} }
     Component { id: avatarC;     Avatar {} }
     Component {

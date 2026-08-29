@@ -131,7 +131,7 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: panel.visible = !panel.visible
+        onClicked: Popovers.toggle(panel)
     }
 
     VolumeBtPanel {

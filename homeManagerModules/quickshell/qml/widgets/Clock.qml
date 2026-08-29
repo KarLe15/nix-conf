@@ -76,7 +76,7 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: calendar.visible = !calendar.visible
+        onClicked: Popovers.toggle(calendar)
     }
 
     CalendarPopup {

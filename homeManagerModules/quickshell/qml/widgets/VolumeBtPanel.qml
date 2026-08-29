@@ -17,7 +17,7 @@ PopupWindow {
     implicitWidth: view.implicitWidth
     implicitHeight: view.implicitHeight
     color: "transparent"
-    visible: false
+    visible: Popovers.active === popup
 
     VolumeBtPanelView {
         id: view

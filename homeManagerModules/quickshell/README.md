@@ -54,6 +54,7 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 | `hardwareConfigs.monitors` | `.apply { pkgs } → .disposition` | Hub monitor + monitor names |
 | `styleConfigs.workspaces` | `.apply { pkgs, monitors } → .workspaces_defined` | Per-monitor workspace ids/glyphs in `Config.qml` |
 | `softwareConfigs.modules.quickshell.enable` | — | Gates the whole module |
+| `softwareConfigs.modules.quickshell.bars` | (attrs) | Overrides the per-screen bar layout; empty = built-in Screen Bars layout |
 
 ## Files
 
@@ -62,7 +63,11 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 | `default.nix` | Thin wrapper — imports `home.nix` |
 | `home.nix` | Installs the package, generates `Theme.qml` + `Config.qml`, writes the QML tree |
 | `qml/shell.qml` | Entry point — one `Bar` per screen via `Variants` |
-| `qml/Bar.qml` | Per-monitor `PanelWindow` (solid bar, three zones) |
+| `qml/Bar.qml` | Per-monitor `PanelWindow` — three zones, each a `Repeater` over `Config.barLayout[role]` |
+| `qml/Popovers.qml` | Singleton coordinating popover dismissal (one-at-a-time + Hyprland focus-grab click-outside) |
+| `qml/widgets/WidgetSlot.qml` | Dispatches one layout entry (`{ w, … }`) to its widget, or a `StubPill` fallback |
+| `qml/widgets/StubPill.qml` | Static design stub pill (icon/label/palette-color from layout data) for not-yet-built widgets |
+| `qml/widgets/Avatar.qml` | User-identity avatar — profile photo (`Config.profileImage`) masked into a disc (code screen) |
 | `qml/widgets/Clock.qml` | Left clock island + calendar trigger (`compact` = time only) |
 | `qml/widgets/CalendarPopup.qml` | `PopupWindow` anchored under the clock |
 | `qml/widgets/CalendarView.qml` | Month calendar body (Monday-first, today/weekend/other-month states) |

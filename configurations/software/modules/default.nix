@@ -153,6 +153,15 @@
         default = false;
         description = "Enable the Quickshell (QtQuick/QML) desktop shell Home Manager module.";
       };
+      bars = lib.mkOption {
+        type    = lib.types.attrs;
+        default = {};
+        description = ''
+          Per-screen bar layout, keyed by monitor role (code/terminal/browser/other),
+          each with left/center/right lists of widget entries. Empty uses the built-in
+          Screen Bars layout. See homeManagerModules/quickshell/home.nix (defaultBarsLayout).
+        '';
+      };
     };
   };
 }

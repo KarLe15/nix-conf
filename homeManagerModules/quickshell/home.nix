@@ -13,9 +13,13 @@ let
   monitors   = customConfigs.hardwareConfigs.monitors.apply { inherit pkgs; };
   workspaces = customConfigs.styleConfigs.workspaces.apply { inherit pkgs monitors; };
 
+  ## Default programs (file explorer, terminal, …) — the single source of truth the
+  ## rest of the config uses; the quickshell preset builds its button actions from it.
+  default-programs = customConfigs.softwareConfigs.defaults.apply { inherit pkgs; };
+
   ## Quickshell-specific config (per-screen bar layout + assets) also comes from a
   ## preset in configurations/ — the module never reaches up into configurations/.
-  quickshellStyle = customConfigs.styleConfigs.quickshell.apply { inherit pkgs; };
+  quickshellStyle = customConfigs.styleConfigs.quickshell.apply { inherit pkgs default-programs; };
 
   ## Catppuccin palettes keyed by flavor. Only flavors selectable by a theme preset
   ## need to exist here. Hex values match the ones used in the Waybar style.css asset
@@ -125,6 +129,7 @@ let
         ++ lib.optional (e ? icon)    ''"icon": "\u${e.icon}"''
         ++ lib.optional (e ? label)   ''"label": "${escStr e.label}"''
         ++ lib.optional (e ? color)   ''"color": "${e.color}"''
+        ++ lib.optional (e ? command) ''"command": "${escStr e.command}"''
         ++ lib.optional (e ? compact) ''"compact": ${lib.boolToString e.compact}''
         ++ lib.optional (e ? dashed)  ''"dashed": ${lib.boolToString e.dashed}'';
     in "{ ${lib.concatStringsSep ", " parts} }";

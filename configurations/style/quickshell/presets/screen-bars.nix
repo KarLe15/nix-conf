@@ -6,12 +6,17 @@
 # ({ w = "clock"; }) or a design stub ({ w = "stub"; icon; label; color; }):
 #   icon    Nerd Font codepoint (hex, no backslash) — serialized as \uXXXX
 #   color   Theme palette name (e.g. "peach", "sapphire")
+#   command shell command run on click ({ w = "action"; }) — launched detached
 #   compact clock time-only (no date)
 #   dashed  stub drawn with a dashed ring ("conditional"/troll pills)
 # Real widget names are dispatched by qml/widgets/WidgetSlot.qml; unknown names
 # fall back to a StubPill built from the entry data.
 {
-  apply = { ... }: {
+  apply = { default-programs, ... }:
+  let
+    # Launch actions are built from the default programs (single source of truth).
+    fileExplorer = dir: ''${default-programs.file-explorer.command} "${dir}"'';
+  in {
     profile-image = ../../status-bars/assets/profile_oneill.jpg;
 
     bars = {
@@ -35,8 +40,8 @@
       code = {                                               # left screen — primary
         left = [
           { w = "avatar"; }
-          { w = "stub"; icon = "f015"; color = "blue"; }   # Home
-          { w = "stub"; icon = "f019"; color = "teal"; }   # Downloads
+          { w = "action"; icon = "f015"; color = "blue"; command = fileExplorer "$HOME"; }            # Home
+          { w = "action"; icon = "f019"; color = "teal"; command = fileExplorer "$HOME/Downloads"; }  # Downloads
         ];
         center = [ { w = "workspaces"; } ];
         right = [

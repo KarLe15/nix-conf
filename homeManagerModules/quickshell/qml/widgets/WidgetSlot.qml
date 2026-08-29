@@ -22,6 +22,7 @@ Loader {
         case "systemp":    return sysTempC;
         case "volume":     return volumeC;
         case "avatar":     return avatarC;
+        case "action":     return actionC;
         default:           return stubC;   // "stub" or anything unrecognised
         }
     }
@@ -32,6 +33,14 @@ Loader {
     Component { id: sysTempC;    SysTemp {} }
     Component { id: volumeC;     VolumeBluetooth {} }
     Component { id: avatarC;     Avatar {} }
+    Component {
+        id: actionC
+        LaunchButton {
+            icon: slot.entry.icon || ""
+            colorName: slot.entry.color || "surface"
+            command: slot.entry.command || ""
+        }
+    }
     Component {
         id: stubC
         StubPill {

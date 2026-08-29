@@ -34,16 +34,36 @@ Rectangle {
     function _short(n) {
         if (!n) return "";
         const w = n.split(" ")[0];
-        return w.length > 9 ? w.slice(0, 9) : w;
+        return w.length > 5 ? w.slice(0, 5) : w;
     }
-    readonly property string btShort:
-        btConnected.length > 0 ? _short(btConnected[0].name || btConnected[0].deviceName) : ""
+    // The connected device's short name, or "Off" when the adapter is disabled,
+    // or "" when the adapter is on but nothing is connected.
+    readonly property string btLabel:
+        !btEnabled ? "Off"
+        : (btConnected.length > 0 ? _short(btConnected[0].name || btConnected[0].deviceName) : "")
+
+    // Fixed-width slots keep the pill from resizing as the volume digits or the
+    // Bluetooth label change. Sized to the widest content each slot can hold.
+    TextMetrics {
+        id: volMetrics
+        font.family: Theme.fontMono
+        font.pixelSize: Theme.fontNormal
+        font.bold: true
+        text: "100%"  // widest number; muted renders as "mute" (same width)
+    }
+    TextMetrics {
+        id: btMetrics
+        font.family: Theme.fontMono
+        font.pixelSize: Theme.fontNormal
+        font.bold: true
+        text: "MMMMM"  // 5 chars — matches the _short() cap
+    }
 
     radius: Theme.pillRadius
     color: muted ? Theme.overlay1 : Theme.sapphire
     opacity: (pillMouse.containsMouse || panel.visible) ? 0.9 : 1.0
     implicitHeight: Theme.pillHeight
-    implicitWidth: pillRow.implicitWidth + 20
+    implicitWidth: pillRow.implicitWidth + 16
 
     Row {
         id: pillRow
@@ -62,7 +82,9 @@ Rectangle {
             }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.muted ? "muted" : root.volPct + "%"
+                width: volMetrics.width
+                horizontalAlignment: Text.AlignLeft
+                text: root.muted ? "mute" : root.volPct + "%"
                 font.family: Theme.fontMono
                 font.pixelSize: Theme.fontNormal
                 font.bold: true
@@ -85,12 +107,17 @@ Rectangle {
                 text: ""  // bluetooth
                 font.family: Theme.fontMono
                 font.pixelSize: Theme.fontIcon
+                // Bright when a device is connected, dimmed when idle, faint when off.
+                opacity: root.btConnected.length > 0 ? 1.0 : (root.btEnabled ? 0.7 : 0.4)
                 color: Theme.onAccent
             }
             Text {
-                visible: root.btShort.length > 0
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.btShort
+                width: btMetrics.width
+                horizontalAlignment: Text.AlignLeft
+                elide: Text.ElideRight
+                text: root.btLabel
+                opacity: root.btEnabled ? 1.0 : 0.6
                 font.family: Theme.fontMono
                 font.pixelSize: Theme.fontNormal
                 font.bold: true

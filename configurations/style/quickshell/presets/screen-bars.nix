@@ -41,7 +41,7 @@
         center = [ { w = "workspaces"; } ];
         right = [
           { w = "stub"; icon = "f11c"; label = "resize"; color = "peach"; }
-          { w = "stub"; icon = "f2c9"; label = "34% · 78°"; color = "peach"; }  # cpu/temp
+          { w = "systemp"; }                                                     # CPU + GPU temps
           { w = "volume"; }
         ];
       };

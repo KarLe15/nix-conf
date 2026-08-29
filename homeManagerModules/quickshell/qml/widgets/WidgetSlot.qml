@@ -19,6 +19,7 @@ Loader {
         case "clock":      return clockC;
         case "workspaces": return workspacesC;
         case "system":     return systemC;
+        case "systemp":    return sysTempC;
         case "volume":     return volumeC;
         case "avatar":     return avatarC;
         default:           return stubC;   // "stub" or anything unrecognised
@@ -28,6 +29,7 @@ Loader {
     Component { id: clockC;      Clock { compact: slot.entry.compact === true } }
     Component { id: workspacesC; Workspaces { screenName: slot.screenName } }
     Component { id: systemC;     SystemModule {} }
+    Component { id: sysTempC;    SysTemp {} }
     Component { id: volumeC;     VolumeBluetooth {} }
     Component { id: avatarC;     Avatar {} }
     Component {

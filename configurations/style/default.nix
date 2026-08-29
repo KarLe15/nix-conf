@@ -6,6 +6,7 @@
     ./icons
     ./themes
     ./status-bars
+    ./quickshell
     ./workspaces
   ];
 }

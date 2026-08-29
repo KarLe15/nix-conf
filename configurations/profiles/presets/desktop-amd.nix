@@ -14,6 +14,7 @@
   style.fonts.active                = "mac-like";
   style.wallpaper.active            = "standard";
   style.statusbar.active            = "waybar-3-screen";
+  style.quickshell.active           = "screen-bars";
   style.workspaces.active           = "standard-3-screen";
 
   ## Software

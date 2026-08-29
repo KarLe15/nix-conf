@@ -107,6 +107,9 @@ let
       status-bars =
         import ./configurations/style/status-bars/presets/${style.statusbar.active}.nix;
 
+      quickshell =
+        import ./configurations/style/quickshell/presets/${style.quickshell.active}.nix;
+
       themes = wrapPreset types.themesOutputType
         (import ./configurations/style/themes/presets/${style.themes.active}.nix);
 

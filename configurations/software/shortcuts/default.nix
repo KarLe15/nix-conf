@@ -10,19 +10,44 @@
       default = "mastodant-1";
       description = ''
         Active keybinding preset name. Consumed by the hyprland module to build
-        Hyprland bind declarations.
+        Hyprland bind declarations (rendered as hl.bind() calls in hyprland.lua).
 
         The selected preset must export a top-level function:
           shortcuts-definition :: { defaults, developpement, launchers, multimedia, pkgs } -> [ ShortcutDef ]
 
         ShortcutDef :: {
-          description     :: str;
-          mod1            :: str;            # modifier key, e.g. "ALT", "SUPER", or "" for none
-          key             :: str;            # key name or XF86 key
-          dispatcher-type :: str;            # Hyprland dispatcher, e.g. "exec", "killactive"
-          command         :: str;            # argument to the dispatcher
-          env             :: str;            # optional env var prefix for exec dispatchers
+          description :: str;          # shown in Hyprland as the bind description
+          mods        :: [ str ];      # modifiers, [ ] for none; joined with "+"
+          key         :: str;          # key name, XF86 key, or "mouse:<code>"
+          dispatcher  :: str;          # see the dispatcher table below
+          args        :: attrs;        # dispatcher arguments, named per dispatcher
+          flags       :: attrs;        # hl.bind options: locked / repeating /
+                                       #   release / long_press / mouse
+          submap      :: str | null;   # submap this bind belongs to, null = global
+          env         :: str;          # environment prefix for `exec`
         }
+
+        Every field except `description`, `key` and `dispatcher` has a default, so
+        an entry only states what it needs (the preset applies `shortcut-defaults`).
+
+        dispatcher              args
+        ----------------------  ------------------------------------------
+        exec                    { cmd }
+        killactive              —
+        forcekillactive         —
+        togglefloating          —
+        fullscreen              { mode = "fullscreen" | "maximized" }
+        togglespecialworkspace  —
+        movetoworkspace         { workspace, follow ? true }   # follow = false moves silently
+        resize                  { x, y }
+        submap-enter            { submap }   # "default" exits the active submap
+
+        Adding a dispatcher means adding a case to `mkDispatcher` in
+        homeManagerModules/hyprland/home.nix; an unmapped one throws at eval time.
+
+        NOTE: this preset is imported unwrapped (it exports a function, not
+        `apply`), so unlike the other presets its shape is not enforced by a
+        submodule type — see custom-config-generator.nix.
       '';
     };
   };

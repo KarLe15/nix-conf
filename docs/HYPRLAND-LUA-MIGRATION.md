@@ -1,6 +1,6 @@
 # Enhancement Proposal: Hyprland Lua Migration & Config Refactor
 
-**Status**: Lua migration **done** (forced, 2026-08-30) — Phases 1–2 and 4–5 outstanding
+**Status**: Lua migration **done** (forced, 2026-08-30); Phase 2 done — Phases 1, 3b, 4–5 outstanding
 **Date**: 2026-08-30, updated 2026-08-31
 **Module**: `homeManagerModules/hyprland/`
 **Related**: [ENHANCEMENT-PROFILES.md](ENHANCEMENT-PROFILES.md), [QUICKSHELL-SHELL.md](QUICKSHELL-SHELL.md)
@@ -77,6 +77,7 @@ community `hl.*` API reference was wrong on two counts.
 | `error setting 'general.gaps_out': css_gap type requires an integer or a table with optional "top"/"right"/"bottom"/"left"` | `gaps_out = "10,3,5,3"` | `{ top = 10; right = 3; bottom = 5; left = 3; }` — hyprlang's comma list was CSS order |
 | `attempt to call a nil value (field 'exec_once')` | `hl.exec_once(cmd)` — **does not exist**, despite being documented | `hl.on("hyprland.start", function() hl.exec_cmd(…) end)` |
 | `hl.window_rule: field 'max_size': expression vec2 type requires exactly 2 elements` | `max_size = { w = 1084; h = 653; }` | `max_size = [ 1084 653 ]` → `{ 1084, 653 }` |
+| *No error at all* — windows moved to another workspace pulled focus with them | `silent = true` on `hl.dsp.window.move` | `follow = false`; the binding reads `follow` and derives silent as `follow.has_value() && !*follow`. Unknown fields are accepted and ignored, so this failed silently |
 
 **Lesson for the remaining phases**: syntax checking and call-name auditing prove
 almost nothing about this API. Field *types* (`css_gap`, `vec2`) and enum *spellings*
@@ -593,14 +594,30 @@ baseline to diff against is the generated `hyprland.lua`, not `hyprland.conf`.
 - **Verify**: diff the generated `hyprland.lua` before/after — it should be identical
   or trivially reordered.
 
-### Phase 2 — Widen the shortcut schema *(no behaviour change)*
+### Phase 2 — Widen the shortcut schema ✅ **Done** (2026-08-31)
 
-- Extend `ShortcutDef` to `{ description; mods; key; dispatcher; args; flags; submap; env; }`
-  — `mods` replacing `mod1` as a list, `flags` for `locked`/`release`/`repeat`,
-  `submap` naming the submap an entry belongs to (null = global).
-- Update the contract docstring in `configurations/software/shortcuts/default.nix`.
-- Replaces the `mkDispatcher` string table with typed dispatcher data.
-- **Verify**: generated `hyprland.lua` diff is empty.
+- `ShortcutDef` is now
+  `{ description; mods :: [str]; key; dispatcher; args; flags; submap; env; }`,
+  with a `shortcut-defaults` attrset each entry is merged over so an entry states
+  only what it needs.
+- `mkDispatcher` reads named `args` fields instead of reinterpreting one `command`
+  string, and throws a named error for a missing argument
+  (`shortcut 'X' (fullscreen) is missing args.mode`).
+- `flags` (locked / repeating / release / long_press / mouse) ride in the `hl.bind`
+  options table beside `description`.
+- Binds partition on `submap`; the Home Manager `submaps` option is wired and
+  renders `hl.define_submap(…)` — empty until Phase 4 populates the preset.
+- Added a `submap-enter` dispatcher, so the schema can both declare *and* enter a
+  submap.
+- `movetoworkspacesilent` renamed to `movetoworkspace` with `args.follow ? true`,
+  making follow-vs-silent a preset choice rather than part of the dispatcher name.
+
+The *workspaces* preset was deliberately left alone — it is shared with Waybar and
+Quickshell and still spells modifiers `"ALT_SHIFT"`, so `home.nix` normalises it at
+the call site via `splitMods` rather than reshaping a preset three modules read.
+
+**Verified**: the whole `nixos-system` derivation hash was unchanged by the schema
+refactor (`ac84d67798r4…` before and after) — not merely the generated Lua.
 
 ### Phase 4 — Introduce submaps
 
@@ -645,6 +662,7 @@ the static `{ w = "stub"; icon = "f11c"; label = "resize"; }` entries currently 
 | **A flake update silently breaks the desktop** — evaluation succeeds, the compositor falls back to defaults at login | **Materialised 2026-08-30.** Nix build success proves nothing about config validity. Pin `hyprland` to a known-good rev and bump deliberately; keep a TTY login available |
 | **Offline validation gives false confidence** — `luac -p` and call-name audits pass on semantically invalid config | **Materialised.** Five runtime errors survived a clean syntax check (see the corrections table). Treat `luac -p` as a floor, not a gate; change one surface at a time and relog |
 | **Third-party API docs are wrong** — `hl.exec_once` is documented but does not exist | **Materialised.** Prefer patterns verifiable in real source (Home Manager's `lib.nix`, Stylix's `modules/hyprland/hm.nix`) over the community reference |
+| **The Lua API silently ignores unknown table fields** — a misspelled or invented field is a no-op, not an error | **Materialised twice.** `silent = true` on `hl.dsp.window.move` (the field is `follow`) shipped undetected through `luac -p`, a call-name audit and a clean compositor load; it surfaced only as wrong runtime behaviour. Confirmed in the REPL: `hl.dsp.window.move({ workspace = "5", bogus_field_xyz = true })` constructs a valid dispatcher. **For any guessed field name, read `src/config/lua/bindings/` in the Hyprland source** — `hyprctl repl` can introspect the API but will not reject bad fields |
 | HM Lua transpiler emits invalid Lua for `$`-bearing strings ([#9468](https://github.com/nix-community/home-manager/issues/9468), closed as not planned) | Did **not** materialise — the screenshot binds' `$(grim …)` / `$HOME` passed through intact. Strategy A (Phase 3b) removes the exposure anyway |
 | Lua and hyprlang configs are mutually exclusive per session | Confirmed: switching needs a full logout/login, not `hyprctl reload` |
 | Upstream Lua API still moving (0.56 expanded it substantially) | The flake input tracks `main`; each bump can change field types and enum spellings, which only a relog will reveal |

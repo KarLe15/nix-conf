@@ -1,168 +1,177 @@
+## Keybinding preset. Each entry is a ShortcutDef consumed by
+## homeManagerModules/hyprland/home.nix and rendered into an hl.bind() call.
+##
+##   mods       list of modifiers, [ ] for none — joined with "+" for Hyprland
+##   key        key name, XF86 key, or "mouse:<code>"
+##   dispatcher what the bind does; mapped to an hl.dsp.* call by mkDispatcher
+##   args       dispatcher arguments, named per dispatcher (see the table below)
+##   flags      hl.bind options: locked / repeating / release / long_press / mouse
+##   submap     submap this bind belongs to, null = always active
+##   env        environment prefix for `exec` (kept a raw string; see D6)
+##
+##   dispatcher              args
+##   ----------------------  ------------------------------------------
+##   exec                    { cmd }
+##   killactive              —
+##   forcekillactive         —
+##   togglefloating          —
+##   fullscreen              { mode = "fullscreen" | "maximized" }
+##   togglespecialworkspace  —
+##   movetoworkspace         { workspace, follow ? true }
+##   resize                  { x, y }
+##   submap-enter            { submap }   # "default" exits the active submap
 rec {
-  mod = "ALT";
-  mod-shift = "ALT_SHIFT";
-  secondary = "SUPER";
-  secondary-shift = "SUPER_SHIFT";
-  shortcuts-definition = {defaults, developpement, launchers, multimedia, pkgs, ...}@programs: [
+  mod = [ "ALT" ];
+  mod-shift = [ "ALT" "SHIFT" ];
+  secondary = [ "SUPER" ];
+  secondary-shift = [ "SUPER" "SHIFT" ];
+
+  ## Defaults every entry inherits, so a ShortcutDef only states what it needs.
+  shortcut-defaults = {
+    mods = [ ];
+    args = { };
+    flags = { };
+    submap = null;
+    env = "";
+  };
+
+  shortcuts-definition = {defaults, developpement, launchers, multimedia, pkgs, ...}@programs:
+    map (s: shortcut-defaults // s) [
     ## ===========================<     WM Commands    >==========================
     {
       description = "Close Active Window";
-      mod1 = secondary;
+      mods = secondary;
       key = "Q";
-      command = "";
-      dispatcher-type = "killactive";
-      env = "";
+      dispatcher = "killactive";
     }
     {
       description = "Force Close Active Window";
-      mod1 = secondary-shift;
+      mods = secondary-shift;
       key = "Q";
-      command = "";
-      dispatcher-type = "forcekillactive";
-      env = "";
+      dispatcher = "forcekillactive";
     }
     {
       description = "FullScreen Active Window (False full screen (with BAR))";
-      mod1 = mod;
+      mods = mod;
       key = "F";
-      command = "1";
-      dispatcher-type = "fullscreen";
-      env = "";
+      dispatcher = "fullscreen";
+      args = { mode = "maximized"; };
     }
     {
       description = "FullScreen Active Window (True full screen (without BAR))";
-      mod1 = mod-shift;
+      mods = mod-shift;
       key = "F";
-      command = "0";
-      dispatcher-type = "fullscreen";
-      env = "";
+      dispatcher = "fullscreen";
+      args = { mode = "fullscreen"; };
     }
     {
       description = "Toggle Floating";
-      mod1 = secondary;
+      mods = secondary;
       key = "Space";
-      command = "";
-      dispatcher-type = "togglefloating";
-      env = "";
+      dispatcher = "togglefloating";
     }
     {
       description = "Display Special workspace";
-      mod1 = mod;
+      mods = mod;
       key = "twosuperior";
-      command = "";
-      dispatcher-type = "togglespecialworkspace";
-      env = "";
+      dispatcher = "togglespecialworkspace";
     }
     {
       description = "Move Special workspace";
-      mod1 = mod-shift;
+      mods = mod-shift;
       key = "twosuperior";
-      command = "special";
-      dispatcher-type = "movetoworkspacesilent";
-      env = "";
+      dispatcher = "movetoworkspace";
+      args = { workspace = "special"; follow = false; };
     }
     {
       description = "Open Notification Center";
-      mod1 = mod-shift;
+      mods = mod-shift;
       key = "N";
-      command = defaults.notification-center.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = defaults.notification-center.command; };
     }
     ## ===========================<  MultiMedia commands  >=======================
+    ## TODO :: These are good candidates for flags = { locked = true; repeating = true; }
+    ## so they repeat when held and still work on the lock screen.
     {
       description = "Increase the Volume";
-      mod1 = "";
       key = "XF86AudioRaiseVolume";
-      command = multimedia.increaseVolume.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = multimedia.increaseVolume.command; };
     }
     {
       description = "Lower the Volume";
-      mod1 = "";
       key = "XF86AudioLowerVolume";
-      command = multimedia.lowerVolume.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = multimedia.lowerVolume.command; };
     }
     {
       description = "Mute / Unmute the Volume";
-      mod1 = "";
       key = "XF86AudioPlay";
-      command = multimedia.toggleVolume.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = multimedia.toggleVolume.command; };
     }
     ## ===========================<  Locking Commands  >==========================
     {
       description = "Logout Screen";
-      mod1 = secondary;
+      mods = secondary;
       key = "L";
-      command = defaults.logout.command;
-      dispatcher-type = "exec";
+      dispatcher = "exec";
+      args = { cmd = defaults.logout.command; };
       # FIXME :: 05/05/2025 :: Add this to fix Wlogout / Wleave issue with icons
       env = defaults.logout.env;
     }
     ## ===========================<  Launchers Manage  >==========================
     {
       description = "Application launcher";
-      mod1 = mod;
+      mods = mod;
       key = "Space";
-      command = launchers.applications.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = launchers.applications.command; };
     }
     {
       description = "Clipboard launcher";
-      mod1 = mod-shift;
+      mods = mod-shift;
       key = "V";
-      command = launchers.clipboard.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = launchers.clipboard.command; };
     }
     ## ===========================<  Default programs  >==========================
     {
       description = "Open File Explorer";
-      mod1 = mod-shift;
+      mods = mod-shift;
       key = "Return";
-      command = defaults.file-explorer.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = defaults.file-explorer.command; };
     }
     {
       description = "Open Terminal";
-      mod1 = mod;
+      mods = mod;
       key = "T";
-      command = defaults.terminal.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = defaults.terminal.command; };
     }
     {
       description = "Open Browser";
-      mod1 = mod;
+      mods = mod;
       key = "B";
-      command = defaults.browser.command;
-      dispatcher-type = "exec";
-      env = "";
+      dispatcher = "exec";
+      args = { cmd = defaults.browser.command; };
     }
     {
       description = "Take Screenshot and modify";
-      mod1 = "";
       key = "mouse:277";
-      dispatcher-type = "exec";
+      dispatcher = "exec";
       ## TODO :: 2025-06-10 :: Change this to be modular on a screenshot config standalone
-      command = ''$(grim -g "$(slurp)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
-      env = "";
+      args.cmd = ''$(grim -g "$(slurp)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
     }
     {
       description = "Take fullscreen Screenshot and modify";
-      mod1 = "SHIFT";
+      mods = [ "SHIFT" ];
       key = "mouse:277";
-      dispatcher-type = "exec";
+      dispatcher = "exec";
       ## TODO :: 2025-06-10 :: Change this to be modular on a screenshot config standalone
-      command = ''$(grim -g "$(slurp -o)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
-      env = "";
+      args.cmd = ''$(grim -g "$(slurp -o)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
     }
   ];
 }

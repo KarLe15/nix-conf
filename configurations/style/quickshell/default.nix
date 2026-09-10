@@ -21,8 +21,9 @@
           autostart :: [ str ]
 
         The `bars` attrset is serialized into Config.qml by
-        homeManagerModules/quickshell/home.nix. See its defaultBarsLayout comment
-        for the entry schema ({ w; icon; label; color; compact; dashed; }).
+        homeManagerModules/quickshell/home.nix and dispatched at runtime by
+        qml/widgets/WidgetSlot.qml. See the header comment in ./presets/screen-bars.nix
+        for the entry schema ({ w; icon; label; color; command; compact; dashed; }).
       '';
     };
   };

@@ -158,8 +158,9 @@
         default = {};
         description = ''
           Per-screen bar layout, keyed by monitor role (code/terminal/browser/other),
-          each with left/center/right lists of widget entries. Empty uses the built-in
-          Screen Bars layout. See homeManagerModules/quickshell/home.nix (defaultBarsLayout).
+          each with left/center/right lists of widget entries. Empty uses the layout
+          from the active preset (style.quickshell.active). See
+          configurations/style/quickshell/presets/*.nix for the entry schema.
         '';
       };
     };

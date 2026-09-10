@@ -7,21 +7,43 @@ widgets) is being ported to QML step by step.
 
 ## Status
 
-**Stage 2 — status bar (current).** Ships the "Screen Bars · Filled" direction: a
-solid Crust top bar on every monitor with three zones —
+**Stages 1–3 done, plus several Stage 6 widgets.** Ships the "Screen Bars · Filled"
+direction: a solid Crust top bar on every monitor, with a **different composition per
+screen** driven by that monitor's role (`code` / `terminal` / `browser` / `other`).
+The layout is data, not code — it comes from the
+`configurations/style/quickshell/` preset (see [Bar layout](#bar-layout)).
 
-- **left**: a clock island (glyph · `HH:mm` · date) — the ultrawide (hub) shows the
-  full time + date, the side screens show time only; clicking it drops a month
-  calendar popover (Calendar Widget · 7b),
-- **center**: the full 1–9 workspace strip (id · `:` · Nerd Font glyph), with live
-  occupancy from Hyprland and click-to-switch — the **focused** workspace (where
-  input focus is) is highlighted, consistently across every bar,
-- **right**: the adaptive system module — a context-colored pill (precedence
-  gaming → llm → container → standard) showing the top context's headline metric;
-  click it for a panel of CPU/MEM/GPU meters, net, a context hero line, and systemd
-  status. Beside it, the **volume + Bluetooth** pill (Pipewire volume/mute +
-  connected BlueZ device); click for a control popover (output, volume slider,
-  Bluetooth toggle + device list with connect/battery/scan).
+| Screen (role) | left | center | right |
+|---|---|---|---|
+| **browser** (ultrawide hub) | clock (time + date) · DND, REC, submap, idle-inhibitor stubs | workspaces | system module · GameMode + scheduler stubs · volume/BT · notification stub |
+| **code** (primary) | avatar · Home + Downloads launch buttons | workspaces | submap stub · CPU/GPU temps · volume/BT |
+| **terminal** | clock (compact) · submap stub | workspaces | LLM stub (dashed) · net up/down |
+| **other** (unmapped) | clock (compact) | workspaces | system module · volume/BT |
+
+What the real widgets do:
+
+- **clock** — glyph · `HH:mm` · date, in the `Theme.locale` locale (`fr_FR`);
+  `compact = true` drops the date. Click drops a month calendar popover
+  (Calendar Widget · 7b).
+- **workspaces** — the full 1–9 strip (id · `:` · Nerd Font glyph), live occupancy
+  from Hyprland and click-to-switch; the **focused** workspace is highlighted,
+  consistently across every bar.
+- **system** — adaptive context pill (precedence gaming → llm → container →
+  standard) showing the top context's headline metric; click for a panel of CPU/MEM/
+  GPU meters, net, a context hero line (top procs / model cards / container list /
+  sparklines), and systemd status.
+- **volume** — Pipewire volume/mute + connected BlueZ device; click for a control
+  popover (output, volume slider, Bluetooth toggle, device list with connect/
+  battery/scan).
+- **systemp** — CPU (`k10temp`) + GPU (`amdgpu`) package temperatures.
+- **network** — upload + download rate pills.
+- **avatar** — profile photo masked into a disc with a lavender ring.
+- **action** — icon-only pill that runs a shell command detached (Home / Downloads
+  shortcuts, built from the repo's default file explorer).
+
+Anything else in the layout renders as a **`StubPill`**: a design placeholder with no
+backend, so unbuilt modules (DND, REC, submap, idle inhibitor, GameMode, scheduler,
+notification count, the troll pill) already appear in the right place.
 
 Colored, filled, dark-on-accent pills, matched to the machine's Catppuccin flavor.
 Workspace ids/glyphs come from the repo's own `workspaces` + `monitors` presets (the
@@ -29,9 +51,9 @@ monitor binding is code → 1/4/7, terminal → 2/5/8, browser → 3/6/9, which 
 per-monitor active highlight).
 
 Quickshell still **coexists** with Waybar: it is installed but **not autostarted**,
-so nothing changes on your desktop until you launch it yourself (`qs`). The adaptive
-system module + hover panel (Stage 3), notifications (Stage 4), and the notch
-launcher / stargate dock (Stage 5) are not implemented yet.
+so nothing changes on your desktop until you launch it yourself (`qs`).
+Notifications (Stage 4) and the notch launcher / stargate dock (Stage 5) are not
+implemented yet.
 
 ## What it does
 
@@ -39,11 +61,68 @@ launcher / stargate dock (Stage 5) are not implemented yet.
   passed in via `home-manager.extraSpecialArgs` in `flake.nix`).
 - Generates `~/.config/quickshell/Theme.qml` — a `Singleton` holding the Catppuccin
   palette (matched to the active theme flavor), semantic color aliases, font
-  families, and shared metrics.
+  families, the date/time locale, and shared metrics.
 - Generates `~/.config/quickshell/Config.qml` — a `Singleton` holding the
   per-monitor workspace layout (`{ id, icon, monitor }`) projected from the
-  `workspaces`/`monitors` presets, plus the `hubMonitor` (ultrawide) name.
-- Writes the static QML component tree (`shell.qml`, `Bar.qml`, `widgets/*.qml`).
+  `workspaces`/`monitors` presets, the connector→role map, the `hubMonitor`
+  (ultrawide) name, the per-screen `barLayout`, and the avatar image path.
+- Writes the static QML component tree (`shell.qml`, `Bar.qml`, `Sys.qml`,
+  `Popovers.qml`, `widgets/*.qml`), the `scripts/` helpers, and the avatar photo.
+
+## Bar layout
+
+Each zone entry is an attrset dispatched by `qml/widgets/WidgetSlot.qml`:
+
+```nix
+{ w = "clock"; compact = true; }                                   # a real widget
+{ w = "action"; icon = "f015"; color = "blue"; command = "…"; }    # launches a command
+{ w = "stub"; icon = "f11c"; label = "resize"; color = "peach"; }  # design placeholder
+```
+
+| Key | Meaning |
+|---|---|
+| `w` | Widget name: `clock`, `workspaces`, `system`, `systemp`, `network`, `volume`, `avatar`, `action` — anything else (notably `stub`) falls back to `StubPill` |
+| `icon` | Nerd Font codepoint, hex without the backslash — serialized as `\uXXXX` |
+| `label` | Text beside the glyph |
+| `color` | `Theme` palette name (`peach`, `sapphire`, …) |
+| `command` | Shell command for `w = "action"`, run detached via `Quickshell.execDetached` |
+| `compact` | Clock shows time only |
+| `dashed` | Stub drawn with a dashed ring (conditional pills) |
+
+The layout normally comes from the active preset
+(`configurations/style/quickshell/presets/<style.quickshell.active>.nix`); a host can
+override the whole map with `software.modules.quickshell.bars` (empty = use the
+preset). **Adding a real widget** = write the component under `qml/widgets/`, add a
+case to `WidgetSlot.qml`, then name it in the preset.
+
+## System metrics
+
+`qml/Sys.qml` is a `pragma Singleton`, so it is **process-global**: one poller set
+serves all three bars. It is the only component that talks to the system — every
+widget is a pure view reading `Sys.<prop>`.
+
+| Poller | Interval | Source | Provides |
+|---|---|---|---|
+| metrics | 2 s | `/proc/stat`, `/proc/meminfo`, `/proc/net/dev`, `/sys/class/hwmon/*`, `/sys/class/drm/card*/device` | CPU %, CPU/GPU temp, GPU %, GPU watts, RAM, VRAM, net rx/tx |
+| context | 5 s | `scripts/context.sh` | context, systemd running/failed, ollama models, docker containers |
+| procs | 5 s | `ps` | top-3 CPU processes |
+
+The metrics poller is one shell one-shot echoing every number on a single line, so a
+snapshot is internally consistent; `Sys` also keeps a rolling 40-sample history for
+the gaming sparklines. The boundary is deliberate — a future socket/DBus daemon could
+push into these same properties without touching a widget.
+
+**Audio and Bluetooth bypass `Sys`**: `VolumeBluetooth.qml` binds Quickshell's own
+`Quickshell.Services.Pipewire` and `Quickshell.Bluetooth` services (live objects, no
+polling).
+
+## Popovers
+
+`qml/Popovers.qml` (singleton) coordinates the drop-downs so that only one is open at
+a time (each binds `visible: Popovers.active === <self>`), and a `HyprlandFocusGrab`
+covering the popover **plus every registered bar** dismisses it on an outside click.
+Including the bars in the grab means clicking another chip swaps the popover in one
+click instead of the grab eating the first click.
 
 ## customConfigs dependencies
 
@@ -51,24 +130,28 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 |---|---|---|
 | `styleConfigs.themes` | `.apply { pkgs } → .flavor` | Selects the Catppuccin palette |
 | `styleConfigs.fonts`  | `.apply { pkgs } → .sansSerif.exact-name`, `.mono.exact-name` | UI + mono font families in `Theme.qml` |
-| `hardwareConfigs.monitors` | `.apply { pkgs } → .disposition` | Hub monitor + monitor names |
+| `hardwareConfigs.monitors` | `.apply { pkgs } → .disposition` | Hub monitor, monitor names, connector→role map |
 | `styleConfigs.workspaces` | `.apply { pkgs, monitors } → .workspaces_defined` | Per-monitor workspace ids/glyphs in `Config.qml` |
+| `styleConfigs.quickshell` | `.apply { pkgs, default-programs } → .bars`, `.profile-image` | Per-screen bar layout + avatar photo |
+| `softwareConfigs.defaults` | `.apply { pkgs }` | Passed to the quickshell preset so launch actions use the repo's default programs |
 | `softwareConfigs.modules.quickshell.enable` | — | Gates the whole module |
-| `softwareConfigs.modules.quickshell.bars` | (attrs) | Overrides the per-screen bar layout; empty = built-in Screen Bars layout |
+| `softwareConfigs.modules.quickshell.bars` | (attrs) | Overrides the per-screen bar layout; empty = the preset's layout |
 
 ## Files
 
 | File | Role |
 |---|---|
 | `default.nix` | Thin wrapper — imports `home.nix` |
-| `home.nix` | Installs the package, generates `Theme.qml` + `Config.qml`, writes the QML tree |
+| `home.nix` | Installs the package, generates `Theme.qml` + `Config.qml`, writes the QML tree, scripts and avatar |
+| `scripts/context.sh` | Context probe — GameMode (session bus), ollama (`/api/ps`), docker, systemd; emits `key=value` lines |
 | `qml/shell.qml` | Entry point — one `Bar` per screen via `Variants` |
 | `qml/Bar.qml` | Per-monitor `PanelWindow` — three zones, each a `Repeater` over `Config.barLayout[role]` |
-| `qml/Popovers.qml` | Singleton coordinating popover dismissal (one-at-a-time + Hyprland focus-grab click-outside) |
 | `qml/Sys.qml` | Singleton — single source of truth for system metrics/context (one poller set, shared by all bars); widgets are pure views over it |
+| `qml/Popovers.qml` | Singleton coordinating popover dismissal (one-at-a-time + Hyprland focus-grab click-outside) |
 | `qml/widgets/WidgetSlot.qml` | Dispatches one layout entry (`{ w, … }`) to its widget, or a `StubPill` fallback |
 | `qml/widgets/StubPill.qml` | Static design stub pill (icon/label/palette-color from layout data) for not-yet-built widgets |
 | `qml/widgets/Avatar.qml` | User-identity avatar — profile photo (`Config.profileImage`) masked into a disc (code screen) |
+| `qml/widgets/LaunchButton.qml` | Icon-only action pill — runs the entry's `command` detached (Home / Downloads shortcuts) |
 | `qml/widgets/Clock.qml` | Left clock island + calendar trigger (`compact` = time only) |
 | `qml/widgets/CalendarPopup.qml` | `PopupWindow` anchored under the clock |
 | `qml/widgets/CalendarView.qml` | Month calendar body (Monday-first, today/weekend/other-month states) |
@@ -77,7 +160,9 @@ launcher / stargate dock (Stage 5) are not implemented yet.
 | `qml/widgets/SystemPanel.qml` | `PopupWindow` anchored under the system pill |
 | `qml/widgets/SystemPanelView.qml` | Adaptive system panel body (per-context: procs / model cards / container list / sparklines) |
 | `qml/widgets/Sparkline.qml` | Canvas area+line chart (gaming panel) |
-| `qml/widgets/VolumeBluetooth.qml` | Volume + Bluetooth bar pill (Pipewire + BlueZ) + panel trigger |
+| `qml/widgets/SysTemp.qml` | CPU + GPU temperature pill — pure view over `Sys` (code screen) |
+| `qml/widgets/Network.qml` | Upload + download rate pills — pure view over `Sys` (terminal screen) |
+| `qml/widgets/VolumeBluetooth.qml` | Volume + Bluetooth bar pill (Pipewire + BlueZ services) + panel trigger |
 | `qml/widgets/VolumeBtPanel.qml` | `PopupWindow` anchored under the volume pill |
 | `qml/widgets/VolumeBtPanelView.qml` | Audio + Bluetooth control body (output, volume slider, BT toggle + device list) |
 
@@ -93,7 +178,8 @@ attrset in `home.nix`. The accent is **mauve** (Screen Bars 1a); change the
 `//@ pragma` comment) and imported via `import "root:/"`. Components then read
 `Theme.<prop>` / `Config.<prop>` directly. This was validated headlessly with
 `QT_QPA_PLATFORM=offscreen qs -p …` — with the comment form the singletons resolve
-as bare types and every property reads `undefined`.
+as bare types and every property reads `undefined`. `Sys.qml` and `Popovers.qml` are
+hand-written singletons following the same rule.
 
 ## Trying it
 
@@ -103,10 +189,10 @@ After a rebuild, launch manually (it will not fight Waybar):
 qs        # or: quickshell
 ```
 
-You should see a solid top bar on each screen: clock left, that monitor's workspace
-pills center, CPU/temp + volume right. Click a workspace pill to switch to it.
-Quickshell hot-reloads on file change; edits to the QML take effect on the next
-rebuild.
+Each screen gets its role's bar (see the table above). Click a workspace pill to
+switch to it; click the clock, the system pill, or the volume pill for their
+popovers. Quickshell hot-reloads on file change; edits to the QML take effect on the
+next rebuild.
 
 ## Notes
 
@@ -114,6 +200,9 @@ rebuild.
   stage, once the bar replaces Waybar.
 - `Theme.qml` and `Config.qml` are generated; edit `home.nix`, not the files in
   `~/.config`.
-- The system module polls `/proc/stat` + a thermal zone and `wpctl` every 2s. If
-  volume shows `--`, check `wpctl get-volume @DEFAULT_AUDIO_SINK@`; if temp looks
-  wrong, adjust the `thermal_zone0` path in `widgets/SystemModule.qml`.
+- Metric paths in `Sys.qml` are AMD-specific: hwmon is matched by chip *name*
+  (`k10temp` for CPU temp, `amdgpu` for GPU temp + package watts) and GPU load/VRAM
+  come from the first DRM card exposing `gpu_busy_percent`. These are the likely
+  edits on another machine.
+- Hover-to-open is not wired for any popover — click to open, click again or click
+  outside to close.

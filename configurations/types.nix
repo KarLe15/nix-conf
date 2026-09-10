@@ -14,6 +14,7 @@
 { lib }:
 let
   monitors      = import ./hardware/monitors/types.nix      { inherit lib; };
+  hyprland      = import ./style/hyprland/types.nix          { inherit lib; };
   themes        = import ./style/themes/types.nix            { inherit lib; };
   fonts         = import ./style/fonts/types.nix             { inherit lib; };
   cursors       = import ./style/cursors/types.nix           { inherit lib; };
@@ -28,6 +29,7 @@ let
   waylandDesktop  = import ./software/wayland-desktop/types.nix { inherit lib; };
 in
   monitors
+  // hyprland
   // themes
   // fonts
   // cursors

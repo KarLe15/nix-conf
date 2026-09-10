@@ -1,6 +1,6 @@
 # Enhancement Proposal: Hyprland Lua Migration & Config Refactor
 
-**Status**: Lua migration **done** (forced, 2026-08-30); Phase 2 done — Phases 1, 3b, 4–5 outstanding
+**Status**: Phases 1, 2, 3, 3b done — Phases 4–5 outstanding
 **Date**: 2026-08-30, updated 2026-08-31
 **Module**: `homeManagerModules/hyprland/`
 **Related**: [ENHANCEMENT-PROFILES.md](ENHANCEMENT-PROFILES.md), [QUICKSHELL-SHELL.md](QUICKSHELL-SHELL.md)
@@ -108,8 +108,9 @@ replaced by `hl.dsp.focus({ direction = "left" })`; and every bind now carries t
 `hl.monitor` ×3, `hl.on`, `hl.window_rule` ×4, `hl.workspace_rule` ×10);
 `hyprctl getoption general:gaps_out` returns `10 3 5 3`, matching the old value.
 
-**Still Strategy B in shape** — every dispatcher is a `mkLuaInline` string. This was
-the emergency fix, not the target architecture. Strategy A (D1) remains the plan.
+**Shipped as Strategy B in shape** — every dispatcher was a `mkLuaInline` string.
+That was the emergency fix, not the target architecture; Phase 3b replaced it with
+Strategy A on 2026-08-31.
 
 ---
 
@@ -539,7 +540,6 @@ strings routed through a generator with an open bug).
 
 | # | Decision | Status |
 |---|---|---|
-| **D3** | New preset location: `configurations/software/hyprland/` or `configurations/style/hyprland/`? Hyprland is a compositor (software) but owns gaps/rounding (style). Quickshell precedent put layout under `style/`. | Open |
 | **D4** | Which submaps to define, and which existing global binds move into them | Open — see [Submap candidates](#submap-candidates) |
 | **D5** | Bump `home.stateVersion` to `26.05` (and let `configType` default), or set `configType = "lua"` explicitly and leave `stateVersion` alone? | **Proposed**: set explicitly; a stateVersion bump has repo-wide effects unrelated to Hyprland |
 | **D6** | Modularize the screenshot commands (the 2025-06-10 TODO) as part of this work, or leave for later? | Open |
@@ -549,6 +549,7 @@ strings routed through a generator with an open bug).
 
 | Decision | Choice | Rationale |
 |---|---|---|
+| **D3 — preset location** | **`configurations/style/hyprland/`** | Sits beside `style/workspaces/` and `style/quickshell/`, which it shares data with, and follows the Quickshell precedent that a shell's layout is style. `input.kb_layout` is the one member that is not really style; not worth a second preset for two keys |
 | **D2 — sequencing** | **Decided by events**: the 2026-08-30 flake update broke the desktop, so the Lua flip happened first, in one step, as an emergency fix. Phases 1–2 became post-hoc cleanup rather than de-risking groundwork | The phased plan assumed hyprlang kept working while we refactored; it did not |
 | **D1 — config generation strategy** | **Strategy A** — Nix generates a data-only `data.lua` from the presets; handwritten Lua modules consume it via `extraLuaFiles` | Same idiom as the Quickshell `Config.qml` / `Theme.qml` split already proven in this repo. Keeps the preset system as the single source of truth shared with Waybar/Quickshell, keeps `$`-bearing shell strings out of the HM transpiler (#9468), and leaves `hl.define_submap` / `hl.on` / timers directly reachable for the submap work |
 | Migrate to Lua at all | **Yes** | hyprlang is frozen and slated for removal within 1–2 releases of 0.55; we are already on a 0.56.x compositor |
@@ -574,25 +575,56 @@ baseline to diff against is the generated `hyprland.lua`, not `hyprland.conf`.
 - Shipped as a key remapping inside `settings`, **not** the Strategy A architecture —
   every dispatcher is still a `mkLuaInline` string. Phase 3b below closes that gap.
 
-### Phase 3b — Land Strategy A *(new)*
+### Phase 3b — Land Strategy A ✅ **Done** (2026-08-31)
 
-- Generate a data-only `data.lua` from the presets; move bind/rule construction into
-  handwritten Lua under `extraLuaFiles`, per [Strategy A](#strategy-a--generated-data--handwritten-lua-recommended).
-- Removes the `mkLuaInline` string-concatenation that the emergency fix left behind,
-  and is a prerequisite for using `hl.on` / timers in Phase 4.
-- **Verify**: generated `hyprland.lua` produces the same call set (73 binds,
-  4 window rules, 10 workspace rules); relog.
+Nix now emits **data only**; the `hl` API surface lives in checked-in Lua.
 
-### Phase 1 — Extract host data into a preset *(no behaviour change)*
+- `data.lua` (generated, ~750 lines) is a plain table serialised with
+  `lib.generators.toLua`. **No Lua source is built by string concatenation
+  anywhere** — `mkLuaInline` is gone from the module.
+- `lua/binds.lua` (checked in) turns bind records into `hl.bind()` calls and holds
+  the whole dispatcher vocabulary in one reviewable place. An unknown dispatcher
+  raises a Lua error naming the bind instead of silently emitting nothing. It also
+  renders submaps via `hl.define_submap`, replacing the Home Manager `submaps`
+  option so there is a single code path.
+- `lua/startup.lua` (checked in) holds the `hyprland.start` handler.
+- `hyprland.lua` becomes a loader: `require("binds")`, `require("startup")`.
 
-- Create `configurations/style/hyprland/` (D3) with `default.nix` (the `active` enum
-  option) and `presets/mastodant-1.nix`.
-- Move out of `home.nix`: window rules, the `special:special` workspace rule, and the
-  `general` / `input` sections.
-- Wire it through `custom-config-generator.nix` exactly as
-  `configurations/style/quickshell/` is wired.
-- **Verify**: diff the generated `hyprland.lua` before/after — it should be identical
-  or trivially reordered.
+**Scope**: only `bind` and `on` moved — the two keys that used `mkLuaInline`.
+`monitor`, `window_rule` and `workspace_rule` were already pure data, and `config`
+**must** stay in `settings` because stylix merges its palette into that same key;
+moving it would silently orphan the border colours.
+
+**Verified by execution.** The hash gate does not apply here — restructuring the
+output is the point — so the config is run against a mock `hl` that records every
+call (dispatchers included, via a metatable proxy) and dumps a canonical sorted
+list. Old and new configs both produce **95 identical calls**: 73 binds, 1 config,
+3 monitors, 4 window rules, 10 workspace rules, and the startup hook with its 3
+commands. The harness lives in the session scratchpad and is worth rebuilding for
+Phase 4 — it is the only gate that catches this API's silent failures.
+
+### Phase 1 — Extract host data into a preset ✅ **Done** (2026-08-31)
+
+New `configurations/style/hyprland/` (D3) with `default.nix`, `types.nix` and
+`presets/mastodant-1.nix`, wired through `configurations/style/default.nix`,
+`configurations/types.nix`, `custom-config-generator.nix` and the `desktop-amd`
+profile.
+
+Moved out of the module: `general.gaps_out`, `input`, the four window rules
+(satty / portal-gtk / brave-popup / codium-dialog) and the `special:special`
+workspace rule. The module's `settings` block is now entirely derived — every key
+traces to a preset.
+
+Given a **real type contract** (`hyprlandOutputType`, enforced via `wrapPreset`)
+rather than the informal treatment `quickshell` and `shortcuts` get: window-rule
+fields are exactly where a silent typo does nothing, and `wrapPreset` is what
+caught the `polarity` mistake during the stylix fix.
+
+**Verified**: derivation hash unchanged (`vhrqszbxdpsn…`).
+
+> Gotcha: `nix` only sees git-tracked paths, so a new preset directory must be
+> `git add`ed before it will even evaluate — the error is
+> `Path '…' in the repository is not tracked by Git`.
 
 ### Phase 2 — Widen the shortcut schema ✅ **Done** (2026-08-31)
 

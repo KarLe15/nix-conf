@@ -1,11 +1,12 @@
 { inputs, pkgs, lib, config, customConfigs, ... }:
 let
   cfg = customConfigs.softwareConfigs.modules.hyprland;
-  inherit (lib.generators) mkLuaInline;
 
   activeMonitorConfig = customConfigs.hardwareConfigs.monitors.apply { inherit pkgs; };
   workspaces = customConfigs.styleConfigs.workspaces.apply { monitors = activeMonitorConfig; inherit pkgs; };
   cursor = customConfigs.styleConfigs.cursors.apply { inherit pkgs; };
+  ## Host-specific Hyprland configuration (sections, window/workspace rules).
+  hyprlandStyle = customConfigs.styleConfigs.hyprland.apply { inherit pkgs; };
   defaults = customConfigs.softwareConfigs.defaults.apply { inherit pkgs; };
   launchers = customConfigs.softwareConfigs.launchers.apply { inherit pkgs; };
   developpement = customConfigs.softwareConfigs.developpement.apply { inherit pkgs; };
@@ -24,15 +25,12 @@ let
     "hyprctl setcursor ${toString cursor.default.exact-name} ${toString cursor.default.size}"
   ] ++ autostart-services;
 
-  ## ==========================< Lua config helpers >==========================
-  ## Hyprland 0.55+ configures itself in Lua; Home Manager renders every key of
-  ## `settings` as a literal `hl.<key>(...)` call, so each key below must be a
-  ## real function of the hl API (`config`, `monitor`, `bind`, `window_rule`,
-  ## `workspace_rule`, `on`, ...) — not a hyprlang section name.
+  ## =====================< Bind data (Strategy A) >===========================
+  ## Nix emits *data* only — no Lua source. qml-style split: the generated
+  ## data.lua is a plain table, and the checked-in lua/*.lua turn it into hl.*
+  ## calls. Nothing here knows the hl API exists, so a wrong dispatcher name is
+  ## a Lua error naming the entry rather than silent nonsense in the config.
   ## See docs/HYPRLAND-LUA-MIGRATION.md.
-
-  ## Render a Lua string literal (handles quoting/escaping).
-  luaStr = s: lib.generators.toLua { } s;
 
   ## Modifiers are a list in the preset; the Lua bind API takes "ALT+SHIFT+F".
   keyCombo = mods: key:
@@ -43,11 +41,6 @@ let
   ## than reshaped there.
   splitMods = m: if m == "" then [ ] else lib.splitString "_" m;
 
-  ## `hl.bind(keys, <dispatcher>, <opts>)`. The dispatcher is raw Lua, so it is
-  ## wrapped in mkLuaInline; opts are omitted entirely when empty.
-  mkBind = keys: dispatcher: opts:
-    { _args = [ keys (mkLuaInline dispatcher) ] ++ lib.optional (opts != { }) opts; };
-
   mapDirectionToLua = direction: {
     Left  = "left";
     Right = "right";
@@ -55,76 +48,105 @@ let
     Down  = "down";
   }.${direction} or (throw "Unknown direction for Hyprland command: ${direction}");
 
-  ## Translate a shortcut preset entry's dispatcher into its Lua equivalent,
-  ## reading named fields from `args` rather than reinterpreting one string.
-  ## All `exec` shortcuts keep the uwsm wrapping for systemd session tracking.
-  mkDispatcher = s:
-    let
-      a = s.args;
-      need = field:
-        a.${field} or (throw "hyprland: shortcut '${s.description}' (${s.dispatcher}) is missing args.${field}");
-      cmd = if s.env != ""
-            then "${s.env} uwsm app -- ${need "cmd"}"
-            else "uwsm app -- ${need "cmd"}";
-    in {
-      exec                   = "hl.dsp.exec_cmd(${luaStr cmd})";
-      killactive             = "hl.dsp.window.close()";
-      forcekillactive        = "hl.dsp.window.kill()";
-      togglefloating         = ''hl.dsp.window.float({ action = "toggle" })'';
-      ## mode is "fullscreen" (no bar) or "maximized" (keeps the bar).
-      fullscreen             = ''hl.dsp.window.fullscreen({ mode = ${luaStr (need "mode")}, action = "toggle" })'';
-      togglespecialworkspace = "hl.dsp.workspace.toggle_special()";
-      ## follow = false is Hyprland's "silent" move: the window goes, focus stays.
-      movetoworkspace        = ''hl.dsp.window.move({ workspace = ${luaStr (need "workspace")}, follow = ${lib.boolToString (a.follow or true)} })'';
-      ## Enter a submap; "default" leaves whatever submap is active.
-      submap-enter           = "hl.dsp.submap(${luaStr (need "submap")})";
-      resize                 = ''hl.dsp.window.resize({ x = ${toString (need "x")}, y = ${toString (need "y")} })'';
-    }.${s.dispatcher}
-      or (throw "hyprland: no Lua dispatcher mapping for '${s.dispatcher}' (shortcut: ${s.description})");
+  ## One shortcut preset entry -> one data record. `args` is normalised here so
+  ## lua/binds.lua never has to supply a default: `follow` in particular is always
+  ## emitted, because its absence is what made silent moves regress once already.
+  shortcutData = s: {
+    keys = keyCombo s.mods s.key;
+    inherit (s) dispatcher;
+    args =
+      if s.dispatcher == "exec" then {
+        cmd = if s.env != ""
+              then "${s.env} uwsm app -- ${s.args.cmd}"
+              else "uwsm app -- ${s.args.cmd}";
+      }
+      else if s.dispatcher == "movetoworkspace" then {
+        inherit (s.args) workspace;
+        follow = s.args.follow or true;
+      }
+      else s.args;
+    opts = { description = s.description; } // s.flags;
+  };
 
-  ## One preset entry -> one hl.bind(). `flags` (locked / repeating / release /
-  ## long_press / mouse) ride alongside the description in the options table.
-  mkShortcutBind = s:
-    mkBind (keyCombo s.mods s.key) (mkDispatcher s) ({ description = s.description; } // s.flags);
-
-  ## Entries name the submap they belong to; null means always active. Submap
-  ## members are held back here and rendered by the `submaps` option (Phase 4).
+  ## Entries name the submap they belong to; null means always active.
   globalShortcuts = builtins.filter (s: s.submap == null) shortcuts-impl;
   submapShortcuts = builtins.filter (s: s.submap != null) shortcuts-impl;
   submapNames = lib.unique (map (s: s.submap) submapShortcuts);
 
-  ## Shortcuts from the shortcuts preset.
-  shortcutBinds = map mkShortcutBind globalShortcuts;
-
   ## Per-workspace focus + silent move, for every key bound to that workspace.
-  workspaceBinds = lib.flatten (map (ws:
+  workspaceBindData = lib.flatten (map (ws:
     map (key: [
-      (mkBind (keyCombo (splitMods ws.mod) key)
-        ''hl.dsp.focus({ workspace = "${toString ws.id}" })''
-        { description = "Focus workspace ${toString ws.id}"; })
-      (mkBind (keyCombo (splitMods ws.mod-shift) key)
-        ''hl.dsp.window.move({ workspace = "${toString ws.id}", follow = false })''
-        { description = "Move window to workspace ${toString ws.id}"; })
+      {
+        keys = keyCombo (splitMods ws.mod) key;
+        dispatcher = "focus-workspace";
+        args = { workspace = toString ws.id; };
+        opts = { description = "Focus workspace ${toString ws.id}"; };
+      }
+      {
+        keys = keyCombo (splitMods ws.mod-shift) key;
+        dispatcher = "movetoworkspace";
+        args = { workspace = toString ws.id; follow = false; };
+        opts = { description = "Move window to workspace ${toString ws.id}"; };
+      }
     ]) ws.shortcut
   ) workspaces.workspaces_defined);
 
   ## Directional focus / window movement.
-  navigationBinds = lib.flatten (map (nav:
+  navigationBindData = lib.flatten (map (nav:
     map (key: [
-      (mkBind (keyCombo (splitMods nav.mod) key)
-        ''hl.dsp.focus({ direction = "${mapDirectionToLua nav.direction}" })''
-        { description = "Focus ${lib.toLower nav.direction}"; })
-      (mkBind (keyCombo (splitMods nav.mod-shift) key)
-        ''hl.dsp.window.move({ direction = "${mapDirectionToLua nav.direction}" })''
-        { description = "Move window ${lib.toLower nav.direction}"; })
+      {
+        keys = keyCombo (splitMods nav.mod) key;
+        dispatcher = "focus-direction";
+        args = { direction = mapDirectionToLua nav.direction; };
+        opts = { description = "Focus ${lib.toLower nav.direction}"; };
+      }
+      {
+        keys = keyCombo (splitMods nav.mod-shift) key;
+        dispatcher = "move-direction";
+        args = { direction = mapDirectionToLua nav.direction; };
+        opts = { description = "Move window ${lib.toLower nav.direction}"; };
+      }
     ]) nav.shortcut
   ) workspaces.navigation);
 
-  ## Mouse binds are ordinary binds carrying the `mouse` option in Lua.
-  mouseBinds = [
-    (mkBind "ALT+mouse:272" "hl.dsp.window.drag()"   { mouse = true; description = "Move window"; })
-    (mkBind "ALT+mouse:273" "hl.dsp.window.resize()" { mouse = true; description = "Resize window"; })
+  ## Mouse binds carry the `mouse` option rather than a separate dispatcher list.
+  mouseBindData = [
+    {
+      keys = "ALT+mouse:272";
+      dispatcher = "window-drag";
+      args = { };
+      opts = { mouse = true; description = "Move window"; };
+    }
+    {
+      keys = "ALT+mouse:273";
+      dispatcher = "window-resize-mouse";
+      args = { };
+      opts = { mouse = true; description = "Resize window"; };
+    }
   ];
+
+  ## The generated data module. lib.generators.toLua does the serialisation, so
+  ## no Lua source is ever built by string concatenation.
+  hyprData = {
+    binds =
+         map shortcutData globalShortcuts
+      ++ workspaceBindData
+      ++ navigationBindData
+      ++ mouseBindData;
+
+    submaps = lib.listToAttrs (map (name: {
+      inherit name;
+      value = map shortcutData (builtins.filter (s: s.submap == name) submapShortcuts);
+    }) submapNames);
+
+    startup = startupCommands;
+  };
+
+  dataLua = ''
+    -- GENERATED by homeManagerModules/hyprland/home.nix from the shortcuts,
+    -- workspaces and monitors presets. Do not edit by hand.
+    return ${lib.generators.toLua { } hyprData}
+  '';
 in {
   config = lib.mkIf cfg.enable {
   stylix.targets.hyprland.enable = true;
@@ -137,14 +159,14 @@ in {
     ## it because home.stateVersion < 26.05, so the format is selected explicitly.
     configType = "lua";
 
-    ## Submaps declared by the shortcuts preset (`submap = "<name>"` on an entry).
-    ## Home Manager renders each as hl.define_submap("<name>", function() … end).
-    ## Empty until Phase 4 populates the preset.
-    submaps = lib.listToAttrs (map (name: {
-      inherit name;
-      value.settings.bind =
-        map mkShortcutBind (builtins.filter (s: s.submap == name) submapShortcuts);
-    }) submapNames);
+    ## data.lua is generated and required by the others; binds/startup are
+    ## checked-in Lua and auto-required by the generated hyprland.lua.
+    extraLuaFiles = {
+      "data"    = { content = dataLua;        autoLoad = false; };
+      "binds"   = { content = ./lua/binds.lua;   };
+      "startup" = { content = ./lua/startup.lua; };
+    };
+
     settings = {
 
       ## hl.monitor({ output, mode, position, scale })
@@ -155,85 +177,23 @@ in {
         scale    = m.scale;
       }) activeMonitorConfig.definition;
 
-      ## Startup Scripts. There is no hl.exec_once() in the Lua API; startup
-      ## commands run from a `hyprland.start` event handler instead — the same
-      ## pattern Home Manager and Stylix use internally.
-      on = {
-        _args = [
-          "hyprland.start"
-          (mkLuaInline ''
-            function()
-            ${lib.concatMapStrings (c: "  hl.exec_cmd(${luaStr c})\n") startupCommands}end
-          '')
-        ];
-      };
-
-      ## Everything that used to be a hyprlang section now lives under hl.config().
-      ## Stylix merges its palette into this same key (it is configType-aware).
-      config = {
-        general = {
-          ## hyprlang spelled this "10,3,5,3" (top,right,bottom,left). The Lua
-          ## css_gap type takes an integer or a table with those named fields.
-          gaps_out = { top = 10; right = 3; bottom = 5; left = 3; };
-        };
-
-        input = {
-          kb_layout = "fr";
-          numlock_by_default = true;
-        };
-      };
-
-      ## Shortcuts definition
-      bind = shortcutBinds ++ workspaceBinds ++ navigationBinds ++ mouseBinds;
+      ## Config sections from the host preset, merged into one hl.config() call.
+      ## Stylix merges its palette into this same key (it is configType-aware),
+      ## which is why this stays in `settings` rather than moving to data.lua.
+      config = hyprlandStyle.sections;
 
       ## https://wiki.hypr.land/Configuring/Window-Rules/
-      window_rule = [
-        {
-          name = "satty";
-          match = { class = "com.gabm.satty"; };
-          float = true; center = true; no_initial_focus = true;
-          decorate = true; border_size = 40;
-        }
-        ## Dialog to save / load file
-        {
-          name = "portal-gtk";
-          match = { class = "Xdg-desktop-portal-gtk"; };
-          center = true; rounding = 0; border_size = 0;
-        }
-        ## Brave Upload
-        # classes :
-        #   - Main Window 'brave-browser'
-        #   - Popups   'brave'
-        # # 1084 653  Value tested on screen
-        {
-          name = "brave-popup";
-          match = { class = "brave"; };
-          float = true; center = true; no_initial_focus = true;
-          max_size = [ 1084 653 ];
-        }
-        ## VSCodium dialogs
-        {
-          name = "codium-dialog";
-          match = { class = "codium"; title = "Open.*"; };
-          float = true; center = true; no_initial_focus = true;
-          no_anim = true;
-          max_size = [ 1084 653 ];
-        }
-      ];
+      window_rule = hyprlandStyle.window-rules;
 
       ## https://wiki.hypr.land/Configuring/Workspace-Rules/
+      ## Per-workspace monitor bindings come from the workspaces preset; anything
+      ## else (special workspaces, …) comes from the host preset.
       workspace_rule =
         (map (ws: {
           workspace = toString ws.id;
           monitor = ws.monitor;
         }) workspaces.workspaces_defined)
-        ++ [
-          {
-            workspace = "special:special";
-            border_size = 40;
-            gaps_out = 40;
-          }
-        ];
+        ++ hyprlandStyle.workspace-rules;
     };
   };
   };

@@ -110,6 +110,9 @@ let
       quickshell =
         import ./configurations/style/quickshell/presets/${style.quickshell.active}.nix;
 
+      hyprland = wrapPreset types.hyprlandOutputType
+        (import ./configurations/style/hyprland/presets/${style.hyprland.active}.nix);
+
       themes = wrapPreset types.themesOutputType
         (import ./configurations/style/themes/presets/${style.themes.active}.nix);
 

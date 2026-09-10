@@ -6,6 +6,11 @@ let
     wallpaper = customConfigs.styleConfigs.wallpaper.apply {inherit pkgs; };
 in {
     stylix.base16Scheme = theme.base16-schemes-yaml;
+    ## Declares the light/dark preference for apps that read it rather than the
+    ## palette: gsettings color-scheme -> xdg-desktop-portal -> Firefox/Brave and
+    ## any site using prefers-color-scheme. Without it stylix defaults to
+    ## polarity = "either" and publishes "no preference", which renders light.
+    stylix.polarity = theme.polarity;
     stylix.fonts = with pkgs; {
         serif = {
             package = fonts.serif.package;

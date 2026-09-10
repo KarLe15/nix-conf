@@ -14,6 +14,12 @@
         The selected preset must export:
           apply :: { pkgs } -> {
             base16-schemes-yaml :: path;   # path to a base16-compatible YAML scheme file
+            flavor              :: str;    # upstream flavour name (consumed by the
+                                           #   catppuccin + quickshell modules)
+            polarity            :: "light" | "dark";
+                                           # published as stylix.polarity, which drives
+                                           #   gsettings color-scheme -> xdg portal ->
+                                           #   prefers-color-scheme in browsers
           }
           autostart :: [ str ]
       '';

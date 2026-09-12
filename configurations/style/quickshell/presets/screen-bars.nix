@@ -22,10 +22,11 @@
     bars = {
       browser = {                                            # ultrawide hub — global modules
         left = [
+          { w = "session"; }
           { w = "clock"; }
           { w = "stub"; icon = "f1f6"; color = "mauve"; }                    # DND (bell-slash)
           { w = "stub"; icon = "f111"; label = "REC"; color = "red"; }      # recording
-          { w = "stub"; icon = "f11c"; label = "resize"; color = "peach"; } # submap
+          { w = "submap"; }
           { w = "stub"; icon = "f0f4"; color = "teal"; }                    # idle inhibitor
         ];
         center = [ { w = "workspaces"; } ];
@@ -39,21 +40,23 @@
       };
       code = {                                               # left screen — primary
         left = [
+          { w = "session"; }
           { w = "avatar"; }
           { w = "action"; icon = "f015"; color = "blue"; command = fileExplorer "$HOME"; }            # Home
           { w = "action"; icon = "f019"; color = "teal"; command = fileExplorer "$HOME/Downloads"; }  # Downloads
         ];
         center = [ { w = "workspaces"; } ];
         right = [
-          { w = "stub"; icon = "f11c"; label = "resize"; color = "peach"; }
+          { w = "submap"; }
           { w = "systemp"; }                                                     # CPU + GPU temps
           { w = "volume"; }
         ];
       };
       terminal = {                                           # right screen — minimal
         left = [
+          { w = "session"; }
           { w = "clock"; compact = true; }
-          { w = "stub"; icon = "f11c"; label = "resize"; color = "peach"; }
+          { w = "submap"; }
         ];
         center = [ { w = "workspaces"; } ];
         right = [
@@ -62,7 +65,7 @@
         ];
       };
       other = {                                              # any unmapped monitor
-        left = [ { w = "clock"; compact = true; } ];
+        left = [ { w = "session"; } { w = "clock"; compact = true; } ];
         center = [ { w = "workspaces"; } ];
         right = [ { w = "system"; } { w = "volume"; } ];
       };

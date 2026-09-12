@@ -15,19 +15,28 @@ The layout is data, not code — it comes from the
 
 | Screen (role) | left | center | right |
 |---|---|---|---|
-| **browser** (ultrawide hub) | clock (time + date) · DND, REC, submap, idle-inhibitor stubs | workspaces | system module · GameMode + scheduler stubs · volume/BT · notification stub |
-| **code** (primary) | avatar · Home + Downloads launch buttons | workspaces | submap stub · CPU/GPU temps · volume/BT |
-| **terminal** | clock (compact) · submap stub | workspaces | LLM stub (dashed) · net up/down |
-| **other** (unmapped) | clock (compact) | workspaces | system module · volume/BT |
+| **browser** (ultrawide hub) | session · clock (time + date) · DND, REC stubs · submap · idle-inhibitor stub | workspaces | system module · GameMode + scheduler stubs · volume/BT · notification stub |
+| **code** (primary) | session · avatar · Home + Downloads launch buttons | workspaces | submap · CPU/GPU temps · volume/BT |
+| **terminal** | session · clock (compact) · submap | workspaces | LLM stub (dashed) · net up/down |
+| **other** (unmapped) | session · clock (compact) | workspaces | system module · volume/BT |
 
 What the real widgets do:
 
 - **clock** — glyph · `HH:mm` · date, in the `Theme.locale` locale (`fr_FR`);
   `compact = true` drops the date. Click drops a month calendar popover
   (Calendar Widget · 7b).
-- **workspaces** — the full 1–9 strip (id · `:` · Nerd Font glyph), live occupancy
-  from Hyprland and click-to-switch; the **focused** workspace is highlighted,
-  consistently across every bar.
+- **workspaces** — the full nine-slot strip (id · `:` · Nerd Font glyph), live
+  occupancy from Hyprland and click-to-switch; the **focused** workspace is
+  highlighted, consistently across every bar. The slots are **session-relative**:
+  in session 7 the same nine pills address workspaces 61–69, keeping their glyphs.
+- **submap** — the active Hyprland submap, reading `default` when there is none.
+  Submaps are modal (only their own binds fire), so the pill filling with the
+  submap's colour is what tells you the keyboard is in a mode. Name, icon and
+  colour come from the `submaps` attrset in the shortcuts preset; an undeclared
+  submap falls back to its raw name.
+- **session** — the active workspace session plus the other open ones (a session is
+  open when it holds at least one window). Click a number to switch. See
+  [docs/HYPRLAND_SESSIONS.md](../../docs/HYPRLAND_SESSIONS.md).
 - **system** — adaptive context pill (precedence gaming → llm → container →
   standard) showing the top context's headline metric; click for a panel of CPU/MEM/
   GPU meters, net, a context hero line (top procs / model cards / container list /
@@ -42,7 +51,7 @@ What the real widgets do:
   shortcuts, built from the repo's default file explorer).
 
 Anything else in the layout renders as a **`StubPill`**: a design placeholder with no
-backend, so unbuilt modules (DND, REC, submap, idle inhibitor, GameMode, scheduler,
+backend, so unbuilt modules (DND, REC, idle inhibitor, GameMode, scheduler,
 notification count, the troll pill) already appear in the right place.
 
 Colored, filled, dark-on-accent pills, matched to the machine's Catppuccin flavor.
@@ -65,7 +74,8 @@ implemented yet.
 - Generates `~/.config/quickshell/Config.qml` — a `Singleton` holding the
   per-monitor workspace layout (`{ id, icon, monitor }`) projected from the
   `workspaces`/`monitors` presets, the connector→role map, the `hubMonitor`
-  (ultrawide) name, the per-screen `barLayout`, and the avatar image path.
+  (ultrawide) name, the session banding, the submap presentation map, the
+  per-screen `barLayout`, and the avatar image path.
 - Writes the static QML component tree (`shell.qml`, `Bar.qml`, `Sys.qml`,
   `Popovers.qml`, `widgets/*.qml`), the `scripts/` helpers, and the avatar photo.
 
@@ -81,7 +91,7 @@ Each zone entry is an attrset dispatched by `qml/widgets/WidgetSlot.qml`:
 
 | Key | Meaning |
 |---|---|
-| `w` | Widget name: `clock`, `workspaces`, `system`, `systemp`, `network`, `volume`, `avatar`, `action` — anything else (notably `stub`) falls back to `StubPill` |
+| `w` | Widget name: `clock`, `workspaces`, `session`, `submap`, `system`, `systemp`, `network`, `volume`, `avatar`, `action` — anything else (notably `stub`) falls back to `StubPill` |
 | `icon` | Nerd Font codepoint, hex without the backslash — serialized as `\uXXXX` |
 | `label` | Text beside the glyph |
 | `color` | `Theme` palette name (`peach`, `sapphire`, …) |
@@ -131,8 +141,9 @@ click instead of the grab eating the first click.
 | `styleConfigs.themes` | `.apply { pkgs } → .flavor` | Selects the Catppuccin palette |
 | `styleConfigs.fonts`  | `.apply { pkgs } → .sansSerif.exact-name`, `.mono.exact-name` | UI + mono font families in `Theme.qml` |
 | `hardwareConfigs.monitors` | `.apply { pkgs } → .disposition` | Hub monitor, monitor names, connector→role map |
-| `styleConfigs.workspaces` | `.apply { pkgs, monitors } → .workspaces_defined` | Per-monitor workspace ids/glyphs in `Config.qml` |
+| `styleConfigs.workspaces` | `.apply { pkgs, monitors } → .workspaces_defined`, `.sessions` | Per-monitor workspace slots/glyphs and the session banding in `Config.qml` |
 | `styleConfigs.quickshell` | `.apply { pkgs, default-programs } → .bars`, `.profile-image` | Per-screen bar layout + avatar photo |
+| `softwareConfigs.shortcuts` | `.submaps` | Submap presentation (name/icon/colour) for the submap pill |
 | `softwareConfigs.defaults` | `.apply { pkgs }` | Passed to the quickshell preset so launch actions use the repo's default programs |
 | `softwareConfigs.modules.quickshell.enable` | — | Gates the whole module |
 | `softwareConfigs.modules.quickshell.bars` | (attrs) | Overrides the per-screen bar layout; empty = the preset's layout |
@@ -150,12 +161,14 @@ click instead of the grab eating the first click.
 | `qml/Popovers.qml` | Singleton coordinating popover dismissal (one-at-a-time + Hyprland focus-grab click-outside) |
 | `qml/widgets/WidgetSlot.qml` | Dispatches one layout entry (`{ w, … }`) to its widget, or a `StubPill` fallback |
 | `qml/widgets/StubPill.qml` | Static design stub pill (icon/label/palette-color from layout data) for not-yet-built widgets |
+| `qml/widgets/SessionPill.qml` | Workspace-session indicator — active session + the open ones, derived from workspace ids; click to switch |
+| `qml/widgets/SubmapPill.qml` | Active-submap indicator — name from the raw Hyprland IPC `submap` event; always visible, reading "default" when none is active |
 | `qml/widgets/Avatar.qml` | User-identity avatar — profile photo (`Config.profileImage`) masked into a disc (code screen) |
 | `qml/widgets/LaunchButton.qml` | Icon-only action pill — runs the entry's `command` detached (Home / Downloads shortcuts) |
 | `qml/widgets/Clock.qml` | Left clock island + calendar trigger (`compact` = time only) |
 | `qml/widgets/CalendarPopup.qml` | `PopupWindow` anchored under the clock |
 | `qml/widgets/CalendarView.qml` | Month calendar body (Monday-first, today/weekend/other-month states) |
-| `qml/widgets/Workspaces.qml` | Center workspace pills (Hyprland-driven) |
+| `qml/widgets/Workspaces.qml` | Center workspace pills — slot-relative, resolved through the active session band |
 | `qml/widgets/SystemModule.qml` | Adaptive system pill — pure view over `Sys` (context-colored) + panel trigger |
 | `qml/widgets/SystemPanel.qml` | `PopupWindow` anchored under the system pill |
 | `qml/widgets/SystemPanelView.qml` | Adaptive system panel body (per-context: procs / model cards / container list / sparklines) |

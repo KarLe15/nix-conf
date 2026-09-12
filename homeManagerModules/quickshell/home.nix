@@ -17,6 +17,14 @@ let
   ## rest of the config uses; the quickshell preset builds its button actions from it.
   default-programs = customConfigs.softwareConfigs.defaults.apply { inherit pkgs; };
 
+  ## Submap presentation (name/icon/color). The submaps themselves are defined in
+  ## the shortcuts preset by entries naming them; this is only how the bar shows
+  ## them, kept there so there is one source of truth.
+  submaps = customConfigs.softwareConfigs.shortcuts.submaps or { };
+  submapEntries = lib.concatStringsSep ", " (lib.mapAttrsToList (n: s:
+    ''"${n}": { "name": "${s.name}", "icon": "\u${s.icon}", "color": "${s.color}" }''
+  ) submaps);
+
   ## Quickshell-specific config (per-screen bar layout + assets) also comes from a
   ## preset in configurations/ — the module never reaches up into configurations/.
   quickshellStyle = customConfigs.styleConfigs.quickshell.apply { inherit pkgs default-programs; };
@@ -159,6 +167,15 @@ let
 
         // The ultrawide "hub" monitor — carries global modules in later stages.
         readonly property string hubMonitor: "${monitors.disposition.browser}"
+
+        // Workspace-session banding: absolute id = (session - 1) * band + slot.
+        // The bar derives both from the ids Hyprland already reports, so sessions
+        // need no extra channel. See docs/HYPRLAND_SESSIONS.md.
+        readonly property int sessionBand: ${toString workspaces.sessions.band}
+        readonly property int sessionCount: ${toString workspaces.sessions.count}
+
+        // Submap presentation, keyed by submap name ("default" = no submap).
+        readonly property var submaps: ({ ${submapEntries} })
 
         // Per-screen bar composition, keyed by role. Each zone lists widget entries
         // dispatched by qml/widgets/WidgetSlot.qml. Generated from the barsLayout

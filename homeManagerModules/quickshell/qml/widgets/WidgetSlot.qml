@@ -22,6 +22,8 @@ Loader {
         case "systemp":    return sysTempC;
         case "network":    return networkC;
         case "volume":     return volumeC;
+        case "session":    return sessionC;
+        case "submap":     return submapC;
         case "avatar":     return avatarC;
         case "action":     return actionC;
         default:           return stubC;   // "stub" or anything unrecognised
@@ -34,6 +36,8 @@ Loader {
     Component { id: sysTempC;    SysTemp {} }
     Component { id: networkC;    Network {} }
     Component { id: volumeC;     VolumeBluetooth {} }
+    Component { id: sessionC;    SessionPill {} }
+    Component { id: submapC;     SubmapPill {} }
     Component { id: avatarC;     Avatar {} }
     Component {
         id: actionC

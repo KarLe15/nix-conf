@@ -2,9 +2,18 @@ import QtQuick
 import Quickshell.Hyprland
 import "root:/"
 
-// Center island: this monitor's workspace pills (id · glyph). The set + glyphs
-// come from the generated Config singleton (the repo's workspaces preset); live
-// focus and occupancy come from Hyprland. Click a pill to switch workspace.
+// Center island: this monitor's workspace pills (id · glyph). The slot set +
+// glyphs come from the generated Config singleton (the repo's workspaces preset);
+// live focus and occupancy come from Hyprland. Click a pill to switch workspace.
+//
+// Sessions: Config.workspaces holds SLOTS (1..9), not absolute workspace ids. The
+// active session is derived from the focused workspace id — no extra channel is
+// needed, because the bar already tracks it:
+//
+//     session = ((id - 1) / band) + 1     slot = ((id - 1) % band) + 1
+//
+// so in session 7 the same nine slots address workspaces 61..69, keeping their
+// glyphs. See docs/HYPRLAND_SESSIONS.md.
 Rectangle {
     id: root
     property string screenName: ""
@@ -14,7 +23,7 @@ Rectangle {
     implicitHeight: Theme.wsHeight
     implicitWidth: strip.implicitWidth + 14
 
-    // Screen Bars shows the full 1..9 strip on every monitor (sorted by id).
+    // Screen Bars shows the full 1..9 slot strip on every monitor (sorted by slot).
     readonly property var items:
         Config.workspaces.slice().sort((a, b) => a.id - b.id)
 
@@ -22,6 +31,14 @@ Rectangle {
     // currently-visible workspace — so every bar marks the same active workspace.
     readonly property int activeWsId:
         Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : -1
+
+    // Special workspaces have non-positive ids and must not move the session.
+    readonly property int session:
+        activeWsId > 0 ? Math.floor((activeWsId - 1) / Config.sessionBand) + 1 : 1
+
+    function absId(slot) {
+        return (root.session - 1) * Config.sessionBand + slot;
+    }
 
     function isOccupied(id) {
         const vs = Hyprland.workspaces.values;
@@ -41,7 +58,9 @@ Rectangle {
             Rectangle {
                 id: pill
                 required property var modelData
-                readonly property int wsId: modelData.id
+                // modelData.id is the slot; the workspace it addresses depends on
+                // the active session.
+                readonly property int wsId: root.absId(pill.modelData.id)
                 readonly property bool focused: pill.wsId === root.activeWsId
                 readonly property bool occupied: root.isOccupied(pill.wsId)
                 readonly property color fgColor:
@@ -91,7 +110,11 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Hyprland.dispatch("workspace " + pill.wsId)
+                    // Since the Hyprland Lua migration, dispatch() is shorthand for
+                    // hl.dispatch(<arg>), so the argument must be a Lua expression —
+                    // "workspace 1" now parses as hl.dispatch(workspace 1) and fails.
+                    onClicked: Hyprland.dispatch(
+                        'hl.dsp.focus({ workspace = "' + pill.wsId + '" })')
                 }
             }
         }

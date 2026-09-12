@@ -12,6 +12,16 @@
         Active keybinding preset name. Consumed by the hyprland module to build
         Hyprland bind declarations (rendered as hl.bind() calls in hyprland.lua).
 
+        It must also export `submaps`, an attrset of presentation metadata keyed by
+        submap name (plus `default`, the no-submap state). The submaps themselves
+        are defined by entries carrying `submap = "<name>"`; this is only how the
+        Quickshell pill displays them:
+
+          submaps :: { <name> = { name :: str; icon :: str; color :: str; }; }
+            name   label shown in the bar
+            icon   Nerd Font codepoint (hex, no backslash)
+            color  Theme palette name (surface, mauve, peach, ...)
+
         The selected preset must export a top-level function:
           shortcuts-definition :: { defaults, developpement, launchers, multimedia, pkgs } -> [ ShortcutDef ]
 

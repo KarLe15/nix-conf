@@ -81,6 +81,7 @@ leaves focus where it was.
 | **S18** | Switch feedback | `hl.notification.create` for now — free, no widget work. A centred Quickshell overlay stays a later option |
 | **S19** | Submap indicator | None needed: the Quickshell bar already has a submap pill, which covers it |
 | **S20** | Workspace rules | **Generated for every band** — 9 sessions × 9 slots = **81 `hl.workspace_rule` calls**, from the same preset data. See [Why 81 rules](#why-81-rules) |
+| **S21** | Cross-session window move | `ALT+SHIFT+1..9` inside the submap sends the focused window to the **same slot** in the target session — only the band changes. Silent (`follow = false`), matching `ALT+SHIFT+<letter>` within a session |
 
 ### The grid, restated
 
@@ -121,6 +122,7 @@ That is what frees `ALT+1…9` and `ALT+Tab`.
 | Key | Effect |
 |---|---|
 | `ALT+1` … `ALT+9` | Switch to that session, creating it empty if new |
+| `ALT+SHIFT+1` … `ALT+SHIFT+9` | Move the focused window to the same slot in that session. In session 3 on workspace 25 (slot 5), `ALT+SHIFT+1` sends it to workspace 5. Focus stays put |
 | `ALT+Tab` | Next open session |
 | `ALT+SHIFT+Tab` | Previous open session |
 | `ALT+Escape` | Return to `default` |

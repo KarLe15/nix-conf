@@ -54,6 +54,7 @@ local function dispatcher(b)
   if k == "session-toggle"         then return function() S.toggleSubmap() end end
   if k == "session-goto"           then return function() S.switchTo(a.session) end end
   if k == "session-cycle"          then return function() S.cycle(a.dir) end end
+  if k == "session-move"           then return function() S.moveWindowTo(a.session) end end
 
   error(string.format("hyprland: unknown dispatcher %q for bind %q",
                       tostring(k), tostring(b.keys)))

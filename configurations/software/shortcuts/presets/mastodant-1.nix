@@ -26,6 +26,17 @@ rec {
   secondary = [ "SUPER" ];
   secondary-shift = [ "SUPER" "SHIFT" ];
 
+  ## Presentation for each submap, consumed by the Quickshell submap pill. The
+  ## submaps themselves are defined below, by entries carrying `submap = "<name>"`;
+  ## this is only how they are displayed. `default` is the no-submap state.
+  ##   name   label shown in the bar
+  ##   icon   Nerd Font codepoint (hex, no backslash)
+  ##   color  Theme palette name (surface, mauve, peach, sky, red, ...)
+  submaps = {
+    default = { name = "default"; icon = "f11c"; color = "surface"; };
+    session = { name = "session"; icon = "f009"; color = "mauve";   };
+  };
+
   ## Defaults every entry inherits, so a ShortcutDef only states what it needs.
   shortcut-defaults = {
     mods = [ ];
@@ -130,6 +141,16 @@ rec {
     mods = mod;
     key = "code:${toString (n + 9)}";
     dispatcher = "session-goto";
+    args = { session = n; };
+  }) (pkgs.lib.range 1 9))
+  ## ALT+SHIFT+1..9 send the focused window to the SAME slot in another session,
+  ## leaving focus where it is. Keycodes again — see the note above.
+  ++ (map (n: {
+    description = "Move window to session ${toString n}";
+    submap = "session";
+    mods = mod-shift;
+    key = "code:${toString (n + 9)}";
+    dispatcher = "session-move";
     args = { session = n; };
   }) (pkgs.lib.range 1 9))
   ++ [

@@ -135,6 +135,29 @@ function M.cycle(dir)
   M.switchTo(open[((idx - 1 + dir) % #open) + 1])
 end
 
+-- Move the focused window to the SAME slot in another session: in session 3 on
+-- workspace 25 (slot 5), targeting session 1 sends it to workspace 5. The slot is
+-- preserved, only the band changes.
+--
+-- Silent by default (follow = false), matching ALT+SHIFT+<letter> within a session.
+function M.moveWindowTo(n)
+  if type(n) ~= "number" or n < 1 or n > M.count then return end
+
+  local ws = hl.get_active_workspace()
+  if not ws or not ws.id or ws.id <= 0 then return end
+
+  local slot   = M.slotOf(ws.id)
+  local target = (n - 1) * M.band + slot
+  if target == ws.id then return end
+
+  hl.dispatch(hl.dsp.window.move({ workspace = tostring(target), follow = false }))
+
+  hl.notification.create({
+    text     = "Window to session " .. n .. "  (slot " .. slot .. ")",
+    duration = 1200,
+  })
+end
+
 -- ------------------------------------------------------------------- submap
 
 -- Bound with submap_universal (S16), so this is the single escape from *any*

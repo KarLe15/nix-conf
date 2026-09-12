@@ -19,7 +19,7 @@
 ##   togglespecialworkspace  —
 ##   movetoworkspace         { workspace, follow ? true }
 ##   resize                  { x, y }
-##   submap-enter            { submap }   # "default" exits the active submap
+##   submap-enter            { submap }   # "reset" exits the active submap
 rec {
   mod = [ "ALT" ];
   mod-shift = [ "ALT" "SHIFT" ];
@@ -36,7 +36,8 @@ rec {
   };
 
   shortcuts-definition = {defaults, developpement, launchers, multimedia, pkgs, ...}@programs:
-    map (s: shortcut-defaults // s) [
+    map (s: shortcut-defaults // s) (
+    [
     ## ===========================<     WM Commands    >==========================
     {
       description = "Close Active Window";
@@ -90,6 +91,48 @@ rec {
       dispatcher = "exec";
       args = { cmd = defaults.notification-center.command; };
     }
+    ## ===========================<  Session mode  >==============================
+    ## See docs/HYPRLAND_SESSIONS.md. ALT+Escape toggles the `session` submap; it
+    ## carries submap_universal, so it is also the single escape from *any* submap.
+    {
+      description = "Session mode";
+      mods = mod;
+      key = "Escape";
+      dispatcher = "session-toggle";
+      flags = { submap_universal = true; };
+    }
+    {
+      description = "Next open session";
+      submap = "session";
+      mods = mod;
+      key = "Tab";
+      dispatcher = "session-cycle";
+      args = { dir = 1; };
+    }
+    {
+      description = "Previous open session";
+      submap = "session";
+      mods = mod-shift;
+      key = "Tab";
+      dispatcher = "session-cycle";
+      args = { dir = -1; };
+    }
+  ]
+  ## ALT+1..9 inside the submap jump straight to a session, creating it empty.
+  ##
+  ## Keyed by KEYCODE, not keysym: this host is AZERTY (input.kb_layout = "fr"),
+  ## where the number row unshifted sends ampersand/eacute/quotedbl/... — binding
+  ## "1" would never match. code:10..code:18 are the physical 1..9 keys on any
+  ## layout (the values `wev` reports).
+  ++ (map (n: {
+    description = "Session ${toString n}";
+    submap = "session";
+    mods = mod;
+    key = "code:${toString (n + 9)}";
+    dispatcher = "session-goto";
+    args = { session = n; };
+  }) (pkgs.lib.range 1 9))
+  ++ [
     ## ===========================<  MultiMedia commands  >=======================
     ## TODO :: These are good candidates for flags = { locked = true; repeating = true; }
     ## so they repeat when held and still work on the lock screen.
@@ -162,6 +205,7 @@ rec {
       description = "Take Screenshot and modify";
       key = "mouse:277";
       dispatcher = "exec";
+      flags = { submap_universal = true; };
       ## TODO :: 2025-06-10 :: Change this to be modular on a screenshot config standalone
       args.cmd = ''$(grim -g "$(slurp)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
     }
@@ -170,8 +214,9 @@ rec {
       mods = [ "SHIFT" ];
       key = "mouse:277";
       dispatcher = "exec";
+      flags = { submap_universal = true; };
       ## TODO :: 2025-06-10 :: Change this to be modular on a screenshot config standalone
       args.cmd = ''$(grim -g "$(slurp -o)" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/satty-$(date '+%Y%m%d-%H-%M-%S').png)'';
     }
-  ];
+  ]);
 }

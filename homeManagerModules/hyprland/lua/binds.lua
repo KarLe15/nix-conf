@@ -10,6 +10,7 @@
 -- Hyprland source. See docs/HYPRLAND-LUA-MIGRATION.md.
 
 local d = require("data")
+local S = require("sessions")
 
 local function dispatcher(b)
   local a = b.args or {}
@@ -23,13 +24,36 @@ local function dispatcher(b)
   if k == "togglespecialworkspace" then return hl.dsp.workspace.toggle_special() end
   -- follow = false is Hyprland's "silent" move: the window goes, focus stays.
   if k == "movetoworkspace"        then return hl.dsp.window.move({ workspace = a.workspace, follow = a.follow }) end
-  if k == "focus-workspace"        then return hl.dsp.focus({ workspace = a.workspace }) end
+  -- Slot-relative binds MUST return a Lua function, not a dispatcher value: a
+  -- dispatcher is built once at config load, which would freeze the session-1
+  -- workspace id into the bind forever. The closure resolves the band at press
+  -- time, so a session switch changes where these land without rebinding.
+  if k == "focus-slot" then
+    return function() hl.dispatch(hl.dsp.focus({ workspace = S.wsName(a.slot) })) end
+  end
+  if k == "move-to-slot" then
+    return function()
+      hl.dispatch(hl.dsp.window.move({ workspace = S.wsName(a.slot), follow = a.follow }))
+    end
+  end
   if k == "focus-direction"        then return hl.dsp.focus({ direction = a.direction }) end
   if k == "move-direction"         then return hl.dsp.window.move({ direction = a.direction }) end
   if k == "resize"                 then return hl.dsp.window.resize({ x = a.x, y = a.y }) end
   if k == "window-resize-mouse"    then return hl.dsp.window.resize() end
   if k == "window-drag"            then return hl.dsp.window.drag() end
   if k == "submap-enter"           then return hl.dsp.submap(a.submap) end
+
+  -- Fire a notification. Useful on its own, and the simplest probe for whether a
+  -- bind is reaching its dispatcher at all.
+  if k == "notify"                 then return function()
+    hl.notification.create({ text = a.text or "", duration = a.duration or 2000 })
+  end end
+
+  -- Session dispatchers are plain Lua functions rather than hl.dsp.* values: they
+  -- carry state, so they must run at press time. hl.bind accepts either.
+  if k == "session-toggle"         then return function() S.toggleSubmap() end end
+  if k == "session-goto"           then return function() S.switchTo(a.session) end end
+  if k == "session-cycle"          then return function() S.cycle(a.dir) end end
 
   error(string.format("hyprland: unknown dispatcher %q for bind %q",
                       tostring(k), tostring(b.keys)))

@@ -361,7 +361,7 @@ end
 hl.define_submap("resize", function()
   hl.bind("h",      hl.dsp.window.resize({ x = -40, y = 0 }))
   hl.bind("l",      hl.dsp.window.resize({ x =  40, y = 0 }))
-  hl.bind("Escape", hl.dsp.submap("default"))
+  hl.bind("Escape", hl.dsp.submap("reset"))   -- "reset", not "default"
 end)
 
 hl.bind("SUPER+R", hl.dsp.submap("resize"), { description = "Resize mode" })

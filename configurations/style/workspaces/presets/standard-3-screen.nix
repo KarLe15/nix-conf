@@ -19,6 +19,15 @@
       {id = 9; icon = ""; shortcut = ["C" "KP_9"]; monitor = monitors.disposition.browser;    inherit mod mod-shift;}
 
     ];
+    ## Session banding (see docs/HYPRLAND_SESSIONS.md). A session is one complete
+    ## instance of the workspace grid below; workspace id = (session - 1) * band + slot,
+    ## so session 1 is ids 1-9 — the historical layout, unchanged.
+    sessions = {
+      count   = 9;   # ALT+1..9 inside the session submap
+      band    = 10;  # ids reach (count - 1) * band + 9 = 89
+      default = 1;
+    };
+
     navigation = [
       {direction = "Left";  shortcut = ["H" "Left"];    inherit mod mod-shift;}
       {direction = "Down";  shortcut = ["j" "Down"];    inherit mod mod-shift;}

@@ -78,14 +78,14 @@ let
     map (key: [
       {
         keys = keyCombo (splitMods ws.mod) key;
-        dispatcher = "focus-workspace";
-        args = { workspace = toString ws.id; };
+        dispatcher = "focus-slot";
+        args = { slot = ws.id; };
         opts = { description = "Focus workspace ${toString ws.id}"; };
       }
       {
         keys = keyCombo (splitMods ws.mod-shift) key;
-        dispatcher = "movetoworkspace";
-        args = { workspace = toString ws.id; follow = false; };
+        dispatcher = "move-to-slot";
+        args = { slot = ws.id; follow = false; };
         opts = { description = "Move window to workspace ${toString ws.id}"; };
       }
     ]) ws.shortcut
@@ -140,6 +140,12 @@ let
     }) submapNames);
 
     startup = startupCommands;
+
+    ## Session banding — lua/sessions.lua owns the live `session` value.
+    sessions = workspaces.sessions;
+
+    ## Slot -> monitor map, so a session switch can pick a default slot per screen.
+    slots = map (ws: { slot = ws.id; monitor = ws.monitor; }) workspaces.workspaces_defined;
   };
 
   dataLua = ''
@@ -163,6 +169,7 @@ in {
     ## checked-in Lua and auto-required by the generated hyprland.lua.
     extraLuaFiles = {
       "data"    = { content = dataLua;        autoLoad = false; };
+      "sessions" = { content = ./lua/sessions.lua; autoLoad = false; };
       "binds"   = { content = ./lua/binds.lua;   };
       "startup" = { content = ./lua/startup.lua; };
     };
@@ -186,13 +193,17 @@ in {
       window_rule = hyprlandStyle.window-rules;
 
       ## https://wiki.hypr.land/Configuring/Workspace-Rules/
-      ## Per-workspace monitor bindings come from the workspaces preset; anything
-      ## else (special workspaces, …) comes from the host preset.
+      ## One rule per (session, slot): `hl.dsp.window.move({ workspace = … })` takes
+      ## no monitor argument, so without a rule for a banded id Hyprland picks the
+      ## focused monitor and the 3x3 grid scrambles outside session 1.
+      ## See docs/HYPRLAND_SESSIONS.md (Why 81 rules).
       workspace_rule =
-        (map (ws: {
-          workspace = toString ws.id;
-          monitor = ws.monitor;
-        }) workspaces.workspaces_defined)
+        (lib.flatten (map (session:
+          map (ws: {
+            workspace = toString ((session - 1) * workspaces.sessions.band + ws.id);
+            monitor = ws.monitor;
+          }) workspaces.workspaces_defined
+        ) (lib.range 1 workspaces.sessions.count)))
         ++ hyprlandStyle.workspace-rules;
     };
   };

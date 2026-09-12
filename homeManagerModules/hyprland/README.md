@@ -126,7 +126,7 @@ it needs:
 | `togglespecialworkspace` | — | `hl.dsp.workspace.toggle_special()` |
 | `movetoworkspace` | `{ workspace, follow ? true }` | `hl.dsp.window.move({ workspace, follow })` — `follow = false` is a silent move |
 | `resize` | `{ x, y }` | `hl.dsp.window.resize({ x, y })` |
-| `submap-enter` | `{ submap }` | `hl.dsp.submap(…)` — `"default"` exits |
+| `submap-enter` | `{ submap }` | `hl.dsp.submap(…)` — `"reset"` exits |
 
 Generated internally for the workspace and navigation binds: `focus-workspace`,
 `focus-direction`, `move-direction`, `window-drag`, `window-resize-mouse`.

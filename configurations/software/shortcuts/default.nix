@@ -40,7 +40,13 @@
         togglespecialworkspace  —
         movetoworkspace         { workspace, follow ? true }   # follow = false moves silently
         resize                  { x, y }
-        submap-enter            { submap }   # "default" exits the active submap
+        submap-enter            { submap }   # "reset" exits the active submap
+
+        KEY vs KEYCODE: `key` is resolved as an XKB keysym, so it is layout
+        dependent. This host is AZERTY (`input.kb_layout = "fr"`), where the
+        unshifted number row sends ampersand/eacute/quotedbl/... -- binding "1"
+        never matches. Use `key = "code:NN"` for anything positional; `wev`
+        prints the keycode to use (number row 1..9 = code:10..code:18).
 
         Adding a dispatcher means adding a case to `mkDispatcher` in
         homeManagerModules/hyprland/home.nix; an unmapped one throws at eval time.

@@ -25,6 +25,9 @@ Loader {
         case "session":    return sessionC;
         case "submap":     return submapC;
         case "avatar":     return avatarC;
+        case "presence":   return presenceC;
+        case "idle":       return idleC;
+        case "notifications": return notifyC;
         case "action":     return actionC;
         default:           return stubC;   // "stub" or anything unrecognised
         }
@@ -39,6 +42,10 @@ Loader {
     Component { id: sessionC;    SessionPill {} }
     Component { id: submapC;     SubmapPill {} }
     Component { id: avatarC;     Avatar {} }
+    // Read-only mirrors of the avatar popover's state (see MirrorPill.qml).
+    Component { id: presenceC;   MirrorPill { kind: "presence" } }
+    Component { id: idleC;       MirrorPill { kind: "idle" } }
+    Component { id: notifyC;     MirrorPill { kind: "notifications" } }
     Component {
         id: actionC
         LaunchButton {

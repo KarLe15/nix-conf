@@ -87,15 +87,76 @@
       fixedHeight    = true;
     };
 
+
+    ## Avatar control centre (design "Avatar Widget" · ids 9a + 9b, network variant
+    ## 10b). The bar avatar is the photo disc whose ring carries presence; clicking
+    ## it drops a popover with identity, the presence switch, the idle inhibitor and
+    ## the network block. Session actions (lock/reboot/power) live elsewhere by
+    ## design. The ring is the only bar indicator — no glyph, no count.
+    ##   width          popover width (design: 372) = 340 inner + 2x16 padding
+    ##   discSize       identity-row disc; the bar disc stays Theme.pillHeight
+    ##   ringWidth      bar ring thickness, then ringGap of background inside it
+    ##   panelRingWidth ring thickness on the larger identity-row disc
+    ##   userName       display name in the popover; "" derives it from $USER
+    ##   presence       Theme palette name per presence state. Focus and DND both
+    ##                  mean "swaync DND on" until the notification centre lands —
+    ##                  see qml/Presence.qml.
+    ##   idleDurations  keep-awake chips, in minutes; 0 renders as "∞"
+    ##   idleDefault    duration used when the switch is flipped without a chip
+    ##   netListHeight  SSID list height before it scrolls
+    ##   facts          rows of the facts block, in order (uptime/kernel/session/shell)
+    ##   mirrors        read-only pills on the hub bar echoing this state; they have
+    ##                  no actions — the popover is the only place that changes it
+    ##   icons          Nerd Font codepoints (hex, no backslash). The design specifies
+    ##                  Tabler webfont glyphs; these are the Font Awesome equivalents
+    ##                  carried by the Nerd Font the fonts preset selects.
+    avatar = {
+      width          = 372;
+      discSize       = 52;
+      ringWidth      = 2;
+      ringGap        = 2;
+      panelRingWidth = 3;
+      userName       = "";
+      presence = {
+        available = "green";      # #a6da95
+        focus     = "yellow";     # #eed49f
+        dnd       = "red";        # #ed8796
+      };
+      idleDurations = [ 30 60 240 0 ];
+      idleDefault   = 60;
+      netListHeight = 208;
+      facts         = [ "uptime" "kernel" "session" "shell" ];
+      mirrors = {
+        presence      = true;
+        idle          = true;
+        notifications = true;
+      };
+      icons = {
+        available    = "f058";  # nf-fa-check_circle       (ti-circle-check)
+        focus        = "f140";  # nf-fa-bullseye           (ti-target)
+        dnd          = "f1f6";  # nf-fa-bell_slash         (ti-bell-off)
+        bell         = "f0f3";  # nf-fa-bell               (ti-bell)
+        awake        = "f0f4";  # nf-fa-coffee             (ti-coffee)
+        asleep       = "f186";  # nf-fa-moon_o             (ti-moon-z-z)
+        wired        = "f1e6";  # nf-fa-plug               (ti-plug-connected)
+        wifi         = "f1eb";  # nf-fa-wifi               (ti-wifi)
+        check        = "f00c";  # nf-fa-check              (ti-check)
+        lock         = "f023";  # nf-fa-lock               (ti-lock)
+        chevronUp    = "f077";  # nf-fa-chevron_up         (ti-chevron-up)
+        chevronDown  = "f078";  # nf-fa-chevron_down       (ti-chevron-down)
+        user         = "f007";  # nf-fa-user — photo fallback
+      };
+    };
+
     bars = {
       browser = {                                            # ultrawide hub — global modules
         left = [
           { w = "session"; }
           { w = "clock"; }
-          { w = "stub"; icon = "f1f6"; color = "mauve"; }                    # DND (bell-slash)
+          { w = "presence"; }                                              # mirrors the avatar ring
           { w = "stub"; icon = "f111"; label = "REC"; color = "red"; }      # recording
           { w = "submap"; }
-          { w = "stub"; icon = "f0f4"; color = "teal"; }                    # idle inhibitor
+          { w = "idle"; }                                                  # mirrors "Keep awake"
         ];
         center = [ { w = "workspaces"; } ];
         right = [
@@ -103,7 +164,7 @@
           { w = "stub"; icon = "f11b"; color = "green"; }                   # GameMode
           { w = "stub"; icon = "f1de"; label = "scx·rusty"; color = "sky"; }
           { w = "volume"; }
-          { w = "stub"; icon = "f0f3"; label = "3"; color = "rosewater"; }  # notifications
+          { w = "notifications"; }                                         # swaync count; hidden at zero
         ];
       };
       code = {                                               # left screen — primary

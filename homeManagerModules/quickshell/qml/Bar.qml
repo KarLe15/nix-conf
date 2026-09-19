@@ -35,6 +35,15 @@ PanelWindow {
     Component.onCompleted: Popovers.registerBar(bar)
     Component.onDestruction: Popovers.unregisterBar(bar)
 
+    // Holds the machine awake while the control centre's "Keep awake" is on
+    // (Avatar Widget · 9b). The wayland inhibitor needs a visible window, which is
+    // exactly what a bar is; one per bar is redundant but harmless — any single
+    // one of them keeps Hyprland from emitting idle, so hypridle never fires.
+    IdleInhibitor {
+        window: bar
+        enabled: Idle.enabled
+    }
+
     // Hairline under the bar.
     Rectangle {
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }

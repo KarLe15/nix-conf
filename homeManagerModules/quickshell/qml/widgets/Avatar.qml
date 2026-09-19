@@ -1,82 +1,31 @@
 import QtQuick
-import QtQuick.Effects
 import "root:/"
 
-// User-identity avatar (Screen Bars · code screen, far left): the profile photo
-// masked into a disc with a lavender ring. Image path comes from Config (installed
-// alongside the QML tree). Falls back to a gradient + user glyph if the photo is
-// missing.
+// The bar's avatar trigger (Screen Bars · code screen, far left). The disc and its
+// presence ring are AvatarDisc; this adds the click that drops the control centre
+// (Avatar Widget · 9b) and nothing else — the ring stays the only indicator, so the
+// widget costs the bar the same width in every state.
 Item {
     id: root
-    implicitHeight: Theme.pillHeight
-    implicitWidth: Theme.pillHeight
+    implicitHeight: disc.implicitHeight
+    implicitWidth: disc.implicitWidth
 
-    readonly property bool hasPhoto: img.status === Image.Ready
-
-    // Fallback disc (shown until/unless the photo loads).
-    Rectangle {
+    AvatarDisc {
+        id: disc
         anchors.fill: parent
-        anchors.margins: 2
-        radius: width / 2
-        visible: !root.hasPhoto
-        gradient: Gradient {
-            orientation: Gradient.Horizontal
-            GradientStop { position: 0.0; color: Theme.lavender }
-            GradientStop { position: 1.0; color: Theme.sapphire }
-        }
-        Text {
-            anchors.centerIn: parent
-            text: "\uf007"  // nf-fa-user
-            font.family: Theme.fontMono
-            font.pixelSize: Theme.fontIcon
-            color: Qt.rgba(0, 0, 0, 0.5)
-        }
+        highlighted: avatarMouse.containsMouse
     }
 
-    // Source photo (hidden; drawn through the mask below).
-    Image {
-        id: img
+    MouseArea {
+        id: avatarMouse
         anchors.fill: parent
-        anchors.margins: 2
-        source: Config.profileImage
-        fillMode: Image.PreserveAspectCrop
-        smooth: true
-        mipmap: true
-        cache: true
-        visible: false
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Popovers.toggle(panel)
     }
 
-    // Circular mask texture.
-    Item {
-        id: mask
-        anchors.fill: img
-        layer.enabled: true
-        visible: false
-        Rectangle {
-            anchors.fill: parent
-            radius: width / 2
-            antialiasing: true
-            color: "black"
-        }
-    }
-
-    MultiEffect {
-        anchors.fill: img
-        source: img
-        visible: root.hasPhoto
-        maskEnabled: true
-        maskSource: mask
-        maskThresholdMin: 0.5
-        maskSpreadAtMin: 1.0
-    }
-
-    // Lavender ring on top.
-    Rectangle {
-        anchors.fill: parent
-        radius: width / 2
-        color: "transparent"
-        border.color: Theme.lavender
-        border.width: 2
-        antialiasing: true
+    AvatarPanel {
+        id: panel
+        anchorItem: root
     }
 }

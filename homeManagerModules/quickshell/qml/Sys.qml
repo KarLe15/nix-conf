@@ -55,6 +55,12 @@ Singleton {
     property var containerList: []   // [{ name, cpu, mem, uptime }] running containers
     property var procs: []           // [{ name, pct }] top CPU processes
 
+    // ---- Host facts (avatar popover · facts block) ----
+    property int uptimeSec: 0        // seconds since boot
+    property string kernel: ""       // uname -r
+    property string host: ""         // uname -n
+    property var ipv4: ({})          // interface name → IPv4 address
+
     // ---- Fast metrics poller (~2s): one shell one-shot returns every number in a
     // single line, so the snapshot is internally consistent. ----
     Process {
@@ -98,6 +104,26 @@ Singleton {
           + "if(n==\"ps\"||n==\"awk\"||n==\"sort\"||n==\"head\"||n==\"sh\"||n==\"wc\")next; c[n]+=$2} "
           + "END{for(k in c) if(c[k]>0.4) printf \"%s %.1f\\n\", k, c[k]}' | sort -k2 -rn | head -n 3"]
         stdout: StdioCollector { onStreamFinished: sys._parseProcs(this.text) }
+    }
+
+    // ---- Host facts poller (~30s): uptime moves, the rest is effectively static
+    // but costs nothing to re-read, and the IPv4 map follows a reconnect. ----
+    Process {
+        id: factsProc
+        running: false
+        command: ["sh", "-c",
+            "read up _ < /proc/uptime; echo \"uptime ${up%%.*}\"; "
+          + "echo \"kernel $(uname -r)\"; echo \"host $(uname -n)\"; "
+          + "ip -4 -o addr show 2>/dev/null | awk '{split($4,a,\"/\"); print \"ip4 \" $2 \" \" a[1]}'"]
+        stdout: StdioCollector { onStreamFinished: sys._parseFacts(this.text) }
+    }
+
+    Timer {
+        interval: 30000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: factsProc.running = true
     }
 
     Timer {
@@ -190,5 +216,30 @@ Singleton {
             if (m) out.push({ name: m[1], pct: m[2] });
         }
         sys.procs = out;
+    }
+
+    function _parseFacts(t) {
+        const lines = t.trim().split(/\n+/);
+        const ips = {};
+        for (let i = 0; i < lines.length; i++) {
+            const f = lines[i].trim().split(/\s+/);
+            if (f[0] === "uptime") sys.uptimeSec = parseInt(f[1]) || 0;
+            else if (f[0] === "kernel") sys.kernel = f[1] || "";
+            else if (f[0] === "host") sys.host = f[1] || "";
+            else if (f[0] === "ip4" && f[1] && f[1] !== "lo") ips[f[1]] = f[2];
+        }
+        sys.ipv4 = ips;
+    }
+
+    // "4h 12m" / "3d 4h" — the popover's uptime row. A property, not a
+    // function: the row has to re-render when uptimeSec moves.
+    readonly property string uptimeText: {
+        const s = sys.uptimeSec;
+        const d = Math.floor(s / 86400);
+        const h = Math.floor((s % 86400) / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        if (d > 0) return d + "d " + h + "h";
+        if (h > 0) return h + "h " + m + "m";
+        return m + "m";
     }
 }

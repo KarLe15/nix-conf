@@ -17,6 +17,10 @@ let
   ## rest of the config uses; the quickshell preset builds its button actions from it.
   default-programs = customConfigs.softwareConfigs.defaults.apply { inherit pkgs; };
 
+  ## Idle schedule (lock/screen-off/suspend seconds) — the avatar popover tells
+  ## you when the machine sleeps, so it reads the same preset hypridle does.
+  powermanagement = customConfigs.softwareConfigs.powermanagement.apply { inherit pkgs; };
+
   ## Submap presentation (name/icon/color). The submaps themselves are defined in
   ## the shortcuts preset by entries naming them; this is only how the bar shows
   ## them, kept there so there is one source of truth.
@@ -54,6 +58,38 @@ let
              + ''"topMargin": ${toString paletteCfg.topMargin}, ''
              + ''"scrim": ${toString paletteCfg.scrim}, "maxRows": ${toString paletteCfg.maxRows}, ''
              + ''"fixedHeight": ${lib.boolToString paletteCfg.fixedHeight} })'';
+
+
+  ## Avatar control centre (see the quickshell style preset). Presence colours are
+  ## Theme palette *names*, resolved in QML so a theme flavor change follows. The
+  ## idle subtitle needs the real hypridle schedule, which lives in the
+  ## powermanagement preset — the same numbers the hypridle module renders.
+  avatarCfg = quickshellStyle.avatar;
+  avatarIcons = lib.concatStringsSep ", " (lib.mapAttrsToList (n: v:
+    ''"${n}": "\u${v}"''
+  ) avatarCfg.icons);
+  avatarPresence = lib.concatStringsSep ", " (lib.mapAttrsToList (n: v:
+    ''"${n}": "${v}"''
+  ) avatarCfg.presence);
+  avatarMirrors = lib.concatStringsSep ", " (lib.mapAttrsToList (n: v:
+    ''"${n}": ${lib.boolToString v}''
+  ) avatarCfg.mirrors);
+  avatarFacts = lib.concatMapStringsSep ", " (f: ''"${f}"'') avatarCfg.facts;
+  avatarDurations = lib.concatMapStringsSep ", " toString avatarCfg.idleDurations;
+  avatarQml = ''({ "width": ${toString avatarCfg.width}, ''
+            + ''"discSize": ${toString avatarCfg.discSize}, ''
+            + ''"ringWidth": ${toString avatarCfg.ringWidth}, ''
+            + ''"ringGap": ${toString avatarCfg.ringGap}, ''
+            + ''"panelRingWidth": ${toString avatarCfg.panelRingWidth}, ''
+            + ''"userName": "${avatarCfg.userName}", ''
+            + ''"presence": ({ ${avatarPresence} }), ''
+            + ''"idleDurations": [ ${avatarDurations} ], ''
+            + ''"idleDefault": ${toString avatarCfg.idleDefault}, ''
+            + ''"idleAfter": ${toString powermanagement.idleTimeouts.lockAfter}, ''
+            + ''"netListHeight": ${toString avatarCfg.netListHeight}, ''
+            + ''"facts": [ ${avatarFacts} ], ''
+            + ''"mirrors": ({ ${avatarMirrors} }), ''
+            + ''"icons": ({ ${avatarIcons} }) })'';
 
   ## Catppuccin palettes keyed by flavor. Only flavors selectable by a theme preset
   ## need to exist here. Hex values match the ones used in the Waybar style.css asset
@@ -209,6 +245,10 @@ let
         // Command palette: presentation + behaviour knobs.
         readonly property var palette: ${paletteQml}
 
+        // Avatar control centre: ring + popover geometry, presence colour
+        // names, idle chips, facts rows, mirror pills and glyphs.
+        readonly property var avatar: ${avatarQml}
+
         // Per-screen bar composition, keyed by role. Each zone lists widget entries
         // dispatched by qml/widgets/WidgetSlot.qml. Generated from the barsLayout
         // preset in home.nix. (Parenthesised so QML reads it as an object literal.)
@@ -265,6 +305,8 @@ in
       "quickshell/Config.qml".text    = configQml;
       "quickshell/Popovers.qml".source = ./qml/Popovers.qml;
       "quickshell/Sys.qml".source     = ./qml/Sys.qml;
+      "quickshell/Presence.qml".source = ./qml/Presence.qml;
+      "quickshell/Idle.qml".source    = ./qml/Idle.qml;
       "quickshell/shell.qml".source   = ./qml/shell.qml;
       "quickshell/Bar.qml".source   = ./qml/Bar.qml;
       "quickshell/Osd.qml".source   = ./qml/Osd.qml;

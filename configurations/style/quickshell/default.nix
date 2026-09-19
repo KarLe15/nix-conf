@@ -17,6 +17,9 @@
             bars          :: attrs;   # per-role bar layout, keyed by monitor role
                                       #   (code/terminal/browser/other); each role has
                                       #   left/center/right lists of widget entries.
+            osd           :: attrs;   # multimedia OSD placement, timing and glyphs
+            palette       :: attrs;   # command palette presentation and behaviour
+            avatar        :: attrs;   # avatar ring + control-centre popover
           }
           autostart :: [ str ]
 

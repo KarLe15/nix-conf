@@ -212,7 +212,7 @@ Each `Bar` registers itself on completion and unregisters on destruction.
 | **4. Notifications** | Notification stack. Per `Notifications`. | swaync | Not started |
 | **5. Launcher / dock** | Notch launcher + stargate dock. Per `Notch Launcher`, `App Launcher`. | rofi | Not started |
 | **6. Widgets** | Calendar, volume/Bluetooth, temperatures, network, launch actions, avatar, side drawer, wallpaper picker. | — | Calendar, volume/BT, CPU+GPU temps, net rates, launch buttons, avatar **done**; side drawer + wallpaper picker not started |
-| **7. Migrate** | Add autostart (systemd user service / Hyprland `exec-once`); disable each old module once its Quickshell replacement is solid. | waybar/swaync/rofi | Not started |
+| **7. Migrate** | Autostart via a systemd user service with `X-Restart-Triggers`, so a rebuild restarts the shell; disable each old module once its Quickshell replacement is solid. | waybar/swaync/rofi | **Waybar + avizo done**; swaync/rofi outstanding |
 
 ---
 
@@ -222,7 +222,8 @@ Each `Bar` registers itself on completion and unregisters on destruction.
 colored, dark-on-accent filled pills (not the floating-islands `Status Bar` mockup).
 Accent is **mauve**.
 
-**Behavior**: still **not autostarted** — coexists with Waybar; launch with `qs`.
+**Behavior**: runs as a managed user service bound to `graphical-session.target`;
+Waybar and avizo are disabled.
 Every monitor gets a solid top bar with a hairline bottom border and three zones, and
 each screen now carries a **different** composition driven by its role:
 

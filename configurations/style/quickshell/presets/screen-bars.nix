@@ -19,6 +19,43 @@
   in {
     profile-image = ../../status-bars/assets/profile_oneill.jpg;
 
+    ## Multimedia OSD (Volume OSD · design ids 9a/9c/9d). A transient overlay
+    ## fired by volume/mic changes. `variant = "all"` renders every alternative at
+    ## once for review — they occupy different thirds of the screen so they do not
+    ## collide.
+    ##   monitor    monitor ROLE the OSD renders on (code/terminal/browser/other)
+    ##   variant    "card" (9a) | "ring" (9c) | "notch" (9d) | "all"
+    ##   accent     Theme palette name
+    ##   holdMs     time the OSD stays up; each change restarts it (design: 1600)
+    ##   fadeMs     appearance fade (design: 180)
+    ##   placement  card only: "bottom" | "top"
+    ##   margin     distance from the screen edge
+    ##   cardWidth  9a card min width
+    ##   lowThreshold  % below which the "volume down" glyph is shown
+    ##   showDevice whether the device line is rendered
+    ##   icons      Nerd Font codepoints (hex, no backslash). The design specifies
+    ##              Tabler webfont glyphs; these are the Font Awesome equivalents
+    ##              carried by the Nerd Font the fonts preset selects.
+    osd = {
+      monitor      = "terminal";   # bottom-right screen
+      variant      = "card";        # set to "card" once a variant is chosen
+      accent       = "blue";       # #8aadf4
+      holdMs       = 1600;         # hold window; each change restarts it
+      fadeMs       = 180;          # appearance fade
+      placement    = "bottom";
+      margin       = 46;           # distance from the screen edge
+      cardWidth    = 340;          # 9a card min width
+      lowThreshold = 45;           # % below which the "volume down" glyph is used
+      showDevice   = true;         # the device line under the level bar
+      icons = {
+        volumeHigh = "f028";    # nf-fa-volume_up        (ti-volume)
+        volumeLow  = "f027";    # nf-fa-volume_down      (ti-volume-2)
+        volumeMute = "f026";    # nf-fa-volume_off       (ti-volume-3)
+        micOn      = "f130";    # nf-fa-microphone       (ti-microphone)
+        micMute    = "f131";    # nf-fa-microphone_slash (ti-microphone-off)
+      };
+    };
+
     bars = {
       browser = {                                            # ultrawide hub — global modules
         left = [

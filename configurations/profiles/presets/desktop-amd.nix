@@ -25,7 +25,7 @@
   software.shortcuts.active         = "mastodant-1";
   software.launchers.active         = "rofi";
   software.powermanagement.active   = "systemD";
-  software.multimedia.active        = "avizo";
+  software.multimedia.active        = "wpctl";   # PipeWire directly; the OSD is quickshell's
   software.shell.active             = "standard";
   software.wayland-desktop.active   = "standard";
 
@@ -34,11 +34,11 @@
   software.modules.catppuccin.enable      = true;
   # Window Manager
   software.modules.wayland-desktop.enable = true;
-  software.modules.waybar.enable          = true;
-  # Quickshell desktop shell (coexists with waybar; launch manually with `qs`)
+  software.modules.waybar.enable          = false;  # replaced by quickshell
+  # Quickshell desktop shell — managed user service, replaces waybar
   software.modules.quickshell.enable      = true;
   software.modules.swaync.enable          = true;
-  software.modules.avizo.enable           = true;
+  software.modules.avizo.enable           = false;  # replaced by the quickshell OSD
   software.modules.hypridle.enable        = true;
   software.modules.hyprlock.enable        = true;
   software.modules.hyprpolkitagent.enable = true;

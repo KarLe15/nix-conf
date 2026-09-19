@@ -13,4 +13,12 @@ ShellRoot {
 
         Bar {}
     }
+
+    // Multimedia OSD — one per screen; each instance renders only if its monitor
+    // role matches Config.osd.monitor. See qml/Osd.qml.
+    Variants {
+        model: Quickshell.screens
+
+        Osd {}
+    }
 }

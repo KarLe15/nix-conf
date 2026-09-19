@@ -29,6 +29,21 @@ let
   ## preset in configurations/ — the module never reaches up into configurations/.
   quickshellStyle = customConfigs.styleConfigs.quickshell.apply { inherit pkgs default-programs; };
 
+  ## Multimedia OSD config (see configurations/style/quickshell/presets/*.nix).
+  ## Icons are hex Nerd Font codepoints in the preset and emitted as \uXXXX, the
+  ## same convention the bar layout uses.
+  osd = quickshellStyle.osd;
+  osdIcons = lib.concatStringsSep ", " (lib.mapAttrsToList (n: v:
+    ''"${n}": "\u${v}"''
+  ) osd.icons);
+  osdQml = ''({ "monitor": "${osd.monitor}", "variant": "${osd.variant}", ''
+         + ''"accent": "${osd.accent}", "holdMs": ${toString osd.holdMs}, ''
+         + ''"fadeMs": ${toString osd.fadeMs}, "placement": "${osd.placement}", ''
+         + ''"margin": ${toString osd.margin}, "cardWidth": ${toString osd.cardWidth}, ''
+         + ''"lowThreshold": ${toString osd.lowThreshold}, ''
+         + ''"showDevice": ${lib.boolToString osd.showDevice}, ''
+         + ''"icons": ({ ${osdIcons} }) })'';
+
   ## Catppuccin palettes keyed by flavor. Only flavors selectable by a theme preset
   ## need to exist here. Hex values match the ones used in the Waybar style.css asset
   ## so Quickshell and Waybar stay visually identical during the coexistence phase.
@@ -177,6 +192,9 @@ let
         // Submap presentation, keyed by submap name ("default" = no submap).
         readonly property var submaps: ({ ${submapEntries} })
 
+        // Multimedia OSD: target monitor role, variant, accent, timing, glyphs.
+        readonly property var osd: ${osdQml}
+
         // Per-screen bar composition, keyed by role. Each zone lists widget entries
         // dispatched by qml/widgets/WidgetSlot.qml. Generated from the barsLayout
         // preset in home.nix. (Parenthesised so QML reads it as an object literal.)
@@ -190,9 +208,43 @@ in
 {
   config = lib.mkIf cfg.enable {
     ## Install the Quickshell binary (upstream flake build, passed in via
-    ## extraSpecialArgs as quickshell-pkg). Launch manually with `qs` for now —
-    ## no autostart while it coexists with Waybar.
+    ## extraSpecialArgs as quickshell-pkg). Also available as `qs` for a manual
+    ## run alongside the service.
     home.packages = [ quickshell-pkg ];
+
+    ## Quickshell as a managed user service, replacing Waybar.
+    ##
+    ## X-Restart-Triggers is the important part. Quickshell watches the RESOLVED
+    ## path of its config files, and Home Manager installs those as symlinks into
+    ## the Nix store — whose targets are immutable. So a rebuild swaps the symlink,
+    ## the resolved store path never changes, the file watcher never fires, and the
+    ## running shell keeps executing the previous generation until it is restarted
+    ## by hand. Listing the generated content and the QML tree here makes the unit
+    ## text change whenever any of them does, so home-manager's sd-switch restarts
+    ## the service on activation.
+    ##
+    ## Reload is not an option: there is no IPC to re-read the config in place.
+    systemd.user.services.quickshell = {
+      Unit = {
+        Description = "Quickshell desktop shell";
+        Documentation = "https://quickshell.org";
+        PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" ];
+        ## Do not start outside a Wayland session (same guard Waybar uses).
+        ConditionEnvironment = "WAYLAND_DISPLAY";
+        X-Restart-Triggers = [
+          "${pkgs.writeText "quickshell-generated" (themeQml + configQml)}"
+          "${./qml}"
+          "${quickshellStyle.profile-image}"
+        ];
+      };
+      Service = {
+        ExecStart = "${quickshell-pkg}/bin/quickshell";
+        Restart = "on-failure";
+        KillMode = "mixed";
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
 
     xdg.configFile = {
       "quickshell/Theme.qml".text     = themeQml;
@@ -201,6 +253,7 @@ in
       "quickshell/Sys.qml".source     = ./qml/Sys.qml;
       "quickshell/shell.qml".source   = ./qml/shell.qml;
       "quickshell/Bar.qml".source   = ./qml/Bar.qml;
+      "quickshell/Osd.qml".source   = ./qml/Osd.qml;
       "quickshell/widgets".source   = ./qml/widgets;
       "quickshell/scripts".source   = ./scripts;
       "quickshell/assets/profile.jpg".source = quickshellStyle.profile-image;

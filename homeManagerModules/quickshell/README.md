@@ -59,8 +59,8 @@ Workspace ids/glyphs come from the repo's own `workspaces` + `monitors` presets 
 monitor binding is code → 1/4/7, terminal → 2/5/8, browser → 3/6/9, which drives the
 per-monitor active highlight).
 
-Quickshell still **coexists** with Waybar: it is installed but **not autostarted**,
-so nothing changes on your desktop until you launch it yourself (`qs`).
+Quickshell now runs as a **managed user service** bound to `graphical-session.target`,
+and has **replaced Waybar** (`software.modules.waybar.enable = false`).
 Notifications (Stage 4) and the notch launcher / stargate dock (Stage 5) are not
 implemented yet.
 
@@ -126,6 +126,33 @@ push into these same properties without touching a widget.
 `Quickshell.Services.Pipewire` and `Quickshell.Bluetooth` services (live objects, no
 polling).
 
+
+## Service and restart-on-rebuild
+
+Quickshell runs as `systemd.user.services.quickshell`, `PartOf` and `WantedBy`
+`graphical-session.target`, guarded by `ConditionEnvironment=WAYLAND_DISPLAY` —
+the same shape Waybar's own unit used.
+
+The part that matters is **`X-Restart-Triggers`**. Quickshell watches the
+*resolved* path of its config files, and Home Manager installs those as symlinks
+into the Nix store, whose targets are immutable. A rebuild swaps the symlink, the
+resolved store path never changes, the file watcher never fires — and the running
+shell keeps executing the previous generation until it is restarted by hand. That
+bit repeatedly during development.
+
+Listing the generated singletons, the QML tree and the avatar as restart triggers
+makes the unit text change whenever any of them does, so Home Manager's `sd-switch`
+restarts the service on activation. Reload is not an option: there is no IPC to
+re-read the config in place.
+
+```
+systemctl --user status quickshell
+systemctl --user restart quickshell
+journalctl --user -u quickshell -f
+```
+
+`qs` is still on `PATH` for running a second instance by hand (useful with
+`QT_QPA_PLATFORM=offscreen` for the headless checks described above).
 ## Popovers
 
 `qml/Popovers.qml` (singleton) coordinates the drop-downs so that only one is open at
@@ -196,9 +223,10 @@ hand-written singletons following the same rule.
 
 ## Trying it
 
-After a rebuild, launch manually (it will not fight Waybar):
+After a rebuild the service restarts itself. To drive it by hand instead:
 
 ```sh
+systemctl --user stop quickshell
 qs        # or: quickshell
 ```
 
@@ -209,8 +237,7 @@ next rebuild.
 
 ## Notes
 
-- No systemd service / Hyprland `exec-once` yet — that arrives with the migration
-  stage, once the bar replaces Waybar.
+- Runs as a systemd user service; see [Service and restart-on-rebuild](#service-and-restart-on-rebuild)
 - `Theme.qml` and `Config.qml` are generated; edit `home.nix`, not the files in
   `~/.config`.
 - Metric paths in `Sys.qml` are AMD-specific: hwmon is matched by chip *name*

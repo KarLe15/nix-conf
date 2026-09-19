@@ -34,7 +34,8 @@ rec {
   ##   color  Theme palette name (surface, mauve, peach, sky, red, ...)
   submaps = {
     default = { name = "default"; icon = "f11c"; color = "surface"; };
-    session = { name = "session"; icon = "f009"; color = "mauve";   };
+    session    = { name = "session"; icon = "f009"; color = "mauve"; };
+    multimedia = { name = "mic";     icon = "f130"; color = "peach"; };
   };
 
   ## Defaults every entry inherits, so a ShortcutDef only states what it needs.
@@ -174,6 +175,39 @@ rec {
       key = "XF86AudioPlay";
       dispatcher = "exec";
       args = { cmd = multimedia.toggleVolume.command; };
+    }
+    ## ===========================< Multimedia mode >=============================
+    ## ALT+KP_Add enters a submap where the SAME XF86Audio keys target the
+    ## microphone instead of the speaker — this keyboard has no XF86AudioMicMute.
+    ## Submaps are modal, so the global speaker binds are inert while it is
+    ## active; ALT+Escape (submap_universal) leaves.
+    {
+      description = "Multimedia mode (microphone)";
+      mods = mod;
+      key = "KP_Add";
+      dispatcher = "submap-enter";
+      args = { submap = "multimedia"; };
+    }
+    {
+      description = "Increase the microphone volume";
+      submap = "multimedia";
+      key = "XF86AudioRaiseVolume";
+      dispatcher = "exec";
+      args = { cmd = multimedia.increaseMic.command; };
+    }
+    {
+      description = "Lower the microphone volume";
+      submap = "multimedia";
+      key = "XF86AudioLowerVolume";
+      dispatcher = "exec";
+      args = { cmd = multimedia.lowerMic.command; };
+    }
+    {
+      description = "Mute / Unmute the microphone";
+      submap = "multimedia";
+      key = "XF86AudioPlay";
+      dispatcher = "exec";
+      args = { cmd = multimedia.toggleMic.command; };
     }
     ## ===========================<  Locking Commands  >==========================
     {

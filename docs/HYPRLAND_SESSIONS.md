@@ -1,6 +1,6 @@
 # Enhancement Proposal: Workspace Sessions
 
-**Status**: Accepted — all decisions settled, implementation not started
+**Status**: Phases A–C done — D/E/F outstanding; submap survey + backlog recorded
 **Date**: 2026-09-12
 **Module**: `homeManagerModules/hyprland/`, `configurations/style/workspaces/`
 **Related**: [HYPRLAND-LUA-MIGRATION.md](HYPRLAND-LUA-MIGRATION.md), [QUICKSHELL-SHELL.md](QUICKSHELL-SHELL.md)
@@ -299,9 +299,122 @@ Recorded so they are not re-litigated:
 
 ---
 
+## Submap survey — prior art and candidates
+
+Recorded 2026-09-12. Cross-cutting rather than session-specific, kept here because
+the `session` submap is the first one built and this is the active plan.
+
+### Candidate submaps
+
+| Submap | Leader | Contents | Status |
+|---|---|---|---|
+| `session` | `ALT+Escape` | switch · move window · cycle | **Built** |
+| `resize` | `SUPER+R` | directional resize, split ratio, preset sizes | **Postponed** — depends on a window-positioning decision not yet taken |
+| `window` | `SUPER+W` | move-to-monitor, groups/tabs, pin, center, pseudo | **Postponed** — same decision; may subsume `resize` |
+| `screenshot` | `SUPER+S` | region / window / fullscreen / delayed, clipboard variants, OCR | Open — independent of the above, and settles D6 |
+| `power` | `SUPER+P` | lock, logout, suspend, reboot, poweroff | Open — only `SUPER+L` (logout) exists today |
+| `minimal` | `SUPER+grave` | a stripped set, so an app can reclaim keys like `Alt-Tab` | Open |
+
+`SUPER` remains nearly empty (`Q`, `Space`, `L`, `SHIFT+Q`), so none of these collide.
+
+### Recurring submaps in the wild
+
+The set is narrow and repeats across configs: **resize** (the wiki's own example,
+near-universal), **window/move**, **screenshot**, **launcher/apps**, **utils**,
+**power/session**, and **minimal**.
+
+Broader patterns: a **leader key** routing to sub-modes (Emacs/Spacemacs style),
+**app-key reclaim**, **nested keychords**, and **workspace overflow** (rejected
+here — see [Goal](#goal); the monitor-role grid makes it unnecessary).
+
+### Omarchy
+
+Also runs a **Lua config** now, in three layers (base / theme / user override) with
+`~/.config/hypr/hyprland.lua` as the entry point — so this repo is not early to the
+migration.
+
+- **Binding themes as a swappable set** — ships a "DHH" default and a "vim"
+  alternative. **This repo already supports that**: `software.shortcuts.active` is
+  an enum over presets, so a `mastodant-1-vim` preset is a new file, not a refactor.
+- **The `minimal` submap** ([discussion #2675](https://github.com/omacom/omarchy/discussions/2675))
+  — `SUPER+grave` toggles a stripped binding set so an application can have its own
+  keys back.
+- **Nested command menus** — `Super+Ctrl+C` opens a *capture* menu rather than firing
+  an action directly.
+- **`CapsLock M <letter>`** for emoji/text expansion: a parallel input system
+  entirely outside the Super scheme.
+- Unified clipboard — `Super+C/X/V` everywhere including terminals, deliberately
+  breaking the `Ctrl+Shift` convention.
+
+That same discussion independently concluded that *"Waybar showing when you're in a
+non-default submap is helpful"* — which is the submap pill built here.
+
+### ML4W
+
+Uses **no submaps at all**; every binding is flat. Its value is elsewhere:
+
+- ⚠️ **Explicit AZERTY handling.** It reads the layout from `input.lua` and maps
+  different keysyms "since AZERTY requires Shift for numbers, preventing direct digit
+  binding" — independent confirmation of the trap hit here. Their fix is per-layout
+  keysym mapping; `code:10`..`code:18` is layout-independent and preferable.
+- **Workspace switching by mouse scroll** (`mainMod + mouse_down/up`) — cheap to add
+  to the Quickshell workspace strip, and session-aware for free.
+- **Screenshot OCR** — text extraction from a region; a strong candidate for the
+  `screenshot` submap.
+- Game-mode toggle; instant-vs-interactive screenshot variants.
+
+### Noctalia
+
+The closest comparison: the same bet (a Quickshell shell) taken further. One layer
+owns **bar, dock, launcher, control center, notifications, wallpaper picker, OSD
+overlays, lock screen, session panel and desktop widgets**, so visual consistency
+comes free — the same reasoning as `Sys.qml`, scaled up.
+
+Relevant to [Phase F](#phase-f--redesign) and to QUICKSHELL-SHELL.md stages 4–6:
+
+- **OSD overlays** (volume, brightness) — currently handled by **avizo**; folding
+  them into Quickshell drops a dependency and matches the bar.
+- **Control center** — one panel instead of three separate popovers.
+- **Script-backed custom widgets** — a generic widget type driven by a shell command,
+  letting the preset add pills without new QML.
+- **Config hot-reload** — worth noting the opposite is true here: Home Manager swaps
+  a symlink whose resolved store path never changes, so the file watcher does not
+  fire and Quickshell must be restarted manually after every rebuild.
+
+### Ranked take
+
+1. **`minimal` submap** — smallest change with real daily value
+2. **`screenshot` submap + OCR** — also settles D6
+3. **Mouse-scroll workspace switching** on the bar
+4. **OSD in Quickshell** — replaces avizo, feeds Phase F
+5. **A vim binding preset** — near-free given the preset system
+
+## Backlog — triaged, pending discussion
+
+Triaged 2026-09-12 from the [submap survey](#submap-survey--prior-art-and-candidates).
+Nothing here is decided; each row lists what has to be settled before it can be
+built.
+
+### To implement
+
+| # | Item | Decisions needed |
+|---|---|---|
+| **B1** | **`minimal` submap** — a stripped binding set so an application can reclaim keys like `Alt-Tab` | What, if anything, survives inside it — pure passthrough, or a small survival set (exit, close window, workspace switch)? And **the leader**: `SUPER+grave` does not exist unshifted on AZERTY, and the physical key left of `1` is `²` (`twosuperior`), already bound to the special workspace. Needs another key or `code:49` |
+| **B2** | **OSD overlays in Quickshell**, replacing avizo | Scope is smaller than it looks: **this host has 0 backlight devices and no `ddcutil`**, so a brightness OSD is inapplicable — volume and mute only (mic? caps-lock?). Replacing avizo is a three-part change: a new `multimedia` preset (today's commands *are* avizo's `volumectl`), `software.modules.avizo.enable = false`, and a Quickshell OSD driven by the Pipewire service `VolumeBluetooth.qml` already binds. Where does it render — focused monitor, or all? |
+| **B3** | **Mods toggles** — DND, game mode, scheduler, idle inhibitor | **This is the same feature as B7.** Each is a toggle with a backend (`swaync-client -dnd`, `gamemoded`, the scx unit, an idle inhibitor) and the stubs already sit in the bar. Decide whether to build four bespoke widgets or one generic preset-driven toggle — the latter delivers B7 at the same time |
+| ~~**B4**~~ | ~~Quickshell hot-reload after a rebuild~~ | **Done** — solved as a systemd user service with `X-Restart-Triggers` listing the generated config and the QML tree, so home-manager's sd-switch restarts it on activation. Also settles autostart (migration Phase 7) |
+
+### Maybe — needs discussion
+
+| # | Item | Decisions needed |
+|---|---|---|
+| **B5** | **Nested command menus** — a leader that opens a menu rather than firing an action (Omarchy's `Super+Ctrl+C` capture menu) | Submap-based or launcher-based (rofi already present)? Which menus are worth it, given the submap pill now makes modal state visible? |
+| **B6** | **Control center** — one panel instead of three separate popovers | Does it replace the calendar / system / volume popovers or sit alongside them? `Popovers.qml` already enforces one-at-a-time, so the gain is layout and consistency, not mechanism |
+| **B7** | **Script-backed custom widgets** — a generic widget driven by shell commands | The entry schema: read command, interval, format, click/toggle action, icon/colour per state. Whether state comes from polling (via `Sys.qml`) or events. See B3 — doing this well removes the need for bespoke toggle widgets |
+
 ## Plan
 
-### Phase A — banding and rules, no behaviour change
+### Phase A — banding and rules ✅ **Done** (2026-09-12)
 
 Introduce `wsFor(slot)` with `session` pinned to 1, so every id resolves to today's
 value. Extend the workspaces preset additively. Generate all 81 `workspace_rule`
@@ -311,13 +424,13 @@ entries (S20).
 call set apart from the 72 new workspace rules. Answer **V1** (where an unruled
 workspace lands) and **V2** (Waybar's reaction) here, before anything depends on them.
 
-### Phase B — the session submap
+### Phase B — the session submap ✅ **Done** (2026-09-12)
 
 Add the `session` submap, the switch function, and the last-slot table. Sessions
 become reachable. **Verify**: switch to session 2, confirm three empty workspaces
 (11/12/13-ish per monitor), switch back, confirm the original windows and slots.
 
-### Phase C — Quickshell session pill
+### Phase C — Quickshell session pill ✅ **Done** (2026-09-12)
 
 Derive session and slot from the workspace id; render the current session plus the
 open ones; keep the slot glyphs unchanged.
@@ -328,6 +441,64 @@ The centred name/number indicator. `hl.notification.create` first if it proves
 sufficient, a Quickshell surface if not.
 
 ---
+
+### Phase E — Refactor
+
+A consolidation pass once the feature work settles. Known candidates, from
+surveying what the sessions work actually left behind:
+
+- **The session arithmetic is duplicated.** `Workspaces.qml` and `SessionPill.qml`
+  each compute `session = ((id - 1) / band) + 1` independently. Extract a
+  `Sessions.qml` singleton — the same treatment `Sys.qml` gave the system metrics,
+  for the same reason: one source of truth, widgets stay pure views.
+- **`homeManagerModules/hyprland/home.nix` has grown** a large bind-data section
+  (`shortcutData`, `workspaceBindData`, `navigationBindData`, `mouseBindData`,
+  `hyprData`). Consider moving the record construction into its own file, or
+  further into Lua now that `lua/binds.lua` owns the API surface.
+- **`lua/binds.lua`'s dispatcher chain is a long `if` ladder** (15 cases). A table
+  lookup keyed by dispatcher name would read better and make the registry
+  enumerable — useful for a future "what binds exist" view.
+- **Preset boundaries**: `sessions` lives in the *workspaces* preset, submap
+  presentation in the *shortcuts* preset, bar layout in the *quickshell* preset.
+  Each was locally reasonable; check the set still coheres.
+- **The shortcuts preset is long** — 19 hand-written entries plus 18 generated
+  plus the submap map. Grouping, or splitting by concern, may help.
+- **D7**: `wayland.windowManager.hyprland.package` is nixpkgs `0.56.2` while the
+  session runs the flake input `0.56.0` — a second, unused Hyprland in the closure.
+- **Dead stubs**: DND, REC, idle-inhibitor, GameMode, scheduler, notification count
+  and the troll pill still render from layout data with no backend. Decide which
+  become real and which are dropped.
+
+**Verify**: the effective-config harness and the QML headless check report no
+change — a refactor phase should move code, not behaviour.
+
+### Phase F — Redesign
+
+A pass over motion and visuals across the whole desktop, not just sessions. The
+survey that motivates it:
+
+- **Hyprland has no animation configuration at all.** The generated `hyprland.lua`
+  contains **zero** `hl.animation` and `hl.curve` calls, so everything runs on
+  compositor defaults. 0.55+ exposes animation leaves and both bezier and spring
+  curves (`hl.curve("mySpring", { type = "spring", mass, stiffness, dampening })`).
+- **Quickshell is almost entirely static**: only 2 of 19 QML files contain a
+  `Behavior`, `Animation` or `Transition` — `SubmapPill` (a 120 ms colour fade) and
+  `VolumeBtPanelView`. Popovers appear and vanish instantly; workspace pills snap.
+- **A session switch moves all three monitors at once** with no visual bridge. This
+  is the single largest motion event in the shell and currently has none.
+- **Unbuilt design surfaces** from the Claude Design source: *System Module Hover*
+  and *Wallpaper Pick Animation* were specified and never implemented.
+- **Token consistency**: pill heights, radii and spacing are `Theme` constants but
+  were tuned per widget as each was written; worth a consistency sweep.
+- **Hover states** are ad hoc — some widgets dim on hover, some do nothing.
+
+Scope note: this phase spans `homeManagerModules/hyprland` (compositor motion) and
+`homeManagerModules/quickshell` (widget motion + visual consistency). It is
+recorded here because this is the active plan, but it is not session-specific — see
+also [QUICKSHELL-SHELL.md](QUICKSHELL-SHELL.md) stages 4–6.
+
+**Verify**: visual, so by relog and inspection. Keep animation parameters in the
+presets rather than the widgets, so they are tunable without touching QML.
 
 ## Risks
 
@@ -348,4 +519,8 @@ sufficient, a Quickshell surface if not.
 - [pyprland workspace plugins](https://deepwiki.com/hyprland-community/pyprland/5.4-workspace-management-plugins)
 - [Unlocking more than 10 workspaces](https://pedropinto.me/blog/an-update-on-unlocking-more-than-10-workspaces-in-hyprland/) — the submap modal-capture pattern this borrows from
 - [Hyprland wiki — Binds](https://wiki.hypr.land/Configuring/Basics/Binds/) — submaps, `submap_universal`, catch-all binds
+- [Omarchy — Hyprland configuration](https://deepwiki.com/basecamp/omarchy/4.1-hyprland-configuration) and [the minimal-submap discussion](https://github.com/omacom/omarchy/discussions/2675)
+- [Omarchy hotkeys manual](https://learn.omacom.io/2/the-omarchy-manual/53/hotkeys)
+- [ML4W keybindings (`default.lua`)](https://github.com/mylinuxforwork/dotfiles/blob/main/dotfiles/.config/hypr/conf/keybindings/default.lua) — including its AZERTY handling
+- [Noctalia](https://github.com/noctalia-dev/noctalia) — a Quickshell shell owning every desktop surface
 - `src/config/lua/objects/LuaMonitor.cpp` in the Hyprland source — `set_workspace` semantics

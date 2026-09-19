@@ -30,6 +30,9 @@ behind one enable flag and themed from the existing presets.
 | Colors | Catppuccin palette keyed by `styleConfigs.themes` flavor, hexes matching `status-bars/assets/style.css` | Quickshell and Waybar render identical hues during coexistence |
 | Bar composition | **Data-driven**, from a `configurations/style/quickshell/` preset | Per-screen layout is config, not code; the module never reaches up into `configurations/` |
 | System metrics | **One `Sys` singleton**, not per-widget pollers | A singleton is process-global, so 3 bars cost one poller set; widgets stay pure views |
+| Shell-wide state (presence, idle) | **One singleton per concern** (`Presence`, `Idle`), widgets are views | The bar avatar, the popover and the hub-bar mirrors read the same object, so they cannot disagree |
+| Presence backend | **swaync stays the source of truth**, subscribed to rather than mirrored | A DND toggle from any source moves the ring; no cached state to drift. Focus == DND until Stage 4 replaces swaync |
+| Wi-Fi | `Quickshell.Networking` (NetworkManager), **no PSK entry** | Joining a new SSID stays a terminal job; a password field would need keyboard focus the bar's popovers cannot take |
 
 ---
 
@@ -45,7 +48,7 @@ behind one enable flag and themed from the existing presets.
      real notch. No host exists for this in the repo yet.
 - **Component surfaces** (each a `.dc.html` mockup): Screen Bars, Status Bar, System
   Widget, App Launcher, Notch Launcher, Notifications, Side Drawer, Calendar Widget,
-  System Module Hover, Wallpaper Pick Animation.
+  System Module Hover, Wallpaper Pick Animation, Volume OSD, Avatar Widget.
 
 ---
 
@@ -86,10 +89,20 @@ homeManagerModules/quickshell/
     ├── Bar.qml                 # per-monitor PanelWindow — 3 zones, each a Repeater over the layout
     ├── Sys.qml                 # singleton — system metrics + context (the only thing that polls)
     ├── Popovers.qml            # singleton — popover dismissal (one-at-a-time + click-outside)
+    ├── Presence.qml            # singleton — presence + notification count (swaync subscription)
+    ├── Idle.qml                # singleton — keep-awake hold + countdown (inhibitor lives on the Bars)
+    ├── Osd.qml                 # multimedia OSD (volume / mic), one per screen
+    ├── CommandPalette.qml      # command palette — apps + clipboard modes
     └── widgets/
         ├── WidgetSlot.qml      # dispatches one layout entry to its widget
         ├── StubPill.qml        # design stub for not-yet-built modules
-        ├── Avatar.qml          # profile-photo disc
+        ├── SessionPill.qml     # active workspace session + the open ones
+        ├── SubmapPill.qml      # active Hyprland submap
+        ├── Avatar.qml          # bar avatar trigger (disc + click)
+        ├── AvatarDisc.qml      # the disc itself — photo masked into a circle, presence ring
+        ├── AvatarPanel.qml     # PopupWindow under the avatar
+        ├── AvatarPanelView.qml # control centre — identity, presence, idle, network, facts
+        ├── MirrorPill.qml      # read-only hub-bar echo of presence / idle / notifications
         ├── LaunchButton.qml    # icon-only pill that runs a command
         ├── Clock.qml           # clock island + calendar trigger
         ├── CalendarPopup.qml   # PopupWindow under the clock
@@ -103,7 +116,9 @@ homeManagerModules/quickshell/
         ├── Network.qml         # upload / download rate pills
         ├── VolumeBluetooth.qml # volume + Bluetooth pill + panel trigger
         ├── VolumeBtPanel.qml   # PopupWindow under the volume pill
-        └── VolumeBtPanelView.qml # audio + Bluetooth control body
+        ├── VolumeBtPanelView.qml # audio + Bluetooth control body
+        ├── OsdCard.qml / OsdRing.qml / OsdNotch.qml # the three OSD variants
+        └── PaletteRow.qml      # mode-agnostic command-palette row
 ```
 
 ### Styling pipeline
@@ -115,7 +130,8 @@ homeManagerModules/quickshell/
 - `home.nix` also **generates** `~/.config/quickshell/Config.qml` — a `Singleton`
   holding the per-monitor workspace layout (`{ id, icon, monitor }`) projected from
   the `workspaces`/`monitors` presets, the connector→role map (`roles`), `hubMonitor`
-  (the ultrawide), the per-screen `barLayout`, and the avatar `profileImage` path.
+  (the ultrawide), the session banding, the submap presentation map, the per-screen
+  `barLayout`, the `osd` / `palette` / `avatar` blocks, and the `profileImage` path.
 - Every QML component reads from the `Theme` / `Config` singletons (`import "root:/"`,
   then `Theme.<prop>` / `Config.<prop>`). Both are generated on rebuild — never edit
   them in `~/.config`.
@@ -184,7 +200,8 @@ directly (live objects, no polling at all).
 ### Popover management
 
 `qml/Popovers.qml` (singleton) coordinates the drop-down panels (calendar, system,
-volume/Bluetooth), giving them two behaviours raw `PopupWindow`s lack:
+volume/Bluetooth, avatar control centre), giving them two behaviours raw
+`PopupWindow`s lack:
 
 - **one-open-at-a-time** — each popup binds `visible: Popovers.active === <self>`, so
   opening one closes any other;
@@ -200,6 +217,40 @@ Each `Bar` registers itself on completion and unregisters on destruction.
 > engine registers `Theme`/`Config` as bare types and every property reads `undefined`.
 > Verified headlessly with `QT_QPA_PLATFORM=offscreen qs -p <dir>` before rebuilding.
 
+### Presence, idle and network (the avatar control centre)
+
+The avatar is the shell's control centre (design "Avatar Widget" · ids 9a + 9b,
+network variant 10b). Three pieces of state sit behind it, each owned by exactly one
+place so the bar, the popover and the hub-bar mirrors can never disagree:
+
+| State | Owner | Backend |
+|---|---|---|
+| presence + notification count | `qml/Presence.qml` (singleton) | `swaync-client -swb` subscription |
+| keep-awake hold + countdown | `qml/Idle.qml` (singleton) | wayland `IdleInhibitor`, instantiated per `Bar` |
+| interfaces, SSIDs, radio | bound directly in the view | `Quickshell.Networking` (NetworkManager) |
+
+- **swaync remains the source of truth for silence.** The subscription emits on
+  connect and on every add/close/DND change, so a `swaync-client -d` typed in a
+  terminal moves the ring; `Presence.set()` fires `-dn`/`-df` and waits for the
+  subscription to confirm. Focus and DND both mean "DND on" until Stage 4 replaces
+  swaync — it cannot filter per application, and the popover's note line says so
+  rather than repeating the mockup's "chat & mail muted".
+- **The inhibitor needs a window.** `Idle` owns the decision; `Bar.qml` carries
+  `IdleInhibitor { window: bar; enabled: Idle.enabled }`. Inhibiting goes through the
+  compositor, so hypridle's timers never fire without the service being touched, and
+  its `lockAfter` (from the powermanagement preset) is what the "sleeps after 10m"
+  subtitle reports.
+- **The Wi-Fi scanner is gated on the popover's visibility.** NetworkManager reports
+  only the connected AP until asked to scan; the API has no one-shot scan, so
+  `scannerEnabled` follows the panel and the design's "rescan" button was dropped.
+- **No PSK entry, by decision.** Saved networks carry a `saved` chip and connect on
+  click; unsaved ones are dimmed and inert. Beyond the policy, a text field would need
+  keyboard focus that a `PopupWindow` under a non-focusable bar cannot take.
+
+Everything presentational — geometry, presence palette names, idle chips, facts rows,
+mirror toggles and all 13 glyphs — comes from the `avatar` block in the quickshell
+style preset, the same shape `osd` and `palette` use.
+
 ---
 
 ## Roadmap
@@ -209,10 +260,10 @@ Each `Bar` registers itself on completion and unregisters on destruction.
 | **1. Scaffold** | Flake input + module + enable flag + minimal `shell.qml` (per-monitor top bar with a centered clock pill). Proves wiring, theme/font injection, multi-monitor `Variants`. | — | **Done** |
 | **2. Status bar** | Workspace pills + clock + basic system module, refactored into `widgets/` components fed by `monitors` + `workspaces` presets. Per the `Screen Bars` mockup (solid Crust bar, filled pills). Later made **data-driven**: per-screen composition from a `configurations/` preset, with `StubPill` standing in for unbuilt modules. | waybar | **Done** |
 | **3. System module** | Adaptive context pill (gaming/llm/container/standard) + click-to-open unified panel with per-context bodies (top procs / model cards / container list / sparklines). Metrics centralised in the `Sys` singleton. Hover-to-open animation still to come (click only). | waybar | **Done** |
-| **4. Notifications** | Notification stack. Per `Notifications`. | swaync | Not started |
-| **5. Launcher / dock** | Notch launcher + stargate dock. Per `Notch Launcher`, `App Launcher`. | rofi | Not started |
-| **6. Widgets** | Calendar, volume/Bluetooth, temperatures, network, launch actions, avatar, side drawer, wallpaper picker. | — | Calendar, volume/BT, CPU+GPU temps, net rates, launch buttons, avatar **done**; side drawer + wallpaper picker not started |
-| **7. Migrate** | Autostart via a systemd user service with `X-Restart-Triggers`, so a rebuild restarts the shell; disable each old module once its Quickshell replacement is solid. | waybar/swaync/rofi | **Waybar + avizo done**; swaync/rofi outstanding |
+| **4. Notifications** | Notification stack. Per `Notifications`. | swaync | Not started — swaync still runs, and the avatar's presence switch drives its DND through `swaync-client` in the meantime |
+| **5. Launcher / dock** | Notch launcher + stargate dock. Per `Notch Launcher`, `App Launcher`. | rofi | Command palette **done** (apps + clipboard modes, global shortcuts); notch launcher + stargate dock not started |
+| **6. Widgets** | Calendar, volume/Bluetooth, temperatures, network, launch actions, avatar, multimedia OSD, side drawer, wallpaper picker. | — | Calendar, volume/BT, CPU+GPU temps, net rates, launch buttons, multimedia OSD, and the avatar **control centre** (presence ring, popover, hub-bar mirrors) **done**; side drawer + wallpaper picker not started |
+| **7. Migrate** | Autostart via a systemd user service with `X-Restart-Triggers`, so a rebuild restarts the shell; disable each old module once its Quickshell replacement is solid. | waybar/swaync/rofi | **Waybar, avizo and rofi done**; swaync outstanding — the avatar popover already reads and drives its DND |
 
 ---
 
@@ -223,26 +274,30 @@ colored, dark-on-accent filled pills (not the floating-islands `Status Bar` mock
 Accent is **mauve**.
 
 **Behavior**: runs as a managed user service bound to `graphical-session.target`;
-Waybar and avizo are disabled.
+Waybar, avizo and rofi are disabled.
 Every monitor gets a solid top bar with a hairline bottom border and three zones, and
 each screen now carries a **different** composition driven by its role:
 
 | Screen (role) | left | center | right |
 |---|---|---|---|
-| **browser** (ultrawide hub) | clock (time + date) · DND, REC, submap, idle-inhibitor stubs | workspaces | system module · GameMode + scheduler stubs · volume/BT · notification stub |
-| **code** (primary) | avatar · Home + Downloads launch buttons | workspaces | submap stub · CPU/GPU temps · volume/BT |
-| **terminal** | clock (compact) · submap stub | workspaces | LLM stub (dashed) · net up/down |
-| **other** (unmapped) | clock (compact) | workspaces | system module · volume/BT |
+| **browser** (ultrawide hub) | session · clock (time + date) · presence mirror · REC stub · submap · idle mirror | workspaces | system module · GameMode + scheduler stubs · volume/BT · notification mirror |
+| **code** (primary) | session · avatar (presence ring + control centre) · Home + Downloads launch buttons | workspaces | submap · CPU/GPU temps · volume/BT |
+| **terminal** | session · clock (compact) · submap | workspaces | LLM stub (dashed) · net up/down |
+| **other** (unmapped) | session · clock (compact) | workspaces | system module · volume/BT |
 
 Workspace ids/glyphs come from the repo's `workspaces` preset (monitor binding code →
 1/4/7, terminal → 2/5/8, browser → 3/6/9); live focus and occupancy come from Hyprland,
 and pills are click-to-switch. The focused workspace is highlighted consistently across
 every bar.
 
-Three popovers are wired, all mutually exclusive and dismissed by clicking outside:
-the **calendar** (from the clock), the **system panel** (per-context body), and the
+Four popovers are wired, all mutually exclusive and dismissed by clicking outside:
+the **calendar** (from the clock), the **system panel** (per-context body), the
 **volume/Bluetooth controls** (output, volume slider, BT toggle, device list with
-connect/battery/scan).
+connect/battery/scan), and the **avatar control centre** (identity, presence switch,
+idle inhibitor with duration chips, network, facts).
+
+Off the bar: the **multimedia OSD** fires on volume/mic changes, and the **command
+palette** (apps + clipboard) opens on a global shortcut.
 
 ### How it is validated (offline, no compositor)
 
@@ -260,6 +315,18 @@ This caught the singleton bug (comment `//@ pragma` → every `Theme.*` was `und
 fixed to real `pragma Singleton`) and confirmed `Theme`/`Config` resolve with correct
 values (`ws=9`, `hubMonitor=HDMI-A-2`, `accent=#c6a0f6`). `Config.qml` generation is
 also checked via `nix eval`. `nix-instantiate --parse` passes on the Nix files.
+
+Two harness shapes have proved worth keeping:
+
+- **Compile probe** — `Qt.createComponent("root:/<file>", Component.PreferSynchronous)`
+  per file, printing `errorString()`. Type-checks every component without
+  instantiating it, so files that need a `PanelWindow` still report cleanly.
+- **Live-backend probe** — a `ShellRoot` holding just the body under test (a
+  `Rectangle`, not a window), driving the *real* daemons: swaync presence
+  transitions, NetworkManager device/SSID enumeration, `Idle` hold and expiry, and
+  panel height across states. Anything that binds lazily (`DesktopEntries`,
+  `Networking.devices`) must be reached through a **binding**, not an imperative read
+  in a `Timer` — that has produced false negatives more than once.
 
 ### Verify on target
 
@@ -280,9 +347,15 @@ qs                                                # launch manually inside Hyprl
 - **`context.sh` probes** GameMode over the session bus, ollama on
   `127.0.0.1:11434`, and `docker`; each degrades to "absent" when the service isn't
   there, so the context falls back to `standard`.
-- **Stubs are inert**: DND, REC, submap, idle-inhibitor, GameMode, scheduler, the
-  notification count, and the troll pill render from layout data with **no backend**.
-  Each becomes real by adding a component + a `WidgetSlot` case.
+- **Stubs are inert**: REC, GameMode, scheduler and the troll pill render from layout
+  data with **no backend**. Each becomes real by adding a component + a `WidgetSlot`
+  case — as DND, the idle inhibitor and the notification count did, becoming
+  `MirrorPill`s over the avatar control centre's state.
 - **Hover-to-open** is not wired for any popover (click to open, click again or
   outside to close). The `System Module Hover` mockup's animation is still to come.
-- **No autostart** until Stage 7. **`.qmlls.ini`** still intentionally not wired.
+- **`.qmlls.ini`** still intentionally not wired.
+- **The avatar control centre needs the live session too**: `PopupWindow` placement,
+  the wayland `IdleInhibitor` and NetworkManager's scan results were all verified on
+  target. Headlessly, the body instantiates against live swaync/NM/`/proc` (see
+  [How it is validated](#how-it-is-validated-offline-no-compositor)) — only the
+  popup and the inhibitor need a compositor.

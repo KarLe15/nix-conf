@@ -168,7 +168,8 @@ violation already corrected for Quickshell by moving layout into
 - Dead stubs: `misc = {}`, `cursor = {}`, and a `general` block holding one key.
 - Screenshot binds are inline shell in the shortcuts preset, carrying the author's
   own `TODO :: 2025-06-10 :: Change this to be modular on a screenshot config standalone`.
-- `hyprland-windowsrules.md` sits at the repo root rather than in `docs/`.
+- `hyprland-windowsrules.md` sat at the repo root rather than in `docs/` — moved to
+  `docs/HYPRLAND-WINDOWRULES.md` (2026-09-19).
 - Comments link the `0.48.0` wiki; the module README documents the old schema.
 - `mapDirectionToHyprland` (Left→`l`) exists only because the dispatcher took a
   single-letter string; the Lua API takes `{ direction = "left" }` instead.
@@ -662,7 +663,8 @@ refactor (`ac84d67798r4…` before and after) — not merely the generated Lua.
 - Evaluate `stableid:` window rules for the Brave main-window-vs-popup case, where
   class matching is already documented as fragile.
 - Resolve D7 (the duplicated Hyprland package).
-- Move `hyprland-windowsrules.md` into `docs/`; replace `0.48.0` wiki links.
+- ~~Move `hyprland-windowsrules.md` into `docs/`~~ — done, now `docs/HYPRLAND-WINDOWRULES.md`.
+- Replace the `0.48.0` wiki links.
 - Remove the stray `~/.config/hypr/old.hyprland.lua` and `hyprland.conf.bak` once the
   Lua config has proven itself.
 - Record the outcome in this document.

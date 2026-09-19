@@ -240,7 +240,7 @@ Configured in `hosts/mastodant-1/gaming.nix`:
 ## Development Notes
 
 - `TODO.md` exists at project root with active development tasks
-- `hyprland-windowsrules.md` documents window rule syntax
+- `docs/HYPRLAND-WINDOWRULES.md` documents window rule syntax (hyprlang era; see HYPRLAND-LUA-MIGRATION.md for the Lua form)
 - `git-scripts-accounts.md` documents multi-account git workflow
 - Branch `feature/add-zed-editor` is currently active (Zed editor integration)
 - JetBrains module is a stub (`home.nix` is empty) despite the flake input being present

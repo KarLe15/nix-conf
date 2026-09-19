@@ -21,8 +21,6 @@
     ## Use Catpuccin for not available modules on stylix
     catppuccin.url = "github:catppuccin/nix";
 
-    hyprland.url = "github:hyprwm/Hyprland";
-
     ## Quickshell :: QtQuick/QML Wayland desktop shell (upstream flake, follows nixpkgs)
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
@@ -50,7 +48,7 @@
 
   outputs = {
     self, nixpkgs, nixpkgs-darwin, darwin, home-manager,
-    ragenix, stylix, catppuccin, hyprland, base16utils,
+    ragenix, stylix, catppuccin, base16utils,
     nix-jetbrains-plugins, zen-browser, quickshell,
     ...
   }@flakeInputs :
@@ -93,7 +91,9 @@
       mkNixosConfig = { system, customConfigs, ... }@mkNixosConfigInput: {
         imports = [ ./nixosModules ];
         _module.args = {
-          hyprland = mkNixosConfigInput.hyprland;
+          ## mast-sysd package built by this flake from daemons/mast-sysd
+          ## (consumed by nixosModules/mast-sysd) — see docs/MASTODANT-SYSD.md
+          mast-sysd-pkg = self.packages.${system}.mast-sysd;
         };
       };
 
@@ -168,7 +168,6 @@
             })
             (mkNixosConfig {
               inherit system customConfigs;
-              hyprland = mkNixOsSystemInputs.flakeInputs.hyprland;
             })
             home-manager.nixosModules.home-manager
             (mkHomeManagerConfig {
@@ -186,6 +185,9 @@
       ;
 
     in {
+      packages.x86_64-linux.mast-sysd =
+        nixpkgs.legacyPackages.x86_64-linux.callPackage ./daemons/mast-sysd/package.nix { };
+
       darwinConfigurations = {
       #   "mac-m1" = mkDarwinSystem {
       #       inherit stylix;

@@ -1,5 +1,11 @@
 { config, lib, pkgs, modulesPath, ... }: {
 
+  ## mast-sysd setup pending — enable when nixosModules/mast-sysd is imported:
+  ## software.modules.mast-sysd.enable = true;
+  ## software.modules.mast-sysd.users = [ "karim" ];
+  ## software.modules.mast-sysd.sessionUsers = [ "karim" ];
+  ## See docs/MASTODANT-SYSD.md
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 

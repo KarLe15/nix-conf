@@ -1,1 +1,3 @@
 local_secrets/**
+
+daemons/**/target

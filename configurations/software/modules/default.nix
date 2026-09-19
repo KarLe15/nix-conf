@@ -164,5 +164,12 @@
         '';
       };
     };
+    mast-sysd = {
+      enable = lib.mkOption {
+        type    = lib.types.bool;
+        default = false;
+        description = "Enable the mast-sysd system daemon (metrics/context/scx source of truth). See docs/MASTODANT-SYSD.md.";
+      };
+    };
   };
 }

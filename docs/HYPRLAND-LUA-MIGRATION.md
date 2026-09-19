@@ -1,7 +1,7 @@
 # Enhancement Proposal: Hyprland Lua Migration & Config Refactor
 
-**Status**: Phases 1, 2, 3, 3b done — Phases 4–5 outstanding
-**Date**: 2026-08-30, updated 2026-08-31
+**Status**: **Complete** — Phases 1–5 done, decisions D1–D7 settled
+**Date**: 2026-08-30, updated 2026-09-19
 **Module**: `homeManagerModules/hyprland/`
 **Related**: [ENHANCEMENT-PROFILES.md](ENHANCEMENT-PROFILES.md), [QUICKSHELL-SHELL.md](QUICKSHELL-SHELL.md)
 
@@ -26,16 +26,18 @@ migration (see [Migration log](#migration-log--what-actually-happened)).
 
 ### Where this repo sits today
 
+Updated 2026-09-19, after D7 moved both packages to nixpkgs.
+
 | Fact | Value |
 |---|---|
-| `hyprland` flake input | `github:hyprwm/Hyprland` (main), locked `c91fa5a` |
-| Compositor actually running | **`Hyprland 0.56.0`**, commit `c91fa5ab…`, built 2026-08-29 (`hyprctl version`) |
-| `programs.hyprland.package` (system, what runs) | flake input → `0.56.0+date=2026-08-29_c91fa5a` |
-| `wayland.windowManager.hyprland.package` (HM) | **nixpkgs default → `0.56.2`** — a second, unused Hyprland in the closure (see D7) |
+| `hyprland` flake input | **Removed** — the input, its `_module.args` plumbing and its aquamarine/hyprutils/hyprlang/xdph tree are gone |
+| Compositor actually running | **`Hyprland 0.56.2`**, tag `v0.56.2-b`, commit `efb5099…` |
+| `programs.hyprland.package` (system) | `pkgs.hyprland` → `0.56.2` |
+| `wayland.windowManager.hyprland.package` (HM) | nixpkgs default → `0.56.2` — the same build; one Hyprland in the closure |
 | `home-manager` input | `github:nix-community/home-manager` (master) |
-| `home.stateVersion` | `25.05` (`homeManagerModules/default.nix:48`) — so `configType` is set explicitly, not inherited |
+| `home.stateVersion` | `25.05` — `configType = "lua"` is set explicitly rather than inherited (D5) |
 | Config format in use | **Lua**, `~/.config/hypr/hyprland.lua` (no `hyprland.conf`) |
-
+| Submaps live | `session` (20 binds) · `multimedia` (3, microphone) |
 ---
 
 ## Migration log — what actually happened
@@ -171,6 +173,8 @@ violation already corrected for Quickshell by moving layout into
 - `hyprland-windowsrules.md` sat at the repo root rather than in `docs/` — moved to
   `docs/HYPRLAND-WINDOWRULES.md` (2026-09-19).
 - Comments link the `0.48.0` wiki; the module README documents the old schema.
+  *(Both fixed: the Lua rewrite replaced the comments with unversioned
+  `wiki.hypr.land/Configuring/…` links, and the README was rewritten in Phase 3b.)*
 - `mapDirectionToHyprland` (Left→`l`) exists only because the dispatcher took a
   single-letter string; the Lua API takes `{ direction = "left" }` instead.
 
@@ -541,15 +545,15 @@ strings routed through a generator with an open bug).
 
 | # | Decision | Status |
 |---|---|---|
-| **D4** | Which submaps to define, and which existing global binds move into them | Open — see [Submap candidates](#submap-candidates) |
-| **D5** | Bump `home.stateVersion` to `26.05` (and let `configType` default), or set `configType = "lua"` explicitly and leave `stateVersion` alone? | **Proposed**: set explicitly; a stateVersion bump has repo-wide effects unrelated to Hyprland |
-| **D6** | Modularize the screenshot commands (the 2025-06-10 TODO) as part of this work, or leave for later? | Open |
-| **D7** | `wayland.windowManager.hyprland.package` resolves to nixpkgs `0.56.2` while the session runs the flake input `0.56.0` — pin it to the same input, or set it to `null`? HM uses it only for the `onChange` reload hook, but it pulls a second Hyprland build into the closure | Open |
 
 ### Settled
 
 | Decision | Choice | Rationale |
 |---|---|---|
+| **D4 — which submaps** | **`session` and `multimedia`, built. `resize`/`window` postponed** | Answered by building rather than deciding: `session` (20 binds) and `multimedia` (3, microphone) are live. `resize` and `window` turn out to be a *window-positioning* decision rather than a submap one, and are deferred until that is thought through — see the [submap survey](HYPRLAND_SESSIONS.md) |
+| **D5 — stateVersion** | **Keep `configType = "lua"` explicit; `home.stateVersion` stays `25.05`** | Decoupled: a stateVersion bump carries repo-wide consequences unrelated to Hyprland, and the explicit setting says what it means at the point it matters |
+| **D6 — screenshot commands** | **Keep as is** | The two inline `grim \| slurp \| satty` pipelines stay in the shortcuts preset. The 2025-06-10 TODO remains open; revisit if a `screenshot` submap is ever built |
+| **D7 — duplicated Hyprland package** | **Both from nixpkgs (`0.56.2`)** | `programs.hyprland.package = pkgs.hyprland` and the `hyprland` flake input removed entirely, along with its aquamarine/hyprutils/hyprlang/xdph tree. System and Home Manager now agree, and the closure carries one Hyprland instead of two. **Not inert**: 0.56.2 changed `HLMonitor.set_workspace`'s signature *and* its creation semantics — see the corrections table in [HYPRLAND_SESSIONS.md](HYPRLAND_SESSIONS.md) |
 | **D3 — preset location** | **`configurations/style/hyprland/`** | Sits beside `style/workspaces/` and `style/quickshell/`, which it shares data with, and follows the Quickshell precedent that a shell's layout is style. `input.kb_layout` is the one member that is not really style; not worth a second preset for two keys |
 | **D2 — sequencing** | **Decided by events**: the 2026-08-30 flake update broke the desktop, so the Lua flip happened first, in one step, as an emergency fix. Phases 1–2 became post-hoc cleanup rather than de-risking groundwork | The phased plan assumed hyprlang kept working while we refactored; it did not |
 | **D1 — config generation strategy** | **Strategy A** — Nix generates a data-only `data.lua` from the presets; handwritten Lua modules consume it via `extraLuaFiles` | Same idiom as the Quickshell `Config.qml` / `Theme.qml` split already proven in this repo. Keeps the preset system as the single source of truth shared with Waybar/Quickshell, keeps `$`-bearing shell strings out of the HM transpiler (#9468), and leaves `hl.define_submap` / `hl.on` / timers directly reachable for the submap work |
@@ -652,22 +656,58 @@ the call site via `splitMods` rather than reshaping a preset three modules read.
 **Verified**: the whole `nixos-system` derivation hash was unchanged by the schema
 refactor (`ac84d67798r4…` before and after) — not merely the generated Lua.
 
-### Phase 4 — Introduce submaps
+### Phase 4 — Introduce submaps ✅ **Done** (2026-09-12/19)
 
-- Define the submaps chosen in D4; move the corresponding global binds into them.
-- **Verify**: `hl.get_current_submap()` reports correctly; `Escape` always returns to
-  `default` from every submap.
+- `session` — 20 binds: switch, move-window-across-sessions, cycle.
+- `multimedia` — 3 binds: the XF86Audio keys retargeted at the microphone, since
+  this keyboard has no XF86AudioMicMute.
+- `ALT+Escape` carries `submap_universal`, so one definition leaves *any* submap and
+  no submap can trap the keyboard. The screenshot binds are universal for the same
+  reason.
+- Submap presentation (name/icon/colour) is declared beside the binds in the
+  shortcuts preset and rendered by the Quickshell submap pill.
+- `resize`/`window` deferred — they are a window-positioning decision (D4).
 
-### Phase 5 — 0.56 features, docs, cleanup
+### Phase 5 — 0.56 features, docs, cleanup ✅ **Done** (2026-09-19)
 
-- Evaluate `stableid:` window rules for the Brave main-window-vs-popup case, where
-  class matching is already documented as fragile.
-- Resolve D7 (the duplicated Hyprland package).
-- ~~Move `hyprland-windowsrules.md` into `docs/`~~ — done, now `docs/HYPRLAND-WINDOWRULES.md`.
-- Replace the `0.48.0` wiki links.
-- Remove the stray `~/.config/hypr/old.hyprland.lua` and `hyprland.conf.bak` once the
-  Lua config has proven itself.
-- Record the outcome in this document.
+- ~~Resolve D7 (the duplicated Hyprland package)~~ — both on nixpkgs `0.56.2`, the
+  flake input removed along with its aquamarine/hyprutils/hyprlang/xdph tree.
+- ~~Move `hyprland-windowsrules.md` into `docs/`~~ — now `docs/HYPRLAND-WINDOWRULES.md`.
+- ~~Replace the `0.48.0` wiki links~~ — the Lua rewrite had already replaced them
+  with unversioned ones. Verified: no `wiki.hypr.land/<version>` link remains in any
+  `.nix` or `.lua`.
+- ~~Remove the stray `~/.config/hypr/old.hyprland.lua` and `hyprland.conf.bak`~~.
+- ~~Evaluate `stableid:` window rules for the Brave case~~ — **rejected, see below.**
+
+#### `stableid:` is not a solution for the Brave rule
+
+Proposed off the 0.56 release-note phrasing ("a new `stableid:` field for window
+rules") without checking what it does. Reading the source settles it:
+
+```cpp
+static uint64_t windowIDCounter = 0x18000000;   // src/desktop/view/Window.cpp
+…
+m_stableID(windowIDCounter++)
+```
+
+It is a **monotonic counter assigned per window at creation and reset every
+compositor start**. "Stable" means stable for the lifetime of *one* window — an
+identity that survives retitling or a class change. It is not stable across
+restarts and says nothing about which application a window belongs to.
+
+The Brave rule needs to fire whenever *a Brave popup* appears — a class of windows,
+matched before the window exists. `stableid:` is a number only knowable after a
+particular window has been created, and different for the next one. There is
+nothing to put in a config file.
+
+It is for **runtime** targeting — `hyprctl dispatch … stableid:18000008` against one
+live window, or a script reacting to an event — not for declarative rules.
+
+If `class = "brave"` ever does prove too loose, the right tools are the other match
+fields: `initialtitle:` matches the title a window was *created* with, before the
+page rewrites it, which is usually what separates a file-picker popup from a browser
+window. `initialclass:` likewise. Nothing has actually been reported as misbehaving,
+so no change was made.
 
 ---
 

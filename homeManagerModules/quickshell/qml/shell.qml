@@ -21,4 +21,13 @@ ShellRoot {
 
         Osd {}
     }
+
+    // Command palette — one per screen; only the target instance opens.
+    // See qml/CommandPalette.qml. NB: the type cannot be called `Palette` — QtQuick
+    // already exposes a `Palette` value type, which silently shadows it.
+    Variants {
+        model: Quickshell.screens
+
+        CommandPalette {}
+    }
 }

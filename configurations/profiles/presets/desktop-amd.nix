@@ -23,7 +23,7 @@
   software.developpement.active     = "opensource";
   software.git-accounts.active      = "standard";
   software.shortcuts.active         = "mastodant-1";
-  software.launchers.active         = "rofi";
+  software.launchers.active         = "quickshell";  # the command palette
   software.powermanagement.active   = "systemD";
   software.multimedia.active        = "wpctl";   # PipeWire directly; the OSD is quickshell's
   software.shell.active             = "standard";
@@ -46,7 +46,7 @@
   software.modules.wlogout.enable         = false;
   software.modules.wleave.enable          = true;
   # App search
-  software.modules.rofi.enable            = true;
+  software.modules.rofi.enable            = false;  # replaced by the quickshell palette
   # IDE
   software.modules.jetbrains.enable       = true;
   software.modules.zed.enable             = true;

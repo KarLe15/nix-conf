@@ -105,13 +105,33 @@ function M.switchTo(n)
   remember()
   M.session = n
 
-  local mem = lastSlot[n] or {}
+  local mem     = lastSlot[n] or {}
+  local focused = hl.get_active_monitor()
+  local targets = {}
+
+  -- Hyprland 0.56.2 changed HLMonitor.set_workspace in two ways versus 0.56.0:
+  -- it now takes a TABLE with a required `workspace` field, and it no longer
+  -- creates a workspace that does not exist (`if (!ws) return 0;`). Entering a
+  -- fresh session would therefore silently do nothing.
+  --
+  -- So make each target exist first: hl.focus maps to dsp_changeWorkspace, which
+  -- does create on demand, and the per-band workspace rules put it on the right
+  -- monitor. Focus is restored afterwards, since creating moves it.
   for _, m in ipairs(hl.get_monitors()) do
     local slot = mem[m.name] or firstSlotFor(m.name)
-    -- NB: the bare selector, not a table. hl.dsp.window.move takes { workspace = … },
-    -- but HLMonitor.set_workspace takes the selector directly (a string, number or
-    -- workspace object). See workspaceSelectorFromLuaSelectorOrObject.
-    m:set_workspace(M.wsName(slot))
+    local sel  = M.wsName(slot)
+    targets[#targets + 1] = { mon = m, sel = sel }
+    if not hl.get_workspace(sel) then
+      hl.dispatch(hl.dsp.focus({ workspace = sel }))
+    end
+  end
+
+  for _, t in ipairs(targets) do
+    t.mon:set_workspace({ workspace = t.sel })
+  end
+
+  if focused then
+    hl.dispatch(hl.dsp.focus({ monitor = focused.name }))
   end
 
   notify()

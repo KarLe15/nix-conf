@@ -6,8 +6,9 @@
       # Add new values here when adding a preset to ./presets/
       type = lib.types.enum [
         "rofi"
+        "quickshell"
       ];
-      default = "rofi";
+      default = "quickshell";
       description = ''
         Active launcher preset name. Defines app launcher and clipboard manager commands.
         Consumed by hyprland (shortcuts) and git-accounts (defaultEditor).

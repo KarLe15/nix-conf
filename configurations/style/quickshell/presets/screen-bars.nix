@@ -56,6 +56,37 @@
       };
     };
 
+    ## Command palette (design "App Launcher" · id 2a). One centred surface with a
+    ## search field, a mode badge and a rich-row list. The design's framing is
+    ## "one component, every mode" — Apps is the only mode implemented so far;
+    ## clipboard/emoji/pass slot in beside it without touching the shell.
+    ##   monitor         monitor ROLE to render on, or "focused" to follow focus
+    ##   accent          Theme palette name — badge, caret, selection, keybind chip
+    ##   selectionStyle  "tint" | "fill" | "outline" | "bar" (design Tweaks)
+    ##   quickKeys       show 2..9 quick-jump numbers on rows (design Tweaks)
+    ##   width           palette width (design: 624)
+    ##   position        "center" (vertically centred) | "top" (topMargin below the edge)
+    ##   topMargin       distance from the top when position = "top" (design: 64)
+    ##   scrim           desktop dim behind the palette, 0..1. The design says 0.62,
+    ##                   which reads gently on its 1160x576 mock and heavily across
+    ##                   a real screen — lowered to 0.35.
+    ##   maxRows         rows shown before the list scrolls
+    ##   fixedHeight     keep the list at maxRows regardless of how many results
+    ##                   match. false lets the box shrink as you filter — which,
+    ##                   combined with position = "center", also makes it drift.
+    palette = {
+      monitor        = "focused";
+      accent         = "mauve";
+      selectionStyle = "fill";
+      quickKeys      = false;
+      width          = 624;
+      position       = "center";
+      topMargin      = 64;
+      scrim          = 0.35;
+      maxRows        = 8;
+      fixedHeight    = true;
+    };
+
     bars = {
       browser = {                                            # ultrawide hub — global modules
         left = [

@@ -220,19 +220,27 @@ rec {
       env = defaults.logout.env;
     }
     ## ===========================<  Launchers Manage  >==========================
+    ## The Quickshell command palette replaces rofi -show drun. Fires the
+    ## GlobalShortcut declared in quickshell qml/CommandPalette.qml.
+    ## rofi is still installed: ALT+SHIFT+V below continues to use it for the
+    ## clipboard until a clipboard mode lands in the palette.
     {
       description = "Application launcher";
       mods = mod;
       key = "Space";
-      dispatcher = "exec";
-      args = { cmd = launchers.applications.command; };
+      dispatcher = "global";
+      args = { name = "quickshell:palette"; };
     }
+    ## The palette's clipboard mode replaces `cliphist list | rofi -dmenu`.
+    ## cliphist still does capture and storage (it holds image entries, which
+    ## Quickshell's text-only clipboard API could not represent) — the palette
+    ## replaces only the picker.
     {
       description = "Clipboard launcher";
       mods = mod-shift;
       key = "V";
-      dispatcher = "exec";
-      args = { cmd = launchers.clipboard.command; };
+      dispatcher = "global";
+      args = { name = "quickshell:clipboard"; };
     }
     ## ===========================<  Default programs  >==========================
     {

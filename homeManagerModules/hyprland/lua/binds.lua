@@ -42,6 +42,9 @@ local function dispatcher(b)
   if k == "window-resize-mouse"    then return hl.dsp.window.resize() end
   if k == "window-drag"            then return hl.dsp.window.drag() end
   if k == "submap-enter"           then return hl.dsp.submap(a.submap) end
+  -- Fires a Quickshell GlobalShortcut (appid:name); the other half lives in
+  -- qml/Palette.qml. Avoids shelling out to `qs ipc`.
+  if k == "global"                 then return hl.dsp.global(a.name) end
 
   -- Fire a notification. Useful on its own, and the simplest probe for whether a
   -- bind is reaching its dispatcher at all.

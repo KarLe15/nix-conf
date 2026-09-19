@@ -51,6 +51,8 @@
         movetoworkspace         { workspace, follow ? true }   # follow = false moves silently
         resize                  { x, y }
         submap-enter            { submap }   # "reset" exits the active submap
+        global                  { name }     # fires a Quickshell GlobalShortcut,
+                                             #   e.g. "quickshell:palette"
 
         KEY vs KEYCODE: `key` is resolved as an XKB keysym, so it is layout
         dependent. This host is AZERTY (`input.kb_layout = "fr"`), where the

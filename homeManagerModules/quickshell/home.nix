@@ -44,6 +44,17 @@ let
          + ''"showDevice": ${lib.boolToString osd.showDevice}, ''
          + ''"icons": ({ ${osdIcons} }) })'';
 
+  ## Command palette config (see the quickshell style preset). Named paletteCfg
+  ## because `palette` already means the Catppuccin colour palette below.
+  paletteCfg = quickshellStyle.palette;
+  paletteQml = ''({ "monitor": "${paletteCfg.monitor}", "accent": "${paletteCfg.accent}", ''
+             + ''"selectionStyle": "${paletteCfg.selectionStyle}", ''
+             + ''"quickKeys": ${lib.boolToString paletteCfg.quickKeys}, ''
+             + ''"width": ${toString paletteCfg.width}, "position": "${paletteCfg.position}", ''
+             + ''"topMargin": ${toString paletteCfg.topMargin}, ''
+             + ''"scrim": ${toString paletteCfg.scrim}, "maxRows": ${toString paletteCfg.maxRows}, ''
+             + ''"fixedHeight": ${lib.boolToString paletteCfg.fixedHeight} })'';
+
   ## Catppuccin palettes keyed by flavor. Only flavors selectable by a theme preset
   ## need to exist here. Hex values match the ones used in the Waybar style.css asset
   ## so Quickshell and Waybar stay visually identical during the coexistence phase.
@@ -195,6 +206,9 @@ let
         // Multimedia OSD: target monitor role, variant, accent, timing, glyphs.
         readonly property var osd: ${osdQml}
 
+        // Command palette: presentation + behaviour knobs.
+        readonly property var palette: ${paletteQml}
+
         // Per-screen bar composition, keyed by role. Each zone lists widget entries
         // dispatched by qml/widgets/WidgetSlot.qml. Generated from the barsLayout
         // preset in home.nix. (Parenthesised so QML reads it as an object literal.)
@@ -254,6 +268,7 @@ in
       "quickshell/shell.qml".source   = ./qml/shell.qml;
       "quickshell/Bar.qml".source   = ./qml/Bar.qml;
       "quickshell/Osd.qml".source   = ./qml/Osd.qml;
+      "quickshell/CommandPalette.qml".source = ./qml/CommandPalette.qml;
       "quickshell/widgets".source   = ./qml/widgets;
       "quickshell/scripts".source   = ./scripts;
       "quickshell/assets/profile.jpg".source = quickshellStyle.profile-image;

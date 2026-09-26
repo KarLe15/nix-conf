@@ -132,6 +132,7 @@
         unstable-nixpkgs.opencode
         unstable-nixpkgs.claude-code
         unstable-nixpkgs.claude-monitor
+        unstable-nixpkgs.herdr # Agent multiplexer in the terminal
         unstable-nixpkgs.spec-kit # Spec driven developpment # https://github.com/github/spec-kit
       ];
     in

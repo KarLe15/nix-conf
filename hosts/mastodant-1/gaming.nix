@@ -67,6 +67,9 @@
   hardware.xone.enable = true;           # Xbox One/Series controllers
   hardware.xpadneo.enable = true;        # Xbox Wireless controller
 
+  # Thrustmaster T248 — out-of-tree FFB driver (hid-tmff2) + Oversteer
+  software.modules.thrustmaster-wheel.enable = true;
+
   # Fonts for games (some games need Windows fonts)
   fonts.packages = with pkgs; [
     corefonts              # Microsoft fonts

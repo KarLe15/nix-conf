@@ -49,6 +49,13 @@
         description = "Enable the Zed editor Home Manager module.";
       };
     };
+    neovim = {
+      enable = lib.mkOption {
+        type    = lib.types.bool;
+        default = false;
+        description = "Enable the Neovim (nvf) Home Manager module.";
+      };
+    };
     rofi = {
       enable = lib.mkOption {
         type    = lib.types.bool;

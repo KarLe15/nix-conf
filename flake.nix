@@ -37,6 +37,12 @@
       url = "github:theCapypara/nix-jetbrains-plugins";
     };
 
+    ## nvf :: declarative Neovim configuration framework (follows nixpkgs)
+    nvf = {
+      url = "github:NotAShelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       # IMPORTANT: we're using "libgbm" and is only available in unstable so ensure
@@ -49,7 +55,7 @@
   outputs = {
     self, nixpkgs, nixpkgs-darwin, darwin, home-manager,
     ragenix, stylix, catppuccin, base16utils,
-    nix-jetbrains-plugins, zen-browser, quickshell,
+    nix-jetbrains-plugins, zen-browser, quickshell, nvf,
     ...
   }@flakeInputs :
     let
@@ -68,6 +74,7 @@
             catppuccin.homeModules.catppuccin
             ragenix.homeManagerModules.default
             zen-browser.homeModules.twilight-official
+            nvf.homeManagerModules.default
             ## TODO :: 06/04/2024 :: Home-Manager module not merged into home-manager repo
             ## Using Custom Home-manager module defined by KarLe
           ];

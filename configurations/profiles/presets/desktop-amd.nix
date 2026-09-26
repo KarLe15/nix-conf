@@ -50,6 +50,7 @@
   # IDE
   software.modules.jetbrains.enable       = true;
   software.modules.zed.enable             = true;
+  software.modules.neovim.enable          = true;
   # Browsers
   software.modules.brave.enable           = true;
   software.modules.zen-browser.enable     = true;

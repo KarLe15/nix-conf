@@ -24,6 +24,7 @@ They do **not** declare NixOS options for preset selection — that is handled b
 | [`fish`](fish/) | active | Shell — aliases, direnv, starship init |
 | [`starship`](starship/) | active | Shell prompt |
 | [`zed`](zed/) | active | Zed editor |
+| [`neovim`](neovim/) | active | Neovim via nvf — kickstart.nvim feature set, stylix-themed |
 | [`zellij`](zellij/) | active | Terminal multiplexer |
 | [`git-accounts`](git-accounts/) | active | Multi-account SSH + git configuration |
 | [`rofi`](rofi/) | active | App launcher + clipboard manager |

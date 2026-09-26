@@ -79,6 +79,7 @@ let
           hypridle
           wleave
           zed
+          neovim
           rofi
           swaync
           avizo

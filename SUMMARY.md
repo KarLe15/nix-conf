@@ -154,6 +154,7 @@ Located in `homeManagerModules/`. Each module follows `default.nix → home.nix`
 | `starship` | Prompt (base16 color palette, rich VCS + language segments) |
 | `zellij` | Terminal multiplexer (stylix-themed) |
 | `zed` | Editor (nix/toml/rust extensions, direnv, stylix-themed) |
+| `neovim` | Editor via nvf (kickstart.nvim feature set, LSP from nixpkgs, stylix-themed) |
 | `jetbrains` | JetBrains IDEs (stub — `nix-jetbrains-plugins` flake ready) |
 
 ### Global Packages (selected)
@@ -161,7 +162,7 @@ Located in `homeManagerModules/`. Each module follows `default.nix → home.nix`
 **Wayland ecosystem**: hyprpaper, waybar, rofi, wleave, avizo, swaynotificationcenter
 **Clipboard/Screenshot**: cliphist, wl-clipboard, grim, slurp, satty
 **Audio**: easyeffects, overskride
-**Editors**: neovim, helix, vscodium, zed-editor
+**Editors**: helix, vscodium, zed-editor (nvim comes from the nvf-wrapped `neovim` module)
 **TUI**: yazi, zellij, gitui, btop, htop, zenith, fastfetch
 **Dev tools**: ripgrep, nil, nixd, mongodb-compass, bruno, devenv, direnv
 **AI tools** (unstable): ollama-rocm, opencode, claude-code, claude-monitor, spec-kit

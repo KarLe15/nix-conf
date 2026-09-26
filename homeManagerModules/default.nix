@@ -28,6 +28,7 @@
     ./starship
     ./zellij
     ./zed
+    ./neovim
     ./jetbrains
     ./wayland-desktop
     ./quickshell
@@ -83,8 +84,10 @@
 
         git
         ## terminal editors
+        ## INFO :: nvim comes from the nvf-wrapped package installed by
+        ## homeManagerModules/neovim; do not add bare `neovim` here or it
+        ## would shadow the wrapper on PATH.
         vim
-        neovim
         helix
 
         ## Terminals

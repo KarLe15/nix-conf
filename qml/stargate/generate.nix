@@ -4,8 +4,11 @@
 ##  Both consumers of the shared tree — the SDDM greeter (nixosModules/sddm-stargate)
 ##  and the lock screen (homeManagerModules/quickshell-lock) — render the same two
 ##  singletons from the same presets, so the gate looks identical whether the machine
-##  is cold or merely idle. Keeping one renderer here is what guarantees that; two
-##  copies of the palette would drift.
+##  is cold or merely idle. Keeping one renderer here is what guarantees that.
+##
+##  The palette itself lives in qml/palette.nix, shared with the bar and the
+##  notification server (qml/shell/generate.nix) — it used to be a second copy of the
+##  same table here, which is exactly the drift this file warns about.
 ##
 ##  Usage:
 ##    let gen = import ../../qml/stargate/generate.nix {
@@ -19,31 +22,13 @@
 { lib, style, theme, fonts }:
 
 let
-  ## Catppuccin palettes keyed by flavor. Hex values match the ones the quickshell
-  ## module renders into its own Theme.qml — the greeter, the lock and the bar must
-  ## agree on every colour.
-  palettes = {
-    macchiato = {
-      rosewater = "#f4dbd6"; flamingo = "#f0c6c6"; pink     = "#f5bde6";
-      mauve     = "#c6a0f6"; red      = "#ed8796"; maroon   = "#ee99a0";
-      peach     = "#f5a97f"; yellow   = "#eed49f"; green    = "#a6da95";
-      teal      = "#8bd5ca"; sky      = "#91d7e3"; sapphire = "#7dc4e4";
-      blue      = "#8aadf4"; lavender = "#b7bdf8";
-      text      = "#cad3f5"; subtext1 = "#b8c0e0"; subtext0 = "#a5adcb";
-      overlay2  = "#939ab7"; overlay1 = "#8087a2"; overlay0 = "#6e738d";
-      surface2  = "#5b6078"; surface1 = "#494d64"; surface0 = "#363a4f";
-      base      = "#24273a"; mantle   = "#1e2030"; crust    = "#181926";
-    };
-  };
+  ## The palette is shared with the bar and the notification server — see
+  ## qml/palette.nix. The greeter, the lock and the bar must agree on every colour,
+  ## and one table is what guarantees it.
+  pal     = import ../palette.nix { inherit lib; };
+  palette = pal.forFlavor "stargate" theme.flavor;
 
-  palette = palettes.${theme.flavor}
-    or (throw "stargate: no Catppuccin palette defined for theme flavor '${theme.flavor}'");
-
-  paletteProps = lib.concatStringsSep "\n" (
-    lib.mapAttrsToList
-      (name: hex: "    readonly property color ${name}: \"${hex}\"")
-      palette
-  );
+  paletteProps = pal.props palette;
 
   ## Render an attrset of Nix scalars as a QML object literal. Parenthesised so QML
   ## reads it as an object, not a statement block.

@@ -5,6 +5,25 @@ let
 
   configDir = "$HOME/.config/quickshell-notify";
 
+  fonts = customConfigs.styleConfigs.fonts.apply { inherit pkgs; };
+  theme = customConfigs.styleConfigs.themes.apply { inherit pkgs; };
+
+  ## The same Theme the bar renders, from the same generator — a toast must not be a
+  ## different shade of mantle than the bar it appears under. Config.qml is
+  ## deliberately not shared: the bar's carries its per-screen layout, and this
+  ## instance will carry the notification preset (docs/NOTIFICATIONS.md D1).
+  shellTheme = import ../../qml/shell/generate.nix { inherit lib theme fonts; };
+
+  ## xdg.configFile cannot mix a source directory with a generated file, so the tree
+  ## is merged in the store first — the same shape quickshell-lock uses.
+  notifyTree = pkgs.runCommand "quickshell-notify-qml" { } ''
+    mkdir -p $out
+    cp -r ${./qml}/. $out/
+    chmod -R u+w $out   # store copies come in read-only, incl. the directories
+
+    cp ${pkgs.writeText "Theme.qml" shellTheme.themeQml} $out/Theme.qml
+  '';
+
   ## Phase 1 runs on a throwaway session bus, where org.freedesktop.Notifications is
   ## unowned while WAYLAND_DISPLAY still reaches the real monitors — so the server
   ## under development never contends with the swaync that is serving real
@@ -63,7 +82,7 @@ in
     ## leaves with it.
     home.packages = [ devWrapper sendWrapper pkgs.libnotify ];
 
-    xdg.configFile."quickshell-notify".source = ./qml;
+    xdg.configFile."quickshell-notify".source = notifyTree;
 
     ## No systemd.user.services block, on purpose. Enabling this module installs an
     ## inert config directory and three commands; nothing starts at login and nothing

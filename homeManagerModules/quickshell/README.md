@@ -53,7 +53,7 @@ What the real widgets do:
 - **presence / idle / notifications** — read-only `MirrorPill`s on the hub bar that
   echo that same state. No click targets: the popover is the only place any of it
   changes. The notification pill hides itself when the count is zero.
-- **action** — icon-only pill that runs a shell command detached (Home / Downloads
+- **action** — icon-only pill that runs a shell command through `uwsm app` (Home / Downloads
   shortcuts, built from the repo's default file explorer).
 
 Anything else in the layout renders as a **`StubPill`**: a design placeholder with no
@@ -103,7 +103,7 @@ Each zone entry is an attrset dispatched by `qml/widgets/WidgetSlot.qml`:
 | `icon` | Nerd Font codepoint, hex without the backslash — serialized as `\uXXXX` |
 | `label` | Text beside the glyph |
 | `color` | `Theme` palette name (`peach`, `sapphire`, …) |
-| `command` | Shell command for `w = "action"`, run detached via `Quickshell.execDetached` |
+| `command` | Shell command for `w = "action"`, launched via `uwsm app` into its own scope |
 | `compact` | Clock shows time only |
 | `dashed` | Stub drawn with a dashed ring (conditional pills) |
 
@@ -269,7 +269,7 @@ the compositor slides an edge-overflowing popover back on screen. Sizes come fro
 | `qml/widgets/AvatarPanel.qml` | `Popover` under the avatar; passes its visibility down to gate the Wi-Fi scanner |
 | `qml/widgets/AvatarPanelView.qml` | Control-centre body — identity, presence switch, idle inhibitor + chips, network (variant 10b), facts |
 | `qml/widgets/MirrorPill.qml` | Read-only hub-bar echo of presence / idle / notification count — no actions |
-| `qml/widgets/LaunchButton.qml` | Icon-only action pill — runs the entry's `command` detached (Home / Downloads shortcuts) |
+| `qml/widgets/LaunchButton.qml` | Icon-only action pill — runs the entry's `command` via `uwsm app` (Home / Downloads shortcuts) |
 | `qml/widgets/Clock.qml` | Left clock island + calendar trigger (`compact` = time only) |
 | `qml/widgets/CalendarPopup.qml` | `PopupWindow` anchored under the clock |
 | `qml/widgets/CalendarView.qml` | Month calendar body (Monday-first, today/weekend/other-month states) |

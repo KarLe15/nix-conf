@@ -156,7 +156,7 @@ exports a `bars` attrset keyed by monitor **role** (`code` / `terminal` / `brows
 | `icon` | Nerd Font codepoint (hex, no backslash) — serialized as `\uXXXX` |
 | `label` | Text beside the glyph |
 | `color` | `Theme` palette name (`peach`, `sapphire`, …) |
-| `command` | Shell command for `w = "action"` — run detached |
+| `command` | Shell command for `w = "action"` — launched via `uwsm app` |
 | `compact` | Clock shows time only (no date) |
 | `dashed` | Stub drawn with a dashed ring (conditional pills) |
 
@@ -244,6 +244,37 @@ and `popoverRadius` (the last shared with every panel body's `radius`).
 > statement, **not** the `//@ pragma Singleton` *comment*. With the comment form the
 > engine registers `Theme`/`Config` as bare types and every property reads `undefined`.
 > Verified headlessly with `QT_QPA_PLATFORM=offscreen qs -p <dir>` before rebuilding.
+
+### Launching apps (`uwsm app`, not `execDetached`)
+
+Anything the shell starts that is meant to outlive it goes through `uwsm app`:
+
+| Call site | Command |
+|---|---|
+| `qml/widgets/LaunchButton.qml` | `uwsm app -a <binary> -- sh -c "<preset command>"` |
+| `qml/CommandPalette.qml` (apps mode) | `uwsm app -- <entry.id>.desktop` |
+
+`Quickshell.execDetached` is `QProcess::startDetached`, which detaches from the
+*parent process* — no zombie, and the child survives quickshell exiting. It does
+**not** leave the cgroup: cgroup membership is inherited across `fork`, so the child
+stays in `quickshell.service`, and `KillMode=mixed` SIGKILLs everything left there
+on stop. Every rebuild restarts the unit, so every app launched from the bar or the
+palette died with it. `DesktopEntry.execute()` is the same call underneath, so the
+palette was not exempt.
+
+`uwsm app` puts each app in its own `app-<name>-<id>.scope` under
+`app-graphical.slice` — the same place `homeManagerModules/hyprland` has always put
+keybind launches (`uwsm app --` on every `exec` dispatcher), which is why apps
+started from a keybind survived a rebuild and apps started from the shell did not.
+It resolves a Desktop Entry ID itself, honouring `Terminal=` and `TryExec=`, so the
+palette passes the id rather than a parsed command. The `-a` on the action pills
+exists only because their preset quoting still needs `sh -c`, and without it every
+scope would be named `app-sh-<id>.scope`.
+
+Short-lived one-shots (`swaync-client` in `Presence.qml`, `hyprctl` in
+`SessionPill.qml`, `cliphist` in the palette) stay on plain `execDetached`/`Process`
+— they finish in milliseconds and own no window.
+
 
 ### Presence, idle and network (the avatar control centre)
 

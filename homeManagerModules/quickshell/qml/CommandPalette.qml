@@ -43,8 +43,9 @@ PanelWindow {
     property int index: 0
 
     // ---- modes -------------------------------------------------------------
-    // Apps: backed by Quickshell's DesktopEntries, so launching is entry.execute()
-    // rather than a shell-out. noDisplay entries are hidden, as in any launcher.
+    // Apps: backed by Quickshell's DesktopEntries, so the search reads real entry
+    // metadata rather than a shell-out. noDisplay entries are hidden, as in any
+    // launcher. Launching goes through `uwsm app` — see `activate` below.
     readonly property var appsMode: ({
         id: "apps",
         badge: "Apps",
@@ -88,7 +89,17 @@ PanelWindow {
                                                  : a.title.localeCompare(b.title));
             return out;
         },
-        activate: function (row) { if (row && row.entry) row.entry.execute(); }
+        // Not entry.execute(): that is execDetached under the hood, which detaches
+        // from the *process* but leaves the child in this unit's cgroup, where
+        // `KillMode=mixed` SIGKILLs it every time a rebuild restarts the shell.
+        // `uwsm app` gives it its own scope under app-graphical.slice instead — the
+        // same treatment the Hyprland keybinds already get. It resolves the entry
+        // itself, so the desktop id is all it needs (Terminal=, TryExec= and the
+        // rest still apply); Quickshell's `id` is the basename with no suffix.
+        activate: function (row) {
+            if (row && row.entry)
+                Quickshell.execDetached(["uwsm", "app", "--", row.entry.id + ".desktop"]);
+        }
     })
 
     // ---- clipboard mode ----------------------------------------------------

@@ -1,23 +1,11 @@
 import QtQuick
-import Quickshell
-import "root:/"
 
-// Drop-down control centre, anchored under the bar avatar (Avatar Widget · 9b).
-// Like the other popovers, the PopupWindow positioning needs the live compositor;
-// AvatarPanelView carries the whole body and is validated headlessly.
-PopupWindow {
+// Drop-down control centre under the bar avatar (Avatar Widget · 9b). Popover carries
+// the anchor, the gap and the arrow; the PopupWindow positioning needs the live
+// compositor, while AvatarPanelView holds the whole body and is validated headlessly.
+Popover {
     id: popup
-    property Item anchorItem
-
-    anchor.item: anchorItem
-    anchor.edges: Edges.Bottom
-    anchor.gravity: Edges.Bottom
-    anchor.margins.top: 6
-
-    implicitWidth: view.implicitWidth
-    implicitHeight: view.implicitHeight
-    color: "transparent"
-    visible: Popovers.active === popup
+    body: view
 
     AvatarPanelView {
         id: view

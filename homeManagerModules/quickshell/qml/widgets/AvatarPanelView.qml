@@ -24,7 +24,7 @@ Rectangle {
     color: Theme.mantle
     border.color: Theme.surface
     border.width: 1
-    radius: 16
+    radius: Theme.popoverRadius
     implicitWidth: inner + 32
     implicitHeight: layout.implicitHeight + 32
 

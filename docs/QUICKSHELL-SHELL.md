@@ -95,27 +95,28 @@ homeManagerModules/quickshell/
     ├── CommandPalette.qml      # command palette — apps + clipboard modes
     └── widgets/
         ├── WidgetSlot.qml      # dispatches one layout entry to its widget
+        ├── Popover.qml         # shared popover chrome — gap under the bar + arrow at the trigger
         ├── StubPill.qml        # design stub for not-yet-built modules
         ├── SessionPill.qml     # active workspace session + the open ones
         ├── SubmapPill.qml      # active Hyprland submap
         ├── Avatar.qml          # bar avatar trigger (disc + click)
         ├── AvatarDisc.qml      # the disc itself — photo masked into a circle, presence ring
-        ├── AvatarPanel.qml     # PopupWindow under the avatar
+        ├── AvatarPanel.qml     # Popover under the avatar
         ├── AvatarPanelView.qml # control centre — identity, presence, idle, network, facts
         ├── MirrorPill.qml      # read-only hub-bar echo of presence / idle / notifications
         ├── LaunchButton.qml    # icon-only pill that runs a command
         ├── Clock.qml           # clock island + calendar trigger
-        ├── CalendarPopup.qml   # PopupWindow under the clock
+        ├── CalendarPopup.qml   # Popover under the clock
         ├── CalendarView.qml    # month calendar body
         ├── Workspaces.qml      # workspace pills (Hyprland-driven)
         ├── SystemModule.qml    # adaptive context pill + panel trigger
-        ├── SystemPanel.qml     # PopupWindow under the system pill
+        ├── SystemPanel.qml     # Popover under the system pill
         ├── SystemPanelView.qml # adaptive panel body (per-context)
         ├── Sparkline.qml       # Canvas area+line chart
         ├── SysTemp.qml         # CPU + GPU temperature pill
         ├── Network.qml         # upload / download rate pills
         ├── VolumeBluetooth.qml # volume + Bluetooth pill + panel trigger
-        ├── VolumeBtPanel.qml   # PopupWindow under the volume pill
+        ├── VolumeBtPanel.qml   # Popover under the volume pill
         ├── VolumeBtPanelView.qml # audio + Bluetooth control body
         ├── OsdCard.qml / OsdRing.qml / OsdNotch.qml # the three OSD variants
         └── PaletteRow.qml      # mode-agnostic command-palette row
@@ -203,7 +204,7 @@ directly (live objects, no polling at all).
 volume/Bluetooth, avatar control centre), giving them two behaviours raw
 `PopupWindow`s lack:
 
-- **one-open-at-a-time** — each popup binds `visible: Popovers.active === <self>`, so
+- **one-open-at-a-time** — `qml/widgets/Popover.qml` binds `visible: Popovers.active === <self>`, so
   opening one closes any other;
 - **click-outside dismiss** — a `HyprlandFocusGrab` covers the open popover *and every
   registered bar*. Including the bars means clicking another chip is not an
@@ -211,6 +212,33 @@ volume/Bluetooth, avatar control centre), giving them two behaviours raw
   the grab eating the first click.
 
 Each `Bar` registers itself on completion and unregisters on destruction.
+
+### Popover chrome (gap + arrow)
+
+`qml/widgets/Popover.qml` wraps the four drop-downs so the gap and the arrow are
+written once. It carries the anchor, the `Popovers` visibility binding, and:
+
+- **The gap.** `anchor.margins` cannot produce one: Quickshell applies margins with
+  `rect.marginsRemoved(...)` on the *anchor rectangle* (`src/core/popupanchor.cpp`),
+  so `margins.top` trims the top of the bar's rect and leaves the bottom edge the
+  popup hangs from exactly where it was — which is why the old `margins.top: 6` did
+  nothing. Instead the window is `Theme.popoverGap` taller than its body and the
+  body is pushed down by that much; the strip above it is masked out of the window,
+  so a click there reaches the desktop and dismisses the popover.
+- **The arrow.** A `Canvas` notch that continues the panel's `mantle` fill and
+  `surface` border, drawn one pixel into the panel so the border underneath it is
+  covered.
+- **Arrow alignment.** The arrow follows the *trigger*, not the window centre. With
+  the default `PopupAdjustment.Slide`, a popover that would overflow a screen edge
+  is slid back on: the avatar sits ~120 px in but carries a 372 px panel, so its
+  window lands against the left edge and a centred arrow would miss the disc by
+  ~60 px. `Popover` reproduces the compositor's clamp
+  (`clamp(triggerCenter - width/2, 0, screenWidth - width)`) and places the arrow at
+  `triggerCenter - windowX`, bounded by `Theme.popoverRadius` so it never rides a
+  rounded corner.
+
+Sizes live in the generated `Theme`: `popoverGap`, `popoverArrowW`, `popoverArrowH`
+and `popoverRadius` (the last shared with every panel body's `radius`).
 
 > **Singleton gotcha (resolved).** Quickshell singletons need a real `pragma Singleton`
 > statement, **not** the `//@ pragma Singleton` *comment*. With the comment form the

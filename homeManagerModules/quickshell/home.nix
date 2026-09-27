@@ -165,6 +165,14 @@ let
         readonly property int pillRadius:  7
         readonly property int wsHeight:    36   // workspace strip + pills
         readonly property int wsRadius:    8
+
+        // Popovers (the bar's drop-downs): the gap that floats a panel clear of the
+        // bar, the arrow notch pointing back at the chip, and the panel's corners.
+        readonly property int popoverGap:    10
+        readonly property int popoverArrowW: 18
+        readonly property int popoverArrowH: 9
+        readonly property int popoverRadius: 16
+
         readonly property int fontNormal:  17   // main pill text (px)
         readonly property int fontIcon:    19   // Nerd Font glyph size (px)
     }

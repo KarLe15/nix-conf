@@ -1,23 +1,11 @@
 import QtQuick
-import Quickshell
-import "root:/"
 
-// Drop-down calendar popover, anchored just under the clock trigger. PopupWindow
-// needs a live Wayland layer-shell surface, so this can only be exercised on the
-// real desktop — the CalendarView body inside it is validated headlessly.
-PopupWindow {
+// Drop-down calendar popover under the clock trigger. Popover carries the anchor,
+// the gap and the arrow; PopupWindow needs a live Wayland surface, so this can only
+// be exercised on the real desktop — the CalendarView body is validated headlessly.
+Popover {
     id: popup
-    property Item anchorItem
-
-    anchor.item: anchorItem
-    anchor.edges: Edges.Bottom
-    anchor.gravity: Edges.Bottom
-    anchor.margins.top: 6
-
-    implicitWidth: view.implicitWidth
-    implicitHeight: view.implicitHeight
-    color: "transparent"
-    visible: Popovers.active === popup
+    body: view
 
     CalendarView { id: view }
 }

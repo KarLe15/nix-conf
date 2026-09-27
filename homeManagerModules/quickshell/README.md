@@ -216,10 +216,18 @@ journalctl --user -u quickshell -f
 
 `qml/Popovers.qml` (singleton) coordinates the drop-downs — calendar, system panel,
 volume/Bluetooth and the avatar control centre — so that only one is open at
-a time (each binds `visible: Popovers.active === <self>`), and a `HyprlandFocusGrab`
+a time (`qml/widgets/Popover.qml` binds `visible: Popovers.active === <self>`), and a `HyprlandFocusGrab`
 covering the popover **plus every registered bar** dismisses it on an outside click.
 Including the bars in the grab means clicking another chip swaps the popover in one
 click instead of the grab eating the first click.
+
+`qml/widgets/Popover.qml` is the shared chrome the four drop-downs are built on: it
+holds the anchor, the visibility binding, the gap that floats the panel clear of the
+bar (`anchor.margins` cannot make one — it shrinks the anchor rect, not the distance)
+and the arrow notch, which tracks the trigger rather than the window centre because
+the compositor slides an edge-overflowing popover back on screen. Sizes come from
+`Theme.popoverGap` / `popoverArrowW` / `popoverArrowH` / `popoverRadius`. See
+`docs/QUICKSHELL-SHELL.md` for the full reasoning.
 
 ## customConfigs dependencies
 
@@ -251,13 +259,14 @@ click instead of the grab eating the first click.
 | `qml/Idle.qml` | Singleton — keep-awake decision, selected duration and countdown; the wayland inhibitor itself lives on each `Bar` |
 | `qml/Osd.qml` | Multimedia OSD — volume/mic overlay fired by Pipewire changes (card / ring / notch variants) |
 | `qml/CommandPalette.qml` | Command palette — apps + clipboard modes, global shortcuts, exclusive keyboard focus while open |
+| `qml/widgets/Popover.qml` | Shared popover chrome — anchor, one-at-a-time visibility, the gap under the bar and the arrow pointing back at the trigger |
 | `qml/widgets/WidgetSlot.qml` | Dispatches one layout entry (`{ w, … }`) to its widget, or a `StubPill` fallback |
 | `qml/widgets/StubPill.qml` | Static design stub pill (icon/label/palette-color from layout data) for not-yet-built widgets |
 | `qml/widgets/SessionPill.qml` | Workspace-session indicator — active session + the open ones, derived from workspace ids; click to switch |
 | `qml/widgets/SubmapPill.qml` | Active-submap indicator — name from the raw Hyprland IPC `submap` event; always visible, reading "default" when none is active |
 | `qml/widgets/Avatar.qml` | Bar avatar trigger — the disc plus the click that drops the control centre |
 | `qml/widgets/AvatarDisc.qml` | The disc itself — photo (`Config.profileImage`) masked into a circle, ringed in the presence colour; reused at 52 px in the popover |
-| `qml/widgets/AvatarPanel.qml` | `PopupWindow` anchored under the avatar; passes its visibility down to gate the Wi-Fi scanner |
+| `qml/widgets/AvatarPanel.qml` | `Popover` under the avatar; passes its visibility down to gate the Wi-Fi scanner |
 | `qml/widgets/AvatarPanelView.qml` | Control-centre body — identity, presence switch, idle inhibitor + chips, network (variant 10b), facts |
 | `qml/widgets/MirrorPill.qml` | Read-only hub-bar echo of presence / idle / notification count — no actions |
 | `qml/widgets/LaunchButton.qml` | Icon-only action pill — runs the entry's `command` detached (Home / Downloads shortcuts) |

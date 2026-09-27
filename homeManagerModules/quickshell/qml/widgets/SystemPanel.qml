@@ -1,24 +1,13 @@
 import QtQuick
-import Quickshell
-import "root:/"
 
-// Drop-down system panel, anchored under the system pill. Like the calendar, the
-// PopupWindow positioning needs the live compositor; the SystemPanelView body is
-// validated headlessly.
-PopupWindow {
+// Drop-down system panel under the system pill. Popover carries the anchor, the gap
+// and the arrow; like the calendar, the PopupWindow positioning needs the live
+// compositor, while the SystemPanelView body is validated headlessly.
+Popover {
     id: popup
-    property Item anchorItem
     property var info
 
-    anchor.item: anchorItem
-    anchor.edges: Edges.Bottom
-    anchor.gravity: Edges.Bottom
-    anchor.margins.top: 6
-
-    implicitWidth: view.implicitWidth
-    implicitHeight: view.implicitHeight
-    color: "transparent"
-    visible: Popovers.active === popup
+    body: view
 
     SystemPanelView {
         id: view

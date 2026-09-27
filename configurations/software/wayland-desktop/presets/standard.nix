@@ -19,6 +19,7 @@
       pkgs.easyeffects # # Manage Inputs / Output for audio
       pkgs.overskride # # Bluetooth App
       pkgs.hyprpwcenter
+      pkgs.systemd-manager-tui # # systemd unit browser, opened from the shell's system panel
     ];
   };
 

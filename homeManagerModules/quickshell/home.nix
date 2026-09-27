@@ -38,6 +38,10 @@ let
   volumeQml = ''({ "audioManager": "${quickshellStyle.volume.audioManager}", ''
             + ''"bluetoothManager": "${quickshellStyle.volume.bluetoothManager}" })'';
 
+  ## System panel knobs — the middle-click target on the systemd status row, which
+  ## the preset takes from the default programs (already terminal-wrapped).
+  systemQml = ''({ "systemdManager": "${quickshellStyle.system.systemdManager}" })'';
+
   ## Multimedia OSD config (see configurations/style/quickshell/presets/*.nix).
   ## Icons are hex Nerd Font codepoints in the preset and emitted as \uXXXX, the
   ## same convention the bar layout uses.
@@ -259,6 +263,9 @@ let
         // output card and the Bluetooth title (the controls Waybar's wireplumber
         // and bluetooth modules carried).
         readonly property var volume: ${volumeQml}
+
+        // System panel: the systemd manager a middle-click on the status row opens.
+        readonly property var system: ${systemQml}
 
         // Command palette: presentation + behaviour knobs.
         readonly property var palette: ${paletteQml}

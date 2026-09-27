@@ -26,6 +26,7 @@
             idlemanager        :: AppDef;
             audiomanager       :: AppDef;
             bluetoothmanager   :: AppDef;
+            systemdmanager     :: AppDef;
           }
           autostart :: [ str ]
 

@@ -253,7 +253,7 @@ singleton (`qml/Launcher.qml`), which wraps `uwsm app`:
 
 | Call | Runs | Used by |
 |---|---|---|
-| `Launcher.app(command)` | `uwsm app -a <binary> -- sh -c "<command>"` | action pills, the volume popover's two middle-clicks |
+| `Launcher.app(command)` | `uwsm app -a <binary> -- sh -c "<command>"` | action pills, the three popover middle-clicks |
 | `Launcher.entry(id)` | `uwsm app -- <id>.desktop` | the command palette, apps mode |
 
 `Quickshell.execDetached` is `QProcess::startDetached`, which detaches from the

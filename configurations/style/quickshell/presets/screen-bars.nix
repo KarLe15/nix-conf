@@ -29,6 +29,13 @@
       bluetoothManager = default-programs.bluetoothmanager.command;
     };
 
+    ## System panel (System Widget · 6b).
+    ##   systemdManager  middle-click on the systemd status row; the default
+    ##                   programs already wrap it in the terminal.
+    system = {
+      systemdManager = default-programs.systemdmanager.command;
+    };
+
     ## Multimedia OSD (Volume OSD · design ids 9a/9c/9d). A transient overlay
     ## fired by volume/mic changes. `variant = "all"` renders every alternative at
     ## once for review — they occupy different thirds of the screen so they do not

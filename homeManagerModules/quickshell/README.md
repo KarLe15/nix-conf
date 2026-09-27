@@ -40,7 +40,8 @@ What the real widgets do:
 - **system** — adaptive context pill (precedence gaming → llm → container →
   standard) showing the top context's headline metric; click for a panel of CPU/MEM/
   GPU meters, net, a context hero line (top procs / model cards / container list /
-  sparklines), and systemd status.
+  sparklines), and systemd status. **Middle-click the systemd row** for the
+  systemd manager (`default-programs.systemdmanager`, terminal-wrapped).
 - **volume** — Pipewire volume/mute + connected BlueZ device; click for a control
   popover (output, volume slider, Bluetooth toggle, device list with connect/
   battery/scan). **Middle-click** the output card for the audio manager
@@ -240,10 +241,10 @@ the compositor slides an edge-overflowing popover back on screen. Sizes come fro
 | `styleConfigs.fonts`  | `.apply { pkgs } → .sansSerif.exact-name`, `.mono.exact-name` | UI + mono font families in `Theme.qml` |
 | `hardwareConfigs.monitors` | `.apply { pkgs } → .disposition` | Hub monitor, monitor names, connector→role map |
 | `styleConfigs.workspaces` | `.apply { pkgs, monitors } → .workspaces_defined`, `.sessions` | Per-monitor workspace slots/glyphs and the session banding in `Config.qml` |
-| `styleConfigs.quickshell` | `.apply { pkgs, default-programs } → .bars`, `.profile-image`, `.osd`, `.palette`, `.avatar`, `.volume` | Per-screen bar layout, avatar photo, OSD / command-palette / avatar-widget config, volume popover's audio + Bluetooth managers |
+| `styleConfigs.quickshell` | `.apply { pkgs, default-programs } → .bars`, `.profile-image`, `.osd`, `.palette`, `.avatar`, `.volume`, `.system` | Per-screen bar layout, avatar photo, OSD / command-palette / avatar-widget config, volume popover's audio + Bluetooth managers, system panel's systemd manager |
 | `softwareConfigs.powermanagement` | `.apply { pkgs } → .idleTimeouts.lockAfter` | The "sleeps after 10m" line in the avatar popover — the same schedule hypridle runs |
 | `softwareConfigs.shortcuts` | `.submaps` | Submap presentation (name/icon/colour) for the submap pill |
-| `softwareConfigs.defaults` | `.apply { pkgs }` | Passed to the quickshell preset so launch actions and the audio manager use the repo's default programs |
+| `softwareConfigs.defaults` | `.apply { pkgs }` | Passed to the quickshell preset so launch actions and the audio / Bluetooth / systemd managers use the repo's default programs |
 | `softwareConfigs.modules.quickshell.enable` | — | Gates the whole module |
 | `softwareConfigs.modules.quickshell.bars` | (attrs) | Overrides the per-screen bar layout; empty = the preset's layout |
 

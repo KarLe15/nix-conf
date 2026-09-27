@@ -18,6 +18,7 @@ in
       idlemanager         = lib.mkOption { type = appDefType; };
       audiomanager        = lib.mkOption { type = appDefType; };
       bluetoothmanager    = lib.mkOption { type = appDefType; };
+      systemdmanager      = lib.mkOption { type = appDefType; };
     };
   };
 }

@@ -1,12 +1,19 @@
 {
-  apply = { pkgs, ... }@inputs: {
+  apply = { pkgs, ... }@inputs:
+  let
+    ## The terminal every TUI entry below is wrapped in, so swapping terminals is a
+    ## single edit. `-e` is the run-this-command flag ghostty shares with kitty,
+    ## alacritty and foot; a terminal that spells it differently needs this changed.
+    terminalCommand = "ghostty";
+    inTerminal = cmd: "${terminalCommand} -e ${cmd}";
+  in {
     browser = {
       command = "firefox";
       name = "Firefox";
       package = pkgs.firefox-unwrapped;
     };
     terminal = {
-      command = "ghostty";
+      command = terminalCommand;
       name = "Ghostty";
       package = pkgs.ghostty;
     };
@@ -70,6 +77,11 @@
       command = "overskride";
       name = "Overskride";
       package = pkgs.overskride;
+    };
+    systemdmanager = {
+      command = inTerminal "systemd-manager-tui";
+      name = "systemd Manager TUI";
+      package = pkgs.systemd-manager-tui;
     };
   };
 

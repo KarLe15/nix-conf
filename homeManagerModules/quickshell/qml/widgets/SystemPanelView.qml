@@ -545,14 +545,35 @@ Rectangle {
         }
 
         // ---- systemd status (hidden for gaming — calm & glanceable) ----
+        // Middle-click opens the systemd manager (terminal-wrapped by the preset).
+        // The binding is invisible, so the row lifts on hover to hint at it — but
+        // never over the red border, which is the failed-units signal.
         Rectangle {
             visible: root.info.context !== "gaming"
             width: root.inner
             radius: 11
-            color: Theme.base
-            border.color: root.info.sysFailed > 0 ? Theme.red : Theme.surface
+            color: sysdArea.containsMouse ? Theme.surface : Theme.base
+            border.color: root.info.sysFailed > 0 ? Theme.red
+                        : sysdArea.containsMouse ? Theme.accent
+                        : Theme.surface
             border.width: 1
             implicitHeight: 46
+
+            Behavior on color { ColorAnimation { duration: 130 } }
+            Behavior on border.color { ColorAnimation { duration: 130 } }
+
+            MouseArea {
+                id: sysdArea
+                anchors.fill: parent
+                hoverEnabled: true
+                // Middle only — a left click on the row still means nothing, so it
+                // must not swallow one and look broken.
+                acceptedButtons: Qt.MiddleButton
+                onClicked: {
+                    Launcher.app(Config.system.systemdManager);
+                    Popovers.closeAll();
+                }
+            }
 
             Text {
                 anchors.left: parent.left

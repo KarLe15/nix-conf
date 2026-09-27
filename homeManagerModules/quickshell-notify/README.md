@@ -7,9 +7,10 @@ and a presence state.
 
 Design, decisions and phasing: **[docs/NOTIFICATIONS.md](../../docs/NOTIFICATIONS.md)**.
 
-> **Status: phase 1 of 9 — scaffold.** The server receives and logs. It draws
-> nothing, stores nothing, has no systemd unit, and does not touch the real session
-> bus. **swaync is still your notification daemon** and stays that way until phase 7.
+> **Status: phase 2 of 9 — toasts.** The server receives and draws the toast stack.
+> Expand/collapse motion is still rough — see the doc's *Known rough edges*.
+> It stores nothing, has no systemd unit, and does not touch the real session bus.
+> **swaync is still your notification daemon** and stays that way until phase 8.
 
 ## Why a second instance
 
@@ -63,8 +64,8 @@ confirm swaync is unaffected.
 > merely mentions the path — all of which live on the real bus. Sending to one of
 > those hits swaync and looks like it worked.
 
-Phase 1 output is one JSON line per notification on stdout, shaped like the history
-record phase 3 will write:
+Toasts appear top-right on the bottom-left screen (DP-3). Each notification also logs
+one JSON line on stdout, shaped like the history record phase 3 will write:
 
 ```json
 {"id":1,"app":"notify-send","desktopEntry":"","summary":"test","body":"body",
@@ -78,8 +79,7 @@ which is what the Focus `unless` patterns (D5) have to match.
 
 | | Arrives in |
 |---|---|
-| A `Theme.qml` — nothing is drawn yet | phase 2, which needs the bar's theme generator factored out to be shared |
-| Toasts | phase 2 |
+| The chat card (avatar + inline reply) | phase 2b |
 | History (`.jsonl`) | phase 3 |
 | Grouping | phase 4 |
 | The socket the bar reads | phase 5 |
@@ -91,8 +91,11 @@ which is what the Focus `unless` patterns (D5) have to match.
 
 | Path | Role |
 |---|---|
-| `home.nix` | Config tree, the dev wrapper, `libnotify`. No unit — see the comment there |
-| `qml/shell.qml` | `NotificationServer`, logging only |
+| `home.nix` | Config tree (Theme + Config merged in the store), the two wrappers, `libnotify`. No unit — see the comment there |
+| `qml/shell.qml` | `NotificationServer` + one `ToastStack` per screen |
+| `qml/Toasts.qml` | Singleton — what is on screen and what is queued behind it |
+| `qml/widgets/Toast.qml` | One card: two states, countdown, urgency colours |
+| `qml/widgets/ToastStack.qml` | The per-screen window; masked to the cards so the rest stays click-through |
 
 One Quickshell detail worth keeping in mind when editing `shell.qml`: a notification
 is **discarded as soon as the handler returns** unless `tracked` is set to true. An

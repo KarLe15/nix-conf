@@ -20,6 +20,9 @@
             volume        :: attrs;   # volume/Bluetooth popover — the managers a
                                       #   middle-click on the output card and the
                                       #   Bluetooth title open
+            notifications :: attrs;   # toast stack placement, timing and urgency
+                                      #   colours, read by the quickshell-notify
+                                      #   instance (see docs/NOTIFICATIONS.md)
             system        :: attrs;   # system panel — the systemd manager a
                                       #   middle-click on the status row opens
             osd           :: attrs;   # multimedia OSD placement, timing and glyphs

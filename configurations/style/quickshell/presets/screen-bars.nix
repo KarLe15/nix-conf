@@ -29,6 +29,31 @@
       bluetoothManager = default-programs.bluetoothmanager.command;
     };
 
+    ## Notifications (Notifications · 4a/4b/4c). Toasts render top-right on the
+    ## bottom-left screen; see docs/NOTIFICATIONS.md for the decisions behind these.
+    ##   monitor       monitor ROLE the toast stack renders on
+    ##   maxVisible    cards on screen at once; the rest queue
+    ##   holdMs        countdown for non-urgent cards; urgent never expires (D8)
+    ##   urgency       per-level card fill + border. Not from the mockup, which only
+    ##                 ever draws mantle — critical is a mantle/red blend rather than
+    ##                 the flat palette red, which is unreadable under body text.
+    notifications = {
+      monitor    = "code";        # DP-3, the bottom-left screen
+      accent     = "blue";        # one of the mockup's four
+      width      = 360;
+      gap        = 12;
+      radius     = 14;
+      margin     = 20;            # from the screen edges
+      maxVisible = 3;
+      holdMs     = 5000;
+      bodyLines  = 2;             # collapsed clamp; expands on hover
+      urgency = {
+        low      = { bg = "#24273a"; border = "#363a4f"; };
+        normal   = { bg = "#1e2030"; border = "#494d64"; };   # the mockup
+        critical = { bg = "#3a2531"; border = "#ed8796"; };
+      };
+    };
+
     ## System panel (System Widget · 6b).
     ##   systemdManager  middle-click on the systemd status row; the default
     ##                   programs already wrap it in the terminal.

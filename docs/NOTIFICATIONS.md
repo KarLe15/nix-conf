@@ -1,6 +1,6 @@
 # Notifications: Quickshell Notification Server
 
-**Status**: In progress — decisions settled; **phase 1 of 9 (scaffold) done**, swaync still serving
+**Status**: In progress — decisions settled; **phase 1 done, phase 2 bar one rough edge** (expand/collapse motion), swaync still serving
 **Date**: 2026-09-27
 **Would affect**: `homeManagerModules/quickshell-notify/` (**added**, phase 1),
 `homeManagerModules/quickshell/` (count pill, `Presence.qml`),
@@ -204,7 +204,7 @@ centre built to render action buttons would have nothing to draw.
 | `persistenceSupported` | false | 3 (history) | it survives leaving the screen |
 | `actionsSupported` | false | 2 (toasts) | action buttons exist and `invoke()` works |
 | `actionIconsSupported` | false | 2 (toasts) | action icons are drawn, not just labels |
-| `inlineReplySupported` | false | 2 (toasts) | a reply field exists and `sendInlineReply()` works |
+| `inlineReplySupported` | false | 2b (chat card) | a reply field exists and `sendInlineReply()` works |
 | `bodyMarkupSupported` | false | — (see below) | markup is parsed rather than shown raw |
 | `bodyHyperlinksSupported` | false | — | links are clickable |
 | `bodyImagesSupported` | false | — | inline `<img>` in the body renders |
@@ -215,7 +215,9 @@ believes it sent a reply box, nothing is drawn, and nothing reports the mismatch
 
 By phase 3 the first six rows are all true — earlier than first planned, because the
 mockup puts action buttons in the *expanded toast* (4b) and an inline reply field in
-the *chat toast* (4a), not only in the centre. The three markup rows stay false unless
+the *chat toast* (4a), not only in the centre. `image`, `actions` and `actionIcons`
+went on with the default card; `inlineReply` waits for the chat card, since nothing
+draws a reply field yet. The three markup rows stay false unless
 a real payload justifies them.
 
 **Markup gotcha, independent of the flags.** Applications send Pango markup whether or
@@ -315,6 +317,18 @@ preset already uses. The bar's mauve is deliberately not reused here.
 **Toasts render on the bottom-left screen**, always: `DP-3` at `x=0, y=1440`, whose
 role is **`code`**. Not per-notification, not follow-focus.
 
+**The countdown bar is inset by the corner radius** rather than spanning edge to edge.
+The mockup is CSS, where `overflow:hidden` clips children to the border radius; QML's
+`clip` only clips to the bounding *rectangle*, so a full-width bar on the bottom row
+visibly pokes out past both corner arcs.
+
+
+**The card currently does not animate its height** — expanding and collapsing change
+size in one step. Not a settled decision: animating it drove a compositor resize on
+every frame, and removing the animation removed the judder but left a jump that still
+does not read as smooth. See *Known rough edges*.
+
+---
 
 ## Architecture
 
@@ -504,7 +518,7 @@ throughout, and nothing user-visible changes until phase 8.
 |---|---|---|
 | **0. Spike** | ~~Server API surface; multi-instance; NDJSON write shape; push transport; private-bus dev path; design read; capture probe~~ | **Done** — see the verification log below |
 | **1. Scaffold** | ~~Module, config tree, `quickshell-notify-dev` wrapper, `NotificationServer` logging received notifications. No unit, no real-bus claim~~ | **Done (2026-09-27)** — ran under `dbus-run-session`; two `notify-send` calls logged in the D2 record shape; real bus still owned by swaync afterwards |
-| **2. Toasts** | Design 4a/4b on the `code` screen: collapsed/expanded card, countdown with hover pause, urgency backgrounds (D8), max 3 + queue. Turns on `image`, `actions`, `actionIcons`, `inlineReply` (D6) | one of each urgency; urgent stays until dismissed; hover pauses and unclamps; an app that sends actions renders them |
+| **2. Toasts** | ~~Design 4a/4b on the `code` screen: collapsed/expanded card, countdown with hover pause, urgency backgrounds (D8), max 3 + queue. Turns on `image`, `actions`, `actionIcons` (D6)~~ | **Done (2026-09-28)** — rendered on DP-3 and captured with `grim`: critical red-tinted with no countdown, normal clamped to 2 lines, low recessed. `inlineReply` deliberately still off — it waits for the chat card that draws the reply field |
 | **3. History** | Daily `.jsonl` via `FileView`, write on arrival, read today + yesterday on start, `historyDays` trim; `persistenceSupported` on | restart the dev instance mid-session; history survives; read the file by hand |
 | **4. Grouping** | Repeats collapse by `appName` within `groupWindowMs` — count badge, stack edge, expand in place. Model-level, so the centre inherits it. A richer key (stack tags, per-app rules) is a later refinement | send 3 from one app; one card, badge reads 3, expands to 3 rows | send 3 from one app; one card, badge reads 3, expands to 3 rows |
 | **5. Socket** | `SocketServer` + state frames; bar client written against the **dev** socket | two instances agree on the count; kill the dev instance → bar degrades, does not hang |
@@ -549,6 +563,50 @@ Phase 8 is the only one with a risk window, and D4 is its undo.
 | 13 | Which screen is bottom-left? | `configurations/hardware/monitors/presets/mastodant-3-screens.nix` | `DP-3` at `x=0, y=1440`, role **`code`** (`DP-1` = bottom-right/`terminal`, `HDMI-A-2` = ultrawide/`browser`) | ✓ toasts pin to `code` |
 | 14 | The design itself | read `Notifications.dc.html` (4a/4b/4c) and `Side Drawer.dc.html` from the Claude Design project | grouping, two-state toasts, countdown bars, per-app chat style with inline reply, right-edge drawer at 378 px reusing the command-palette shell | ✓ folded into *Design*; corrected D6's phasing |
 
+
+---
+
+## Known rough edges
+
+### Expand/collapse still does not feel smooth
+
+**Symptom.** Hovering a card to expand it, and unhovering to collapse, feels clunky.
+
+**Measured.** With `Behavior on implicitHeight` (130 ms) on the card, one expand
+produced **seven window resizes in 100 ms** — one per animation frame:
+
+```
+WINH 170.0 t=8267 → 196 → 216 → 229 → 236 → 240 → 241.0 t=8366
+```
+
+The card lives in a layer-shell surface whose height follows it
+(`ToastStack.implicitHeight: column.implicitHeight`), so every frame was a configure
+round-trip with the compositor.
+
+**Tried, and not good enough.** Removing the height animation brought it down to two
+changes in the same millisecond on expand and one on collapse — the judder is gone,
+but the card now *jumps* between sizes, which still does not read as smooth. This is
+the current state: one artifact traded for another.
+
+**What to try next.** Keep the animation, but stop routing it through the surface:
+
+1. Give `Toast` a `targetHeight` — the content height, unanimated — alongside an
+   animated `height`.
+2. Size the window from the sum of `targetHeight` across the visible cards, so it is
+   already at the expanded size *before* the card starts growing, and does not shrink
+   until after a collapse animation has finished (hold the peak, release on a timer
+   or on the animation's `onStopped`).
+3. The card keeps `clip: true`, so its content is revealed by the growing height.
+
+That gives one configure per transition *and* real motion. The awkward part is step 2
+— a `Repeater` does not readily expose a sum over its delegates, so the stack likely
+needs to track the cards itself (or `Toasts` holds the geometry).
+
+**Worth ruling out first:** confirm the remaining clunkiness is the resize at all.
+Pin the window to a fixed tall height, re-enable the card animation, and watch — if
+it is smooth like that, the surface resize is confirmed as the whole story; if not,
+something else (font reflow on `maximumLineCount` change, for instance) is also
+contributing.
 
 ---
 

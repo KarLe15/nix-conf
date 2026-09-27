@@ -16,6 +16,7 @@
   style.statusbar.active            = "waybar-3-screen";
   style.hyprland.active             = "mastodant-1";
   style.quickshell.active           = "screen-bars";
+  style.sddm.active                 = "stargate";
   style.workspaces.active           = "standard-3-screen";
 
   ## Software

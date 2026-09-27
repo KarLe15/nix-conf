@@ -22,6 +22,10 @@
   services.displayManager.gdm.enable = false;
   services.displayManager.sddm.enable = true;
 
+  ## Stargate greeter theme (nixosModules/sddm-stargate). The theme only takes
+  ## effect while SDDM itself is enabled above.
+  software.modules.sddm.enable = true;
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "fr";

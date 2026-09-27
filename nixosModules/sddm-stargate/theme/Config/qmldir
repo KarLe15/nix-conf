@@ -1,0 +1,8 @@
+# Singletons shared by every widget in this theme. SDDM builds one QML engine per
+# monitor, so these are per screen — nothing here crosses between views.
+#
+# Theme.qml and Config.qml are GENERATED on rebuild by
+# nixosModules/sddm-stargate/default.nix. MissionData.qml is hand-written.
+singleton Theme 1.0 Theme.qml
+singleton Config 1.0 Config.qml
+singleton MissionData 1.0 MissionData.qml

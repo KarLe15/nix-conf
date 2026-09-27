@@ -18,6 +18,7 @@ let
   themes        = import ./style/themes/types.nix            { inherit lib; };
   fonts         = import ./style/fonts/types.nix             { inherit lib; };
   cursors       = import ./style/cursors/types.nix           { inherit lib; };
+  sddm          = import ./style/sddm/types.nix              { inherit lib; };
   wallpapers    = import ./style/wallpapers/types.nix        { inherit lib; };
   defaults      = import ./software/defaults/types.nix       { inherit lib; };
   launchers     = import ./software/launchers/types.nix      { inherit lib; };
@@ -33,6 +34,7 @@ in
   // themes
   // fonts
   // cursors
+  // sddm
   // wallpapers
   // defaults
   // launchers

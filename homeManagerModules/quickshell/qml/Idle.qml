@@ -28,8 +28,10 @@ Singleton {
         return m === 0 ? "∞" : (m >= 60 ? (m / 60) + "h" : m + "m");
     }
 
-    readonly property string remainingLabel: {
-        const m = Math.ceil(idle.remaining / 60);
+    // Format a countdown as "45m" / "2h" / "1h 30m". Factored out of remainingLabel
+    // so a pill can reserve room by measuring the very strings it will later render.
+    function labelFor(seconds) {
+        const m = Math.ceil(seconds / 60);
         if (m >= 60) {
             const h = Math.floor(m / 60);
             const r = m % 60;
@@ -37,6 +39,33 @@ Singleton {
         }
         return Math.max(m, 1) + "m";
     }
+
+    readonly property string remainingLabel: idle.labelFor(idle.remaining)
+
+    // The longest string any configured hold reaches on its way down — for the 240m
+    // chip that is "3h 59m", not "4h". Walked minute by minute rather than reasoned
+    // about: the chip list is short and this runs once.
+    readonly property string widestRemainingLabel: {
+        let widest = "";
+        for (const m of idle.durations)
+            for (let n = 1; n <= m; n++) {
+                const s = idle.labelFor(n * 60);
+                if (s.length > widest.length) widest = s;
+            }
+        return widest;
+    }
+
+    // Compact state for the bar pill; the popover gets the longer `sub` instead.
+    // Three states, three short words: the countdown while a timed hold runs,
+    // "Hold" while one has no expiry to count down to, "Off" when nothing is held.
+    readonly property string pillLabel:
+          !idle.enabled    ? "Off"
+        : idle.minutes > 0 ? idle.remainingLabel
+        : "Hold"
+
+    // Everything pillLabel can ever be, so the pill reserves one width for all of
+    // them. "3h 59m" wins today; the two words are shorter and cost nothing.
+    readonly property var pillLabels: [ idle.widestRemainingLabel, "Off", "Hold" ]
 
     // When the machine would sleep on its own — hypridle's lock timeout, read from
     // the same preset the hypridle module renders.

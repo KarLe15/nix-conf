@@ -37,6 +37,14 @@ Rectangle {
             ? Theme[meta.color]
             : (active ? Theme.peach : Theme.surface)
 
+    // Every submap shares this one pill, so it reserves the widest glyph and the
+    // widest label across all of them: entering or leaving a submap recolours the
+    // pill without resizing it or shifting the glyph inside it.
+    readonly property var names: Object.keys(Config.submaps)
+
+    TextSlot { id: glyphSlot; candidates: root.names.map(k => Config.submaps[k].icon || ""); pixelSize: Theme.fontIcon }
+    TextSlot { id: labelSlot; candidates: root.names.map(k => Config.submaps[k].name || k); bold: true }
+
     radius: Theme.pillRadius
     color: root.fill
     implicitHeight: Theme.pillHeight
@@ -75,6 +83,10 @@ Rectangle {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
+            // Math.max keeps the raw-name fallback above readable: a submap with no
+            // preset entry can be wider than anything the slots measured.
+            width: Math.max(glyphSlot.widest, implicitWidth)
+            horizontalAlignment: Text.AlignHCenter
             text: root.glyph
             font.family: Theme.fontMono
             font.pixelSize: Theme.fontIcon
@@ -83,6 +95,8 @@ Rectangle {
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
+            width: Math.max(labelSlot.widest, implicitWidth)
+            horizontalAlignment: Text.AlignHCenter
             text: root.label
             font.family: Theme.fontMono
             font.pixelSize: Theme.fontNormal

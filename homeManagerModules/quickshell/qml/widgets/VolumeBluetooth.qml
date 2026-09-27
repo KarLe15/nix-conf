@@ -36,11 +36,11 @@ Rectangle {
         const w = n.split(" ")[0];
         return w.length > 5 ? w.slice(0, 5) : w;
     }
-    // The connected device's short name, or "Off" when the adapter is disabled,
-    // or "" when the adapter is on but nothing is connected.
+    // The connected device's short name, "On" when the adapter is up with nothing
+    // connected, or "Off" when it is disabled.
     readonly property string btLabel:
         !btEnabled ? "Off"
-        : (btConnected.length > 0 ? _short(btConnected[0].name || btConnected[0].deviceName) : "")
+        : (btConnected.length > 0 ? _short(btConnected[0].name || btConnected[0].deviceName) : "On")
 
     // Fixed-width slots keep the pill from resizing as the volume digits or the
     // Bluetooth label change. Sized to the widest content each slot can hold.
@@ -49,7 +49,7 @@ Rectangle {
         font.family: Theme.fontMono
         font.pixelSize: Theme.fontNormal
         font.bold: true
-        text: "100%"  // widest number; muted renders as "mute" (same width)
+        text: "100%"  // widest number; muted renders as "Mute" (same width)
     }
     TextMetrics {
         id: btMetrics
@@ -84,7 +84,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width: volMetrics.width
                 horizontalAlignment: Text.AlignLeft
-                text: root.muted ? "mute" : root.volPct + "%"
+                text: root.muted ? "Mute" : root.volPct + "%"
                 font.family: Theme.fontMono
                 font.pixelSize: Theme.fontNormal
                 font.bold: true

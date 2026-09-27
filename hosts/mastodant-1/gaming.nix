@@ -38,7 +38,8 @@
     steam-run               # Run non-NixOS binaries
     appimage-run            # Run AppImages
     piper                   # Gaming mouse configuration
-    solaar                  # Logitech device manager
+    ## solaar comes from hardware.logitech.wireless.enableGraphical below —
+    ## adding it here would install the app without its hidraw udev rules.
     # nexusmods-app-unfree    # Mod Manager (mainly for skyrim)
     ## === Additional Launchers ===
     prismlauncher           # Minecraft launcher
@@ -66,6 +67,15 @@
   # Enable Xbox controller support
   hardware.xone.enable = true;           # Xbox One/Series controllers
   hardware.xpadneo.enable = true;        # Xbox Wireless controller
+
+  # Logitech wireless peripherals (Bolt receiver 046d:c548, MX Master 3S).
+  # Installs logitech-udev-rules, whose 42-logitech-unify-permissions.rules
+  # tags the Logitech hidraw nodes with uaccess — without it Solaar cannot
+  # open /dev/hidraw* and reports no devices.
+  hardware.logitech.wireless = {
+    enable          = true;
+    enableGraphical = true;              # provides pkgs.solaar
+  };
 
   # Thrustmaster T248 — out-of-tree FFB driver (hid-tmff2) + Oversteer
   software.modules.thrustmaster-wheel.enable = true;

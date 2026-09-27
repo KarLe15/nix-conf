@@ -165,6 +165,19 @@
         '';
       };
     };
+    quickshell-notify = {
+      enable = lib.mkOption {
+        type    = lib.types.bool;
+        default = false;
+        description = ''
+          Enable the Quickshell notification server: a second quickshell instance
+          that will own org.freedesktop.Notifications, the toasts and the centre.
+          Phase 1 installs an inert config tree and a dev wrapper only — no unit,
+          no bus claim, and swaync keeps serving notifications. See
+          docs/NOTIFICATIONS.md.
+        '';
+      };
+    };
     quickshell = {
       enable = lib.mkOption {
         type    = lib.types.bool;

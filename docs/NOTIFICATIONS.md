@@ -1,8 +1,8 @@
 # Notifications: Quickshell Notification Server
 
-**Status**: Planned — architecture and decisions settled, implementation not started
+**Status**: In progress — decisions settled; **phase 1 of 8 (scaffold) done**, swaync still serving
 **Date**: 2026-09-27
-**Would affect**: `homeManagerModules/quickshell-notify/` (new),
+**Would affect**: `homeManagerModules/quickshell-notify/` (**added**, phase 1),
 `homeManagerModules/quickshell/` (count pill, `Presence.qml`),
 `configurations/software/modules/`, `configurations/style/quickshell/`,
 `homeManagerModules/swaync/` (disabled)
@@ -407,7 +407,7 @@ throughout, and nothing user-visible changes until phase 7.
 | Phase | Deliverable | Verification |
 |---|---|---|
 | **0. Spike** | ~~Server API surface; multi-instance; NDJSON write shape; push transport; private-bus dev path~~ | **Done** — see the verification log below |
-| **1. Scaffold** | Module, config tree, `quickshell-notify-dev` wrapper, `NotificationServer` logging `trackedNotifications`. No unit, no real-bus claim | runs under `dbus-run-session`; `notify-send` into it reaches the log |
+| **1. Scaffold** | ~~Module, config tree, `quickshell-notify-dev` wrapper, `NotificationServer` logging received notifications. No unit, no real-bus claim~~ | **Done (2026-09-27)** — ran under `dbus-run-session`; two `notify-send` calls logged in the D2 record shape; real bus still owned by swaync afterwards |
 | **2. Toasts** | Toast stack, per-monitor, urgency-aware (critical never auto-expires); `imageSupported` on | send one of each urgency; critical stays until dismissed |
 | **3. History** | Daily `.jsonl` via `FileView`, write on arrival, read today + yesterday on start, `historyDays` trim; `persistenceSupported` on | restart the dev instance mid-session; history survives; read the file by hand |
 | **4. Socket** | `SocketServer` + state frames; bar client written against the **dev** socket | two instances agree on the count; kill the dev instance → bar degrades, does not hang |
@@ -446,6 +446,7 @@ Phase 7 is the only one with a risk window, and D4 is its undo.
 | 7 | Hot reload as a durability route | `quickshell-lock/home.nix:56` | Home Manager symlinks into the store; the watched target never changes, so the watcher never fires. Restart is required | ✗ ruled out — see D2 |
 | 8 | Private-bus development path | `dbus-run-session` + `busctl … GetNameOwner … org.freedesktop.Notifications` | name unowned on the private bus; `WAYLAND_DISPLAY=wayland-1` survives into it | ✓ enables D3 — build with swaync still running |
 | 9 | Can a disabled swaync be auto-started? | `grep -rl org.freedesktop.Notifications` over the session D-Bus service dirs; `systemctl --user list-unit-files swaync*` | no activation file anywhere claims the name; swaync is a plain user unit (`swaync.service enabled`) | ✓ D4 is safe — disabling the module removes the unit, nothing reactivates it |
+| 10 | Capability flags gate what senders transmit | phase 1 run: `notify-send … -A reply=Reply` against the scaffold | notify-send printed *"Actions are not supported by this notifications server"* and the payload arrived with `actions: []` | ✓ D6 confirmed live — an unadvertised capability is dropped by the sender, silently |
 
 ---
 

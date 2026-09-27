@@ -33,6 +33,7 @@
     ./wayland-desktop
     ./quickshell
     ./quickshell-lock
+    ./quickshell-notify
   ];
 
   stylix.targets.gitui.enable = true;

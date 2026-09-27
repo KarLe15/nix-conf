@@ -95,7 +95,8 @@ let
           hyprland
           wayland-desktop
           quickshell
-          quickshell-lock;
+          quickshell-lock
+          quickshell-notify;
       };
     };
 

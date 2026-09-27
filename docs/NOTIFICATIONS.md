@@ -1,11 +1,12 @@
 # Notifications: Quickshell Notification Server
 
-**Status**: In progress — decisions settled; **phase 1 of 8 (scaffold) done**, swaync still serving
+**Status**: In progress — decisions settled; **phase 1 of 9 (scaffold) done**, swaync still serving
 **Date**: 2026-09-27
 **Would affect**: `homeManagerModules/quickshell-notify/` (**added**, phase 1),
 `homeManagerModules/quickshell/` (count pill, `Presence.qml`),
 `configurations/software/modules/`, `configurations/style/quickshell/`,
 `homeManagerModules/swaync/` (disabled)
+**Design**: Claude Design project → `Notifications.dc.html` (4a/4b/4c), `Side Drawer.dc.html` (3a/3b)
 **Related**: [QUICKSHELL-SHELL.md](QUICKSHELL-SHELL.md) (stage 4),
 [MASTODANT-SYSD.md](MASTODANT-SYSD.md) (the client/server pattern this mirrors),
 [SHELL-BACKEND.md](SHELL-BACKEND.md) (the scoping principle)
@@ -48,8 +49,10 @@ no new compiled daemon.
 | D2 | Durability | **Both halves: separate process (restart gap) + daily NDJSON files (history).** | They solve different failures — see the table below. Storage is JSON-lines rather than SQLite because the history is destined for an **ETL to a NAS** (ElasticSearch or similar) for analysis: one self-contained record per line ships without reshaping, and completed daily files are immutable ETL input. SQLite was verified working (Verification 4) and rejected on shape, not capability. |
 | D3 | Cutover | **Build on a private bus; flag day last.** Develop the whole thing under `dbus-run-session`, where the notification name is unowned and `WAYLAND_DISPLAY` still works — toasts render on the real screens while swaync keeps serving the real bus. `software.modules.swaync.enable = false` lands in the same rebuild that first enables the `quickshell-notify` unit, once toasts, centre and history all work. | Only one process may own `org.freedesktop.Notifications` per session bus, so the two cannot coexist on the real one (Verification 8). Claiming it early would mean living without a working notification system for the length of the build, where every bug is a notification you never saw. |
 | D4 | Rollback | Keep the swaync module **present but disabled** until the centre is solid. Deep clean of unused modules is a later, separate pass. | A broken server means *no notifications at all*, silently. Re-enabling must be a one-line revert. Safe to leave installed: swaync ships **no D-Bus activation file** (Verification 9), so a disabled unit cannot be auto-started into a name fight with the new server. |
-| D5 | Presence / Focus | **Three distinct behaviours** — Available: all toasts; Focus: `focusMutes` denylist with per-app regex `unless` exceptions; DND: silence except `urgency = critical`. The shell ships the **matcher**; `focusMutes` starts empty and the rules are written by hand. In every state the notification still reaches the centre and the history. `Presence.qml` stops shelling to `swaync-client` and reads the new instance. See *Presence rules* below. | A native server sees `appName`/`desktopEntry`/`summary` before anything is drawn, so Focus can suppress the *interruption* without suppressing the *record*. Today Focus and DND are the same `swaync-client -dn` with different labels. |
-| D6 | Advertised capabilities | **Each flag is flipped in the same commit that implements its rendering** — image at phase 2, persistence at 3, actions/actionIcons/inlineReply at 5. Full set by phase 7; the three markup flags stay off. See *Advertised capabilities* below. | Quickshell defaults nearly everything to false, so this is not just about persistence: `actionsSupported: false` means apps never send actions and the centre has nothing to render. Each flag is a promise to senders, and breaking one fails silently — the app believes it sent a reply box and nothing is drawn. |
+| D5 | Presence / Focus | **Three distinct behaviours** — Available: all toasts; Focus: `focusMutes` denylist with per-app regex `unless` exceptions; DND: silence except the D8 urgent set. The shell ships the **matcher**; `focusMutes` starts empty and the rules are written by hand. In every state the notification still reaches the centre and the history. `Presence.qml` stops shelling to `swaync-client` and reads the new instance. See *Presence rules* below. | A native server sees `appName`/`desktopEntry`/`summary` before anything is drawn, so Focus can suppress the *interruption* without suppressing the *record*. Today Focus and DND are the same `swaync-client -dn` with different labels. |
+| D6 | Advertised capabilities | **Each flag is flipped in the same commit that implements its rendering** — image, actions, actionIcons and inlineReply all at phase 2, persistence at 3. Full set by phase 3; the three markup flags stay off. See *Advertised capabilities* below. | Quickshell defaults nearly everything to false, so this is not just about persistence: `actionsSupported: false` means apps never send actions and there is nothing to render. Each flag is a promise to senders, and breaking one fails silently — the app believes it sent a reply box and nothing is drawn. **Corrected after reading the mockup:** actions and inline reply live in the *toast* (4b expanded, 4a chat), not only the centre, so their flags move from phase 5 to phase 2. |
+| D7 | Screen capture | **Suppress toasts while a screencast is active**, via Hyprland's `screencast` socket2 event. No compositor-level exclusion is possible — see Verification 11. | The layer-rule validator in Hyprland 0.56.2 rejects every capture-exclusion field, so a toast cannot be hidden *from* a capture. Not drawing it at all is better anyway: the notification still lands in the centre and the history, so nothing is lost — you are simply not interrupted, and nothing leaks, mid-share. Limit, accepted: `screencast` fires for portal-based capture (OBS, browsers, meeting apps); a one-shot `grim` screenshot goes straight to wlr-screencopy and would still catch a toast — see *Deliberately deferred*. |
+| D8 | Urgency | **One `urgent` predicate, used twice.** Urgent (`urgency = critical`) ⇒ bypasses DND **and** never auto-expires. Everything else ⇒ silenced by DND, expires on the countdown. Rendered as the toast's own background and border — see *Design*. | Collapsing "what gets through DND" and "what never expires" into a single definition means the two cannot drift apart. The mockup is silent on urgency, so both the rule and the colours are decisions taken here. |
 
 ### Why both halves of D2
 
@@ -143,9 +146,13 @@ the same `swaync-client -dn` with different labels and ring colours.
 |---|---|
 | **Available** | everything |
 | **Focus** | everything except apps in `focusMutes`, minus each app's own `unless` exceptions |
-| **DND** | nothing except `urgency = critical` (system-sourced alarms) |
+| **DND** | nothing except the **urgent** set (D8) |
 
 **In all three states the notification still lands in the centre and in the history.**
+
+A fourth suppressor sits outside presence entirely: while a screencast is active no
+toast is drawn at all, whatever the presence state (D7).
+
 Presence suppresses the *interruption*, never the *record* — which is what makes
 Focus safe to leave on.
 
@@ -195,9 +202,9 @@ centre built to render action buttons would have nothing to draw.
 | `bodySupported` | **true** | — | body text is displayed |
 | `imageSupported` | false | 2 (toasts) | `image`/`appIcon` is rendered |
 | `persistenceSupported` | false | 3 (history) | it survives leaving the screen |
-| `actionsSupported` | false | 5 (centre) | action buttons exist and `invoke()` works |
-| `actionIconsSupported` | false | 5 (centre) | action icons are drawn, not just labels |
-| `inlineReplySupported` | false | 5 (centre) | a reply field exists and `sendInlineReply()` works |
+| `actionsSupported` | false | 2 (toasts) | action buttons exist and `invoke()` works |
+| `actionIconsSupported` | false | 2 (toasts) | action icons are drawn, not just labels |
+| `inlineReplySupported` | false | 2 (toasts) | a reply field exists and `sendInlineReply()` works |
 | `bodyMarkupSupported` | false | — (see below) | markup is parsed rather than shown raw |
 | `bodyHyperlinksSupported` | false | — | links are clickable |
 | `bodyImagesSupported` | false | — | inline `<img>` in the body renders |
@@ -206,8 +213,10 @@ centre built to render action buttons would have nothing to draw.
 before. Advertising a capability you do not render fails *silently* — the application
 believes it sent a reply box, nothing is drawn, and nothing reports the mismatch.
 
-By phase 7 the first six rows are all true. The three markup rows stay false unless a
-real payload justifies them.
+By phase 3 the first six rows are all true — earlier than first planned, because the
+mockup puts action buttons in the *expanded toast* (4b) and an inline reply field in
+the *chat toast* (4a), not only in the centre. The three markup rows stay false unless
+a real payload justifies them.
 
 **Markup gotcha, independent of the flags.** Applications send Pango markup whether or
 not it is advertised, and QML `Text` parses markup by default — so an unstyled body
@@ -235,6 +244,77 @@ restart cadence.
 across a QML **reload**, within one process. It does nothing across a process restart.
 
 ---
+
+## Design
+
+From the Claude Design project, `Notifications.dc.html` — surfaces **4a** (toast
+stack), **4b** (toast anatomy), **4c** (notification centre). Values below are the
+mockup's own; anything not in it is marked as a decision taken here.
+
+### 4a · Toast stack
+
+Top-right, **360 px** wide, 12 px between cards, **max 3 visible and the rest queue**.
+Card: mantle fill, `surface1` border, radius **14**, shadow `0 18px 40px rgba(0,0,0,.4)`.
+
+Three card shapes:
+
+| Shape | When |
+|---|---|
+| **Default** | any notification |
+| **Chat** | per-app rule — 3 px accent stripe, circular avatar, sender name over the **app name**, and an inline **`Reply…`** field with a send arrow. The mockup reads "Signal · left screen"; the screen half is dropped — see *Deliberately deferred* |
+| **Grouped** | repeats from one app — count badge, a stack edge peeking above the card, `▾ 2 more from Signal` |
+
+A 3 px countdown bar runs along the bottom: `surface0` track, accent fill, **pauses on
+hover**.
+
+### 4b · Toast anatomy — two states
+
+*Collapsed* (default): header (app tile · name · time · ✕) → title → body **clamped to
+2 lines** → expand chevron ▾ → countdown.
+
+*Expanded* (hover or click): body unclamps, **action buttons appear** (`surface0` pills,
+radius 9), chevron flips to ▴, and the countdown freezes to a full-width grey
+(`#5b6078`) bar for as long as the pointer stays.
+
+### 4c · Notification centre
+
+The **right-edge drawer**: `top/right/bottom: 16`, width **378 px**, mantle fill,
+`surface1` border, radius 18, shadow `-34px 0 70px rgba(0,0,0,.42)`, over a
+`rgba(24,25,38,.34)` scrim.
+
+- header: "Notifications" + **Clear all** (hovers red)
+- a **Do Not Disturb** row — "Silence all alerts" + a 36×20 toggle
+- rows on `base` with `surface0` borders, radius 12; grouped rows carry the same count
+  badge and stack edge as the toast
+- footer: `↵ open` · `⌫ dismiss` · "4 notifications"
+- swipe a card to dismiss; groups expand in place
+
+> **Dependency.** The mockup says this "reuses 3a/3b drawer shell exactly" — the
+> `Side Drawer` surface, which is itself *"the command palette, re-presented as a tall
+> island docked to the right edge."* `qml/CommandPalette.qml` is already built, so the
+> centre is largely a re-presentation of an existing component rather than a new shell.
+
+### Decisions taken beyond the mockup
+
+The design is silent on urgency, on which monitor toasts use, and on screen capture.
+
+**Urgency → the toast's own background** (D8). The mockup only ever draws mantle:
+
+| Urgency | Background | Border |
+|---|---|---|
+| Low | `base` `#24273a` | `surface0` `#363a4f` |
+| Normal | `mantle` `#1e2030` (the mockup) | `surface1` `#494d64` |
+| Critical | `#3a2531` — mantle tinted red | `red` `#ed8796` |
+
+Critical is a blend rather than the flat palette red, which at full strength makes body
+text hard to read.
+
+**Accent is `blue`** (`#8aadf4`) — one of the four the mockup offers, and what the OSD
+preset already uses. The bar's mauve is deliberately not reused here.
+
+**Toasts render on the bottom-left screen**, always: `DP-3` at `x=0, y=1440`, whose
+role is **`code`**. Not per-notification, not follow-focus.
+
 
 ## Architecture
 
@@ -350,10 +430,20 @@ Preset additions in `configurations/style/quickshell/presets/screen-bars.nix`:
 
 ```nix
 notifications = {
-  monitor    = "code";        # monitor ROLE the toasts render on (open question)
+  ## Placement (Design 4a). Always the bottom-left screen — DP-3 at x=0,y=1440,
+  ## whose role is "code". Not per-notification, not follow-focus.
+  monitor    = "code";
   placement  = "top-right";
-  holdMs     = 5000;          # urgency-normal; critical never auto-expires
-  maxVisible = 3;
+  accent     = "blue";        # #8aadf4 — one of the mockup's four
+  width      = 360;
+  gap        = 12;
+  radius     = 14;
+  maxVisible = 3;             # the rest queue
+  holdMs     = 5000;          # countdown for non-urgent; urgent never expires (D8)
+
+  ## Repeats from one app collapse into a group card (Design 4a/4c). Grouped by
+  ## appName alone for now — see *Deliberately deferred*.
+  groupWindowMs = 30000;      # arrivals closer than this group together
 
   historyDays        = 30;    # daily .jsonl files kept before deletion
   historyIncludeBody = false; # bodies carry message contents — opt in (D2)
@@ -363,8 +453,13 @@ notifications = {
   ## Ships empty; rules are written by hand. Shape:
   ##   { app = "Slack"; unless = [ "#deploys" "#incidents" ]; }
   presence.focusMutes = [ ];
+
+  ## Per-app chat style (Design 4a) — avatar + inline reply instead of the
+  ## default card. Also by hand.
+  chatApps = [ ];
 };
 ```
+
 
 ---
 
@@ -386,13 +481,14 @@ Ordering against swaync is not needed — D3 makes them mutually exclusive.
 
 ## Widget surface
 
-Three separable pieces, in build order:
+Four separable pieces, in build order:
 
 | # | Piece | Lives in | Notes |
 |---|---|---|---|
-| 1 | **Toast stack** | notify | Per-notification popup. The OSD components (`OsdCard`, `OsdNotch`) already solve timed overlays with `holdMs`/`fadeMs` and are the closest prior art. Critical urgency must not auto-expire. |
-| 2 | **Count pill** | bar | `{ w = "notifications" }` is a `MirrorPill` today reading `Presence.count`. It keeps working — only its source changes from the swaync subscription to the socket. |
-| 3 | **Centre** | notify | The history list: per-notification actions (`invoke()`), inline reply (`sendInlineReply()`), dismiss, clear-all, DND toggle. The real work. |
+| 1 | **Toast stack** | notify | Design 4a/4b: two states per card (collapsed → expanded on hover/click), a countdown bar that pauses on hover, three card shapes (default / chat / grouped). `OsdCard` and `OsdNotch` already solve timed overlays with `holdMs`/`fadeMs` and are the closest prior art. Urgent cards never auto-expire and carry their own background (D8). |
+| 2 | **Grouping** | notify | Repeats from one app collapse into a group card — count badge, stack edge, expand in place. Appears in the toast stack **and** the centre, so it belongs to the model rather than either view: the list is no longer one row per notification. |
+| 3 | **Count pill** | bar | `{ w = "notifications" }` is a `MirrorPill` today reading `Presence.count`. It keeps working — only its source changes from the swaync subscription to the socket. |
+| 4 | **Centre** | notify | Design 4c, the right-edge drawer: grouped + single rows, actions (`invoke()`), inline reply (`sendInlineReply()`), swipe to dismiss, clear-all, DND toggle, `↵`/`⌫` keyboard. Largely a re-presentation of `qml/CommandPalette.qml` — see the dependency note under *Design*. |
 
 The avatar control centre's presence switch becomes real under D5: a preset list of
 app ids, one rule check before a toast is drawn. Everything still lands in the centre.
@@ -401,22 +497,23 @@ app ids, one rule check before a toast is drawn. Everything still lands in the c
 
 ## Roadmap
 
-Phases 1–6 run on a **private bus** (D3): swaync keeps serving real notifications
-throughout, and nothing user-visible changes until phase 7.
+Phases 1–7 run on a **private bus** (D3): swaync keeps serving real notifications
+throughout, and nothing user-visible changes until phase 8.
 
 | Phase | Deliverable | Verification |
 |---|---|---|
-| **0. Spike** | ~~Server API surface; multi-instance; NDJSON write shape; push transport; private-bus dev path~~ | **Done** — see the verification log below |
+| **0. Spike** | ~~Server API surface; multi-instance; NDJSON write shape; push transport; private-bus dev path; design read; capture probe~~ | **Done** — see the verification log below |
 | **1. Scaffold** | ~~Module, config tree, `quickshell-notify-dev` wrapper, `NotificationServer` logging received notifications. No unit, no real-bus claim~~ | **Done (2026-09-27)** — ran under `dbus-run-session`; two `notify-send` calls logged in the D2 record shape; real bus still owned by swaync afterwards |
-| **2. Toasts** | Toast stack, per-monitor, urgency-aware (critical never auto-expires); `imageSupported` on | send one of each urgency; critical stays until dismissed |
+| **2. Toasts** | Design 4a/4b on the `code` screen: collapsed/expanded card, countdown with hover pause, urgency backgrounds (D8), max 3 + queue. Turns on `image`, `actions`, `actionIcons`, `inlineReply` (D6) | one of each urgency; urgent stays until dismissed; hover pauses and unclamps; an app that sends actions renders them |
 | **3. History** | Daily `.jsonl` via `FileView`, write on arrival, read today + yesterday on start, `historyDays` trim; `persistenceSupported` on | restart the dev instance mid-session; history survives; read the file by hand |
-| **4. Socket** | `SocketServer` + state frames; bar client written against the **dev** socket | two instances agree on the count; kill the dev instance → bar degrades, does not hang |
-| **5. Centre** | The drawer: actions (`invoke()`), inline reply, dismiss, clear-all, DND toggle; `actionsSupported`, `actionIconsSupported`, `inlineReplySupported` on | round-trip an action against an app that sends them |
-| **6. Focus (D5)** | The matcher — app denylist plus per-app `unless` patterns — shipping with an **empty** `focusMutes`; `toastShown`/`suppressedBy` recorded | a hand-written rule suppresses its app; an `unless` match re-admits it; both land in the history | a muted app produces no toast but a centre row and a history line |
-| **7. Flag day** | Unit lands, swaync disabled, bar swaps off `swaync-client`, dev wrapper and `-dev` paths deleted | `notify-send` on the real bus renders; `busctl … GetNameOwner` points at the new instance; swaync gone from `systemctl --user list-units` |
-| **8. Harden** | Docs: this file → implemented; `QUICKSHELL-SHELL.md` stages 4 + 7 | headless QML checks, on-target soak |
+| **4. Grouping** | Repeats collapse by `appName` within `groupWindowMs` — count badge, stack edge, expand in place. Model-level, so the centre inherits it. A richer key (stack tags, per-app rules) is a later refinement | send 3 from one app; one card, badge reads 3, expands to 3 rows | send 3 from one app; one card, badge reads 3, expands to 3 rows |
+| **5. Socket** | `SocketServer` + state frames; bar client written against the **dev** socket | two instances agree on the count; kill the dev instance → bar degrades, does not hang |
+| **6. Centre** | Design 4c: the right-edge drawer, grouped + single rows, actions, inline reply, swipe dismiss, clear-all, DND toggle, `↵`/`⌫` | round-trip an action against an app that sends them |
+| **7. Focus + capture** | D5 matcher (app denylist + per-app `unless`) shipping with an **empty** `focusMutes`; `toastShown`/`suppressedBy` recorded; D7 screencast suppression | a hand-written rule suppresses its app; `unless` re-admits it; starting an OBS capture stops toasts and stopping it resumes them |
+| **8. Flag day** | Unit lands, swaync disabled, bar swaps off `swaync-client`, dev wrapper and `-dev` paths deleted | `notify-send` on the real bus renders; `busctl … GetNameOwner` points at the new instance; swaync gone from `systemctl --user list-units` |
+| **9. Harden** | Docs: this file → implemented; `QUICKSHELL-SHELL.md` stages 4 + 7 | headless QML checks, on-target soak |
 
-Phase 7 is the only one with a risk window, and D4 is its undo.
+Phase 8 is the only one with a risk window, and D4 is its undo.
 
 ---
 
@@ -424,7 +521,7 @@ Phase 7 is the only one with a risk window, and D4 is its undo.
 
 | Risk | Mitigation |
 |---|---|
-| Server breaks → **silent** total notification loss | D4: swaync module stays present-but-disabled; re-enable is one line. D3 keeps the build entirely off the real bus until phase 7, so this is exposure of one phase, not eight. |
+| Server breaks → **silent** total notification loss | D4: swaync module stays present-but-disabled; re-enable is one line. D3 keeps the build entirely off the real bus until phase 8, so this is exposure of one phase, not nine. |
 | The notify unit is down → notifications dropped, nothing queues them | `Restart=always`, `RestartSec=1`. The gap is the same one swaync has; it is not made worse. |
 | Schema drift bar ↔ notify | Versioned `hello` frame (mast-sysd D6 pattern); mismatch → bar degrades to `connected: false` rather than mis-rendering. |
 | Whole-file rewrite per notification (FileView has no append) | Daily rotation bounds it to one day of records. If volume ever makes this hurt, a `Process` append shell-out or SQLite (Verification 4) are both open. |
@@ -447,17 +544,24 @@ Phase 7 is the only one with a risk window, and D4 is its undo.
 | 8 | Private-bus development path | `dbus-run-session` + `busctl … GetNameOwner … org.freedesktop.Notifications` | name unowned on the private bus; `WAYLAND_DISPLAY=wayland-1` survives into it | ✓ enables D3 — build with swaync still running |
 | 9 | Can a disabled swaync be auto-started? | `grep -rl org.freedesktop.Notifications` over the session D-Bus service dirs; `systemctl --user list-unit-files swaync*` | no activation file anywhere claims the name; swaync is a plain user unit (`swaync.service enabled`) | ✓ D4 is safe — disabling the module removes the unit, nothing reactivates it |
 | 10 | Capability flags gate what senders transmit | phase 1 run: `notify-send … -A reply=Reply` against the scaffold | notify-send printed *"Actions are not supported by this notifications server"* and the payload arrived with `actions: []` | ✓ D6 confirmed live — an unadvertised capability is dropped by the sender, silently |
+| 11 | Can a layer surface be excluded from screen capture? | probed the live Hyprland 0.56.2 Lua validator field by field: `hl.layer_rule({ match = …, <field> = true })` | `blur` and `xray` accepted; `noscreenshare`, `no_screenshare`, `noscreencopy`, `no_screencopy`, `hidden`, `ignorezero` all "unknown field". Legacy `layerrule` keyword unreachable — this config uses the Lua parser | ✗ no compositor exclusion exists → D7 suppresses instead |
+| 12 | Does the compositor announce a capture? | `strings` over the Hyprland binary | socket2 emits `screencast` and `screencastv2` | ✓ D7's trigger. Portal-based capture only; a `grim` one-shot bypasses it |
+| 13 | Which screen is bottom-left? | `configurations/hardware/monitors/presets/mastodant-3-screens.nix` | `DP-3` at `x=0, y=1440`, role **`code`** (`DP-1` = bottom-right/`terminal`, `HDMI-A-2` = ultrawide/`browser`) | ✓ toasts pin to `code` |
+| 14 | The design itself | read `Notifications.dc.html` (4a/4b/4c) and `Side Drawer.dc.html` from the Claude Design project | grouping, two-state toasts, countdown bars, per-app chat style with inline reply, right-edge drawer at 378 px reusing the command-palette shell | ✓ folded into *Design*; corrected D6's phasing |
+
 
 ---
 
-## Open questions
+## Deliberately deferred
 
-- **Which monitor role** do toasts render on? The OSD preset picks `terminal`; the
-  notifications mockup may disagree. Needs the design surface checked.
-- **Critical urgency** — never auto-expire is assumed above. Confirm against the
-  `Notifications` mockup.
-- **Centre placement** — a full-height drawer (roadmap stage 6's side drawer) or a
-  right-anchored panel? Affects nothing structural; both live in the notify instance.
+Not open questions — decisions to *not* do something, recorded so they are not
+re-litigated later.
+
+| | Decision |
+|---|---|
+| **`grim` screenshots** | Accepted. D7 covers portal-based capture; a one-shot screenshot can still catch a toast. Fixing it would mean the screenshot keybind knowing about the notification server, and that coupling costs more than the case is worth. |
+| **`app · screen` in the chat card** | Dropped from the mockup. The subtitle is the **app name only**. The monitor a sending app sits on is not in the notification spec and would need a `desktopEntry` lookup against Hyprland's client list on every toast. |
+| **Group identity** | `appName` within `groupWindowMs`, and nothing cleverer. Some apps set `x-dunst-stack-tag` or reuse ids per conversation; a richer engine can come later, keyed off what the phase 1 log actually shows those apps sending. The `hints` keys are already recorded on every notification for exactly this. |
 
 ---
 
@@ -466,7 +570,7 @@ Phase 7 is the only one with a risk window, and D4 is its undo.
 **Phase 1 scaffold:** `homeManagerModules/quickshell-notify/` modelled on
 `quickshell-lock/`, the `quickshell-notify-dev` wrapper, and a `NotificationServer`
 that logs `trackedNotifications`. No unit and no real-bus claim yet — swaync keeps
-serving the real bus through phase 6, and nothing user-visible changes until D3's
-flag day at phase 7.
+serving the real bus through phase 7, and nothing user-visible changes until D3's
+flag day at phase 8.
 
 `libnotify` (`notify-send`) is not installed and is needed to drive the dev instance.

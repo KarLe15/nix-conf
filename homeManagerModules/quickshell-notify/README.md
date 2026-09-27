@@ -7,7 +7,7 @@ and a presence state.
 
 Design, decisions and phasing: **[docs/NOTIFICATIONS.md](../../docs/NOTIFICATIONS.md)**.
 
-> **Status: phase 1 of 8 — scaffold.** The server receives and logs. It draws
+> **Status: phase 1 of 9 — scaffold.** The server receives and logs. It draws
 > nothing, stores nothing, has no systemd unit, and does not touch the real session
 > bus. **swaync is still your notification daemon** and stays that way until phase 7.
 
@@ -81,10 +81,11 @@ which is what the Focus `unless` patterns (D5) have to match.
 | A `Theme.qml` — nothing is drawn yet | phase 2, which needs the bar's theme generator factored out to be shared |
 | Toasts | phase 2 |
 | History (`.jsonl`) | phase 3 |
-| The socket the bar reads | phase 4 |
-| The centre | phase 5 |
-| Focus rules | phase 6 |
-| A systemd unit, and swaync's retirement | phase 7 |
+| Grouping | phase 4 |
+| The socket the bar reads | phase 5 |
+| The centre | phase 6 |
+| Focus rules + capture suppression | phase 7 |
+| A systemd unit, and swaync's retirement | phase 8 |
 
 ## Files
 

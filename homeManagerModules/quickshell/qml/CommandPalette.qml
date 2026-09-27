@@ -89,17 +89,11 @@ PanelWindow {
                                                  : a.title.localeCompare(b.title));
             return out;
         },
-        // Not entry.execute(): that is execDetached under the hood, which detaches
-        // from the *process* but leaves the child in this unit's cgroup, where
-        // `KillMode=mixed` SIGKILLs it every time a rebuild restarts the shell.
-        // `uwsm app` gives it its own scope under app-graphical.slice instead — the
-        // same treatment the Hyprland keybinds already get. It resolves the entry
-        // itself, so the desktop id is all it needs (Terminal=, TryExec= and the
-        // rest still apply); Quickshell's `id` is the basename with no suffix.
-        activate: function (row) {
-            if (row && row.entry)
-                Quickshell.execDetached(["uwsm", "app", "--", row.entry.id + ".desktop"]);
-        }
+        // Not entry.execute(): that is execDetached under the hood, which leaves the
+        // app in this unit's cgroup to be killed on the next rebuild. Launcher hands
+        // the id to `uwsm app`, which resolves the entry itself — Terminal= and
+        // TryExec= still apply — and gives it its own scope.
+        activate: function (row) { if (row && row.entry) Launcher.entry(row.entry.id); }
     })
 
     // ---- clipboard mode ----------------------------------------------------

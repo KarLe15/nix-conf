@@ -25,6 +25,7 @@
             lockscreen         :: AppDef;
             idlemanager        :: AppDef;
             audiomanager       :: AppDef;
+            bluetoothmanager   :: AppDef;
           }
           autostart :: [ str ]
 

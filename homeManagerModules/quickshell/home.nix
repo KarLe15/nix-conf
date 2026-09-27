@@ -33,6 +33,11 @@ let
   ## preset in configurations/ — the module never reaches up into configurations/.
   quickshellStyle = customConfigs.styleConfigs.quickshell.apply { inherit pkgs default-programs; };
 
+  ## Volume/Bluetooth popover knobs — the middle-click targets on the output card
+  ## and the Bluetooth title, which the preset takes from the default programs.
+  volumeQml = ''({ "audioManager": "${quickshellStyle.volume.audioManager}", ''
+            + ''"bluetoothManager": "${quickshellStyle.volume.bluetoothManager}" })'';
+
   ## Multimedia OSD config (see configurations/style/quickshell/presets/*.nix).
   ## Icons are hex Nerd Font codepoints in the preset and emitted as \uXXXX, the
   ## same convention the bar layout uses.
@@ -250,6 +255,11 @@ let
         // Multimedia OSD: target monitor role, variant, accent, timing, glyphs.
         readonly property var osd: ${osdQml}
 
+        // Volume / Bluetooth popover: the managers a middle-click opens on the
+        // output card and the Bluetooth title (the controls Waybar's wireplumber
+        // and bluetooth modules carried).
+        readonly property var volume: ${volumeQml}
+
         // Command palette: presentation + behaviour knobs.
         readonly property var palette: ${paletteQml}
 
@@ -312,6 +322,7 @@ in
       "quickshell/Theme.qml".text     = themeQml;
       "quickshell/Config.qml".text    = configQml;
       "quickshell/Popovers.qml".source = ./qml/Popovers.qml;
+      "quickshell/Launcher.qml".source = ./qml/Launcher.qml;
       "quickshell/Sys.qml".source     = ./qml/Sys.qml;
       "quickshell/Presence.qml".source = ./qml/Presence.qml;
       "quickshell/Idle.qml".source    = ./qml/Idle.qml;

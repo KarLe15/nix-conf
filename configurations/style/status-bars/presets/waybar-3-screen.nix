@@ -4,6 +4,9 @@
     workspaces_data = {
       workspaces = workspaces.workspaces_defined;
     };
+    bluetooth_config = {
+      on-click-middle = default-programs.bluetoothmanager.command;
+    };
     wireplumber_config = {
       toggle_mute_volume_command = multimedia-programs.toggleVolume.command;
       default_sound_manager_command = default-programs.audiomanager.command;
@@ -51,9 +54,7 @@
           {
             type    = "bluetooth";
             id      = "bluetooth";
-            config  = {
-              on-click-middle = "overskride";
-            };
+            config  =  bluetooth_config;
           }
           {
             type    = "wireplumber";
@@ -167,9 +168,7 @@
           {
             type    = "bluetooth";
             id      = "bluetooth";
-            config  = {
-              on-click-middle = "overskride";
-            };
+            config  =  bluetooth_config;
           }
           {
             type    = "wireplumber";

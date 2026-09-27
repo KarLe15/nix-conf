@@ -19,6 +19,16 @@
   in {
     profile-image = ../../status-bars/assets/profile_oneill.jpg;
 
+    ## Volume / Bluetooth popover (Volume Bluetooth Widget · 8b). Both are the
+    ## middle-click controls Waybar's wireplumber and bluetooth modules carried,
+    ## taken from the default programs so there is one source of truth.
+    ##   audioManager      middle-click on the OUTPUT card
+    ##   bluetoothManager  middle-click on the BLUETOOTH title
+    volume = {
+      audioManager     = default-programs.audiomanager.command;
+      bluetoothManager = default-programs.bluetoothmanager.command;
+    };
+
     ## Multimedia OSD (Volume OSD · design ids 9a/9c/9d). A transient overlay
     ## fired by volume/mic changes. `variant = "all"` renders every alternative at
     ## once for review — they occupy different thirds of the screen so they do not

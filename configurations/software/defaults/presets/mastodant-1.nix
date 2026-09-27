@@ -66,6 +66,11 @@
       name = "EasyEeffects";
       package = pkgs.easyeffects;
     };
+    bluetoothmanager = {
+      command = "overskride";
+      name = "Overskride";
+      package = pkgs.overskride;
+    };
   };
 
   autostart = [

@@ -43,7 +43,10 @@ What the real widgets do:
   sparklines), and systemd status.
 - **volume** — Pipewire volume/mute + connected BlueZ device; click for a control
   popover (output, volume slider, Bluetooth toggle, device list with connect/
-  battery/scan).
+  battery/scan). **Middle-click** the output card for the audio manager
+  (`default-programs.audiomanager`) or the BLUETOOTH title for the Bluetooth
+  manager (`default-programs.bluetoothmanager`) — the controls Waybar carried on
+  the same spots.
 - **systemp** — CPU (`k10temp`) + GPU (`amdgpu`) package temperatures.
 - **network** — upload + download rate pills.
 - **avatar** — profile photo masked into a disc whose **ring carries presence**
@@ -237,10 +240,10 @@ the compositor slides an edge-overflowing popover back on screen. Sizes come fro
 | `styleConfigs.fonts`  | `.apply { pkgs } → .sansSerif.exact-name`, `.mono.exact-name` | UI + mono font families in `Theme.qml` |
 | `hardwareConfigs.monitors` | `.apply { pkgs } → .disposition` | Hub monitor, monitor names, connector→role map |
 | `styleConfigs.workspaces` | `.apply { pkgs, monitors } → .workspaces_defined`, `.sessions` | Per-monitor workspace slots/glyphs and the session banding in `Config.qml` |
-| `styleConfigs.quickshell` | `.apply { pkgs, default-programs } → .bars`, `.profile-image`, `.osd`, `.palette`, `.avatar` | Per-screen bar layout, avatar photo, OSD / command-palette / avatar-widget config |
+| `styleConfigs.quickshell` | `.apply { pkgs, default-programs } → .bars`, `.profile-image`, `.osd`, `.palette`, `.avatar`, `.volume` | Per-screen bar layout, avatar photo, OSD / command-palette / avatar-widget config, volume popover's audio + Bluetooth managers |
 | `softwareConfigs.powermanagement` | `.apply { pkgs } → .idleTimeouts.lockAfter` | The "sleeps after 10m" line in the avatar popover — the same schedule hypridle runs |
 | `softwareConfigs.shortcuts` | `.submaps` | Submap presentation (name/icon/colour) for the submap pill |
-| `softwareConfigs.defaults` | `.apply { pkgs }` | Passed to the quickshell preset so launch actions use the repo's default programs |
+| `softwareConfigs.defaults` | `.apply { pkgs }` | Passed to the quickshell preset so launch actions and the audio manager use the repo's default programs |
 | `softwareConfigs.modules.quickshell.enable` | — | Gates the whole module |
 | `softwareConfigs.modules.quickshell.bars` | (attrs) | Overrides the per-screen bar layout; empty = the preset's layout |
 
@@ -255,6 +258,7 @@ the compositor slides an edge-overflowing popover back on screen. Sizes come fro
 | `qml/Bar.qml` | Per-monitor `PanelWindow` — three zones, each a `Repeater` over `Config.barLayout[role]` |
 | `qml/Sys.qml` | Singleton — single source of truth for system metrics/context (one poller set, shared by all bars); widgets are pure views over it |
 | `qml/Popovers.qml` | Singleton coordinating popover dismissal (one-at-a-time + Hyprland focus-grab click-outside) |
+| `qml/Launcher.qml` | Singleton wrapping `uwsm app` — every app the shell starts gets its own scope under app-graphical.slice, so a rebuild does not kill it |
 | `qml/Presence.qml` | Singleton — presence + notification count, subscribed to `swaync-client -swb`; `set()` drives swaync DND |
 | `qml/Idle.qml` | Singleton — keep-awake decision, selected duration and countdown; the wayland inhibitor itself lives on each `Bar` |
 | `qml/Osd.qml` | Multimedia OSD — volume/mic overlay fired by Pipewire changes (card / ring / notch variants) |

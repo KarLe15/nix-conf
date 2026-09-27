@@ -57,14 +57,33 @@ Rectangle {
             }
         }
 
-        // Output device card.
+        // Output device card. Middle-click opens the audio manager — the control
+        // Waybar's wireplumber module carried on the same spot. The binding is
+        // invisible, as it was there, so the card lifts on hover to hint at it.
         Rectangle {
             width: parent.width
             radius: 11
-            color: Theme.base
-            border.color: Theme.surface
+            color: outputArea.containsMouse ? Theme.surface : Theme.base
+            border.color: outputArea.containsMouse ? root.accent : Theme.surface
             border.width: 1
             implicitHeight: 58
+
+            Behavior on color { ColorAnimation { duration: 130 } }
+            Behavior on border.color { ColorAnimation { duration: 130 } }
+
+            MouseArea {
+                id: outputArea
+                anchors.fill: parent
+                hoverEnabled: true
+                // Middle only — a left click on the card still means nothing, so it
+                // must not swallow one and look broken.
+                acceptedButtons: Qt.MiddleButton
+                onClicked: {
+                    Launcher.app(Config.volume.audioManager);
+                    Popovers.closeAll();
+                }
+            }
+
             Row {
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -180,7 +199,11 @@ Rectangle {
         Item {
             width: parent.width
             height: 24
+            // Middle-click the title opens the Bluetooth manager \u2014 the control
+            // Waybar's bluetooth module carried. Invisible as it was there, so the
+            // title brightens on hover to hint at it.
             Row {
+                id: btTitle
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 8
@@ -189,7 +212,8 @@ Rectangle {
                     text: "\uf293"  // bluetooth
                     font.family: Theme.fontMono
                     font.pixelSize: 15
-                    color: Theme.blue
+                    color: btTitleArea.containsMouse ? Theme.sky : Theme.blue
+                    Behavior on color { ColorAnimation { duration: 130 } }
                 }
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
@@ -197,7 +221,20 @@ Rectangle {
                     font.family: Theme.fontMono
                     font.pixelSize: 11
                     font.bold: true
-                    color: Theme.overlay1
+                    color: btTitleArea.containsMouse ? Theme.fg : Theme.overlay1
+                    Behavior on color { ColorAnimation { duration: 130 } }
+                }
+            }
+            // Covers the title only, not the rest of the row \u2014 the On/Off label and
+            // the adapter toggle sit to its right and keep their own handling.
+            MouseArea {
+                id: btTitleArea
+                anchors.fill: btTitle
+                hoverEnabled: true
+                acceptedButtons: Qt.MiddleButton
+                onClicked: {
+                    Launcher.app(Config.volume.bluetoothManager);
+                    Popovers.closeAll();
                 }
             }
             Text {

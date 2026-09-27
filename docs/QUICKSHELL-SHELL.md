@@ -89,6 +89,7 @@ homeManagerModules/quickshell/
     ├── Bar.qml                 # per-monitor PanelWindow — 3 zones, each a Repeater over the layout
     ├── Sys.qml                 # singleton — system metrics + context (the only thing that polls)
     ├── Popovers.qml            # singleton — popover dismissal (one-at-a-time + click-outside)
+    ├── Launcher.qml            # singleton — app launching via `uwsm app` (own scope, survives a rebuild)
     ├── Presence.qml            # singleton — presence + notification count (swaync subscription)
     ├── Idle.qml                # singleton — keep-awake hold + countdown (inhibitor lives on the Bars)
     ├── Osd.qml                 # multimedia OSD (volume / mic), one per screen
@@ -247,12 +248,13 @@ and `popoverRadius` (the last shared with every panel body's `radius`).
 
 ### Launching apps (`uwsm app`, not `execDetached`)
 
-Anything the shell starts that is meant to outlive it goes through `uwsm app`:
+Anything the shell starts that is meant to outlive it goes through the `Launcher`
+singleton (`qml/Launcher.qml`), which wraps `uwsm app`:
 
-| Call site | Command |
-|---|---|
-| `qml/widgets/LaunchButton.qml` | `uwsm app -a <binary> -- sh -c "<preset command>"` |
-| `qml/CommandPalette.qml` (apps mode) | `uwsm app -- <entry.id>.desktop` |
+| Call | Runs | Used by |
+|---|---|---|
+| `Launcher.app(command)` | `uwsm app -a <binary> -- sh -c "<command>"` | action pills, the volume popover's two middle-clicks |
+| `Launcher.entry(id)` | `uwsm app -- <id>.desktop` | the command palette, apps mode |
 
 `Quickshell.execDetached` is `QProcess::startDetached`, which detaches from the
 *parent process* — no zombie, and the child survives quickshell exiting. It does

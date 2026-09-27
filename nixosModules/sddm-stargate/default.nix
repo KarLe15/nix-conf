@@ -144,6 +144,10 @@ let
     License=MIT
     Theme-Id=stargate
     Theme-API=2.0
+    # Without this the daemon defaults to 5 and goes looking for a `sddm-greeter`
+    # binary that a Qt6-only SDDM does not ship, then silently drops the theme
+    # (src/common/ThemeMetadata.cpp:64, src/daemon/Greeter.cpp:95).
+    QtVersion=6
     MainScript=Main.qml
     ConfigFile=theme.conf
   '';

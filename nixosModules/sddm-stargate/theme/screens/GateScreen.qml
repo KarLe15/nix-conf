@@ -267,13 +267,18 @@ Item {
             Row {
                 spacing: 14
 
-                // Caps lock, next to the layout it applies to. Shown only when it
-                // is on — which is exactly when a refused password needs
-                // explaining.
+                // Caps lock, next to the layout it applies to. Faded rather than
+                // hidden: a Row re-packs around a child it drops, so toggling
+                // visibility here would shunt the layout and power buttons
+                // sideways on a keypress.
                 Row {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 8
-                    visible: root.capsOn
+                    opacity: root.capsOn ? 1 : 0
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 150 }
+                    }
 
                     Glyph {
                         anchors.verticalCenter: parent.verticalCenter
@@ -439,9 +444,16 @@ Item {
 
                         Item { width: 1; height: 14 }
 
+                        // Fixed box, centred text. A QtQuick positioner drops any child
+                        // whose width is zero, so an empty Text would take its own 22px
+                        // out of the column and shift the whole field up on the first
+                        // keystroke. The width also has to hold the longest message
+                        // without changing, hence 420 and eliding rather than wrapping.
                         Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: 420
                             height: 22
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
                             text: root.hint
                             font.family: Theme.fontMono
                             font.pixelSize: 14

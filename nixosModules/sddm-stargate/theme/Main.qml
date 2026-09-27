@@ -23,10 +23,18 @@ Item {
     readonly property string forced:
         (typeof config !== "undefined" && config.previewScreen) ? config.previewScreen : "auto"
 
+    // Xorg names a connector differently from the kernel: DRM calls the ultrawide
+    // HDMI-A-2, the X server calls it HDMI-2. The preset quotes DRM names, the same
+    // ones the monitors preset uses, so both sides are normalised here and one
+    // preset works whether the greeter runs on X11 or on Wayland.
+    function connector(name) {
+        return String(name).replace(/-[AB]-(\d+)$/, "-$1")
+    }
+
     readonly property bool gateConnected: {
         const list = Qt.application.screens
         for (let i = 0; i < list.length; i++)
-            if (list[i].name === Config.screens.gate)
+            if (connector(list[i].name) === connector(Config.screens.gate))
                 return true
         return false
     }
@@ -46,16 +54,16 @@ Item {
     readonly property string role: {
         if (forced !== "auto")
             return forced
-        const name = Screen.name
+        const name = connector(Screen.name)
         if (gateConnected) {
-            if (name === Config.screens.gate)
+            if (name === connector(Config.screens.gate))
                 return "gate"
         } else if (widest) {
             return "gate"
         }
-        if (name === Config.screens.dhd)
+        if (name === connector(Config.screens.dhd))
             return "dhd"
-        if (name === Config.screens.telemetry)
+        if (name === connector(Config.screens.telemetry))
             return "telemetry"
         return "none"
     }

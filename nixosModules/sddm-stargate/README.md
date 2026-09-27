@@ -78,6 +78,24 @@ nixosModules/sddm-stargate/
 `themes`, `fonts` and `sddm` presets — editing the installed copies under
 `/run/current-system` has no effect.
 
+### Two things SDDM will not tell you
+
+`metadata.desktop` must carry **`QtVersion=6`**. `ThemeMetadata.cpp:64` defaults that key
+to `5`, and the daemon then looks for a `sddm-greeter` binary that a Qt6-only SDDM does
+not ship; it drops the theme and runs its stock one instead
+(`Greeter.cpp:95-101`). The only trace is one line in the boot log:
+
+```
+The theme at ".../themes/stargate" requires missing ".../bin/sddm-greeter" . Using fallback theme.
+```
+
+`Theme-API=2.0` is a different field and does not control this.
+
+**Connector names differ between X11 and Wayland.** The kernel calls the ultrawide
+`HDMI-A-2`; the X server calls it `HDMI-2`. The preset quotes DRM names — the same ones
+`configurations/hardware/monitors/` uses — and `Main.qml` normalises both sides before
+comparing, so one preset works under either greeter.
+
 ### Pure QtQuick, on purpose
 
 The theme imports only `QtQuick` and `QtQuick.Window`: no `QtQuick.Controls` (the

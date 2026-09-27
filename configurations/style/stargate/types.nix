@@ -1,6 +1,6 @@
 { lib }:
 {
-  sddmOutputType = lib.types.submodule {
+  stargateOutputType = lib.types.submodule {
     options = {
       screens = lib.mkOption {
         type = lib.types.submodule {
@@ -93,6 +93,34 @@
           };
         };
         description = "Dial-home-device geometry and idle animation.";
+      };
+
+      lock = lib.mkOption {
+        type = lib.types.submodule {
+          options = {
+            pamService = lib.mkOption {
+              type        = lib.types.str;
+              description = "PAM service the lock authenticates against.";
+            };
+            powerActions = lib.mkOption {
+              type        = lib.types.listOf (lib.types.enum [ "suspend" "reboot" "poweroff" ]);
+              description = "Which power actions the lock screen offers, in order.";
+            };
+            unlockDelayMs = lib.mkOption {
+              type        = lib.types.int;
+              description = "How long the vortex holds after PAM accepts, in milliseconds.";
+            };
+            capsLedGlob = lib.mkOption {
+              type        = lib.types.str;
+              description = ''
+                Glob matching the keyboard caps-lock LEDs. Quickshell exposes no
+                caps-lock state, so the lock polls these while it is up and simply
+                shows nothing if the glob matches no files.
+              '';
+            };
+          };
+        };
+        description = "Lock-screen specifics; unused by the SDDM greeter.";
       };
 
       clock24 = lib.mkOption {

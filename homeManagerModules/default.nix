@@ -32,6 +32,7 @@
     ./jetbrains
     ./wayland-desktop
     ./quickshell
+    ./quickshell-lock
   ];
 
   stylix.targets.gitui.enable = true;

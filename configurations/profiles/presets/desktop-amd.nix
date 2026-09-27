@@ -16,7 +16,7 @@
   style.statusbar.active            = "waybar-3-screen";
   style.hyprland.active             = "mastodant-1";
   style.quickshell.active           = "screen-bars";
-  style.sddm.active                 = "stargate";
+  style.stargate.active             = "stargate";
   style.workspaces.active           = "standard-3-screen";
 
   ## Software
@@ -38,6 +38,8 @@
   software.modules.waybar.enable          = false;  # replaced by quickshell
   # Quickshell desktop shell — managed user service, replaces waybar
   software.modules.quickshell.enable      = true;
+  # Stargate lock screen — installed; defaults.lockscreen points at it.
+  software.modules.quickshell-lock.enable = true;
   software.modules.swaync.enable          = true;
   software.modules.avizo.enable           = false;  # replaced by the quickshell OSD
   software.modules.hypridle.enable        = true;

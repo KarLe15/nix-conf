@@ -8,7 +8,7 @@
     ./status-bars
     ./hyprland
     ./quickshell
-    ./sddm
+    ./stargate
     ./workspaces
   ];
 }

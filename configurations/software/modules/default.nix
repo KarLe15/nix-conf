@@ -154,6 +154,17 @@
         description = "Enable the Wayland desktop utilities module (wallpaper, clipboard, screenshots).";
       };
     };
+    quickshell-lock = {
+      enable = lib.mkOption {
+        type    = lib.types.bool;
+        default = false;
+        description = ''
+          Enable the Stargate lock screen: a resident quickshell instance holding
+          an ext-session-lock client. Repointing defaults.lockscreen at it is a
+          separate step, so the module can be installed before it is trusted.
+        '';
+      };
+    };
     quickshell = {
       enable = lib.mkOption {
         type    = lib.types.bool;

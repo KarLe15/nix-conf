@@ -14,7 +14,7 @@ is set separately, in `hosts/mastodant-1/services-configuration.nix`.
 | **dhd** | `DP-3` (1920×1080, left) | Dial-home device idling, saved gate addresses, last login. Display only. |
 | **telemetry** | `DP-1` (1920×1080, right) | Three E2PZ modules and the MALP environment board. Display only. |
 
-Connector → screen comes from `configurations/style/sddm/presets/stargate.nix`, so
+Connector → screen comes from `configurations/style/stargate/presets/stargate.nix`, so
 moving the greeter to another monitor is a one-line change.
 
 ### Dialling
@@ -61,21 +61,28 @@ it lives in `theme/Config/MissionData.qml` where it can be edited freely.
 ## Layout
 
 ```
+qml/stargate/                   # shared with the lock screen
+├── generate.nix                # renders Theme.qml + Config.qml from the presets
+├── Config/qmldir · MissionData.qml
+├── screens/                    # DhdScreen · TelemetryScreen (pure ambience)
+└── widgets/                    # Gate, Dhd, Zpm, bars, lists … plus paint.js
+
 nixosModules/sddm-stargate/
-├── default.nix                 # options, generated singletons, the theme derivation
-└── theme/
+├── default.nix                 # options, the theme derivation, metadata.desktop
+└── theme/                      # the greeter-only half, merged over the shared tree
     ├── Main.qml                # picks the screen for this view, claims the keyboard
-    ├── Config/
-    │   ├── qmldir              # declares the three singletons
-    │   ├── Theme.qml           # GENERATED — palette, fonts, metrics
-    │   ├── Config.qml          # GENERATED — screen roles, geometry, glyphs
-    │   └── MissionData.qml     # hand-written mission flavour
-    ├── screens/                # GateScreen · DhdScreen · TelemetryScreen
-    └── widgets/                # Gate, Dhd, Zpm, bars, lists … plus paint.js
+    ├── screens/GateScreen.qml  # bound to sddm / userModel / sessionModel / keyboard
+    └── widgets/                # PowerActions, SessionPicker
 ```
 
+The split is by what the file touches: anything reading an SDDM context object stays
+here, everything else is shared verbatim with
+[homeManagerModules/quickshell-lock](../../homeManagerModules/quickshell-lock), so a
+fix to the gate lands on the login screen and the lock screen at once.
+
 `Theme.qml` and `Config.qml` are regenerated on every rebuild from the active
-`themes`, `fonts` and `sddm` presets — editing the installed copies under
+`themes`, `fonts` and `stargate` presets by `qml/stargate/generate.nix` — editing the
+installed copies under
 `/run/current-system` has no effect.
 
 ### Two things SDDM will not tell you
@@ -115,7 +122,7 @@ wider.
 
 ## Preset knobs
 
-`configurations/style/sddm/presets/stargate.nix`:
+`configurations/style/stargate/presets/stargate.nix`:
 
 | Key | What it drives |
 |---|---|

@@ -71,6 +71,28 @@
       origin    = "P3X-984";
     };
 
+    ## Lock-screen specifics. The SDDM greeter ignores these; it gets its power
+    ## actions and its caps-lock state from the daemon instead.
+    lock = {
+      ## PAM service the lock authenticates against, declared on the host as
+      ## security.pam.services.<name>.
+      pamService = "stargate-lock";
+
+      ## Which power actions the lock offers. A lock screen that can power the
+      ## machine off is a footgun for anyone walking past it, so only suspend.
+      powerActions = [ "suspend" ];
+
+      ## The vortex holds for this long after PAM accepts before the surfaces go.
+      ## The greeter can never show the kawoosh — SDDM closes its views the instant
+      ## the login is accepted — so the lock is the only place it is ever seen.
+      unlockDelayMs = 900;
+
+      ## Quickshell has no caps-lock API, so the lock reads the keyboard LEDs.
+      ## Globbed rather than named: this host has two keyboards and the input
+      ## numbers move when either is replugged.
+      capsLedGlob = "/sys/class/leds/*::capslock/brightness";
+    };
+
     clock24 = true;
 
     ## The host runs LANG=en_US with French LC_* overrides, but the greeter runs

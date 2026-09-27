@@ -1,7 +1,7 @@
 { lib, ... }: {
   imports = [
   ];
-  options.style.sddm = {
+  options.style.stargate = {
     active = lib.mkOption {
       # Add new values here when adding a preset to ./presets/
       type = lib.types.enum [
@@ -9,7 +9,7 @@
       ];
       default = "stargate";
       description = ''
-        Active SDDM greeter theme preset name.
+        Active Stargate preset name — drives both the SDDM greeter and the lock screen.
 
         The selected preset must export:
           apply :: { pkgs, ... } -> {

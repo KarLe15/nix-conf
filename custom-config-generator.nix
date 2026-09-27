@@ -94,7 +94,8 @@ let
           fish
           hyprland
           wayland-desktop
-          quickshell;
+          quickshell
+          quickshell-lock;
       };
     };
 
@@ -111,8 +112,8 @@ let
       quickshell =
         import ./configurations/style/quickshell/presets/${style.quickshell.active}.nix;
 
-      sddm = wrapPreset types.sddmOutputType
-        (import ./configurations/style/sddm/presets/${style.sddm.active}.nix);
+      stargate = wrapPreset types.stargateOutputType
+        (import ./configurations/style/stargate/presets/${style.stargate.active}.nix);
 
       hyprland = wrapPreset types.hyprlandOutputType
         (import ./configurations/style/hyprland/presets/${style.hyprland.active}.nix);

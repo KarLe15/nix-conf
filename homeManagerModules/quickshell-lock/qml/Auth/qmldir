@@ -1,0 +1,4 @@
+# The lock's own state machine, shared across every screen. Unlike the SDDM
+# greeter — which gets one QML engine per monitor and so cannot share anything —
+# the lock is a single process, so one singleton drives all three surfaces.
+singleton Auth 1.0 Auth.qml

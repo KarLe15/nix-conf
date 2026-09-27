@@ -14,5 +14,8 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
   security.pam.services.hyprlock = {};
+  ## PAM service the Stargate lock authenticates against
+  ## (homeManagerModules/quickshell-lock, via Quickshell's PamContext).
+  security.pam.services.stargate-lock = {};
 }
 

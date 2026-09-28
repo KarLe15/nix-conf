@@ -1,6 +1,6 @@
 # Notifications: Quickshell Notification Server
 
-**Status**: In progress — decisions settled; **phase 1 done, phase 2 bar one rough edge** (expand/collapse motion), swaync still serving
+**Status**: In progress — decisions settled; **phases 1–2 of 9 done** (scaffold + toasts), swaync still serving
 **Date**: 2026-09-27
 **Would affect**: `homeManagerModules/quickshell-notify/` (**added**, phase 1),
 `homeManagerModules/quickshell/` (count pill, `Presence.qml`),
@@ -306,10 +306,14 @@ The design is silent on urgency, on which monitor toasts use, and on screen capt
 |---|---|---|
 | Low | `base` `#24273a` | `surface0` `#363a4f` |
 | Normal | `mantle` `#1e2030` (the mockup) | `surface1` `#494d64` |
-| Critical | `#3a2531` — mantle tinted red | `red` `#ed8796` |
+| Critical | `#6e2435` — deep red | `red` `#ed8796` |
 
 Critical is a blend rather than the flat palette red, which at full strength makes body
-text hard to read.
+text hard to read. The value was chosen by rendering the candidates as real cards on
+the target screen and picking from those; it holds 4.8:1 against the body text, above
+the 4.5:1 floor but without much margin — so it is about as hot as a tinted card can
+get. A filled red card (palette red with crust text) was rejected: the header row's
+dim greys are illegible on it and would all need reworking.
 
 **Accent is `blue`** (`#8aadf4`) — one of the four the mockup offers, and what the OSD
 preset already uses. The bar's mauve is deliberately not reused here.
@@ -323,10 +327,33 @@ The mockup is CSS, where `overflow:hidden` clips children to the border radius; 
 visibly pokes out past both corner arcs.
 
 
-**The card currently does not animate its height** — expanding and collapsing change
-size in one step. Not a settled decision: animating it drove a compositor resize on
-every frame, and removing the animation removed the judder but left a jump that still
-does not read as smooth. See *Known rough edges*.
+**Card height animates; the window never resizes.** Two constraints meet here, and
+getting either wrong is visible.
+
+A window sized to its content asks the compositor for a resize on *every frame* of an
+expand — measured at seven configure round-trips over 100 ms, which is what made the
+cards judder. So the stack window is a fixed full-height strip down the right edge and
+never resizes; the animation stays entirely client-side, measured at nine samples on a
+~16.5 ms cadence.
+
+Input is then confined to the cards by a mask — but the mask must **not** follow the
+animation. Bound to live geometry it oscillates: hovering expands the card, the column
+grows, the input region is rewritten, the compositor re-sends a pointer leave, the card
+collapses, and round again — measured as `hovered` flapping true/false three times
+under a stationary pointer, which also let the countdown resume and expire the card
+being read. The mask therefore *settles*: any geometry change restarts a short timer and
+only a quiet column rewrites the region. One update per transition. The region always
+covers at least the collapsed card, so a pointer that started inside stays inside while
+it catches up.
+
+**The visible stack is a `ListModel`, not a JS array.** A `Repeater` over an array
+rebuilds *every* delegate whenever the array is reassigned, and both adding and
+removing a toast reassign it. Each new arrival therefore destroyed and recreated the
+cards already on screen: every countdown restarted from full and the whole stack ran
+in lockstep, then blinked and restarted again each time one expired. A `ListModel`
+changes incrementally, so inserting or removing one card leaves the others — and
+their timers — untouched. Verified with three arrivals a second apart: they expire
+1.01 s and 1.015 s apart, matching the stagger they arrived with.
 
 ---
 
@@ -563,50 +590,6 @@ Phase 8 is the only one with a risk window, and D4 is its undo.
 | 13 | Which screen is bottom-left? | `configurations/hardware/monitors/presets/mastodant-3-screens.nix` | `DP-3` at `x=0, y=1440`, role **`code`** (`DP-1` = bottom-right/`terminal`, `HDMI-A-2` = ultrawide/`browser`) | ✓ toasts pin to `code` |
 | 14 | The design itself | read `Notifications.dc.html` (4a/4b/4c) and `Side Drawer.dc.html` from the Claude Design project | grouping, two-state toasts, countdown bars, per-app chat style with inline reply, right-edge drawer at 378 px reusing the command-palette shell | ✓ folded into *Design*; corrected D6's phasing |
 
-
----
-
-## Known rough edges
-
-### Expand/collapse still does not feel smooth
-
-**Symptom.** Hovering a card to expand it, and unhovering to collapse, feels clunky.
-
-**Measured.** With `Behavior on implicitHeight` (130 ms) on the card, one expand
-produced **seven window resizes in 100 ms** — one per animation frame:
-
-```
-WINH 170.0 t=8267 → 196 → 216 → 229 → 236 → 240 → 241.0 t=8366
-```
-
-The card lives in a layer-shell surface whose height follows it
-(`ToastStack.implicitHeight: column.implicitHeight`), so every frame was a configure
-round-trip with the compositor.
-
-**Tried, and not good enough.** Removing the height animation brought it down to two
-changes in the same millisecond on expand and one on collapse — the judder is gone,
-but the card now *jumps* between sizes, which still does not read as smooth. This is
-the current state: one artifact traded for another.
-
-**What to try next.** Keep the animation, but stop routing it through the surface:
-
-1. Give `Toast` a `targetHeight` — the content height, unanimated — alongside an
-   animated `height`.
-2. Size the window from the sum of `targetHeight` across the visible cards, so it is
-   already at the expanded size *before* the card starts growing, and does not shrink
-   until after a collapse animation has finished (hold the peak, release on a timer
-   or on the animation's `onStopped`).
-3. The card keeps `clip: true`, so its content is revealed by the growing height.
-
-That gives one configure per transition *and* real motion. The awkward part is step 2
-— a `Repeater` does not readily expose a sum over its delegates, so the stack likely
-needs to track the cards itself (or `Toasts` holds the geometry).
-
-**Worth ruling out first:** confirm the remaining clunkiness is the resize at all.
-Pin the window to a fixed tall height, re-enable the card animation, and watch — if
-it is smooth like that, the surface resize is confirmed as the whole story; if not,
-something else (font reflow on `maximumLineCount` change, for instance) is also
-contributing.
 
 ---
 

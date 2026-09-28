@@ -43,13 +43,10 @@ Rectangle {
     clip: true
     implicitHeight: body.implicitHeight + 3      // + the countdown strip
 
-    // No height animation, deliberately. The card lives in a layer-shell surface
-    // whose size follows it, so animating the height asked the compositor for a
-    // resize on every frame — seven configure round-trips per expand, which is what
-    // made the card judder. Changing size in one step costs one round-trip and is
-    // visually clean. A genuinely animated height would mean pre-sizing the window
-    // to the expanded height before animating the card inside it, and holding that
-    // size until a collapse finishes; worth doing only if the motion is wanted back.
+    // Safe to animate again now the stack window is a fixed-size strip: the height
+    // change no longer propagates into a layer-shell resize, so this stays inside
+    // the client instead of costing a configure round-trip per frame.
+    Behavior on implicitHeight { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
 
     // ---- countdown -------------------------------------------------------------
     // An explicit ticker rather than a NumberAnimation with `paused`: a property

@@ -8,7 +8,6 @@ and a presence state.
 Design, decisions and phasing: **[docs/NOTIFICATIONS.md](../../docs/NOTIFICATIONS.md)**.
 
 > **Status: phase 2 of 9 — toasts.** The server receives and draws the toast stack.
-> Expand/collapse motion is still rough — see the doc's *Known rough edges*.
 > It stores nothing, has no systemd unit, and does not touch the real session bus.
 > **swaync is still your notification daemon** and stays that way until phase 8.
 

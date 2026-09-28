@@ -35,8 +35,9 @@
     ##   maxVisible    cards on screen at once; the rest queue
     ##   holdMs        countdown for non-urgent cards; urgent never expires (D8)
     ##   urgency       per-level card fill + border. Not from the mockup, which only
-    ##                 ever draws mantle — critical is a mantle/red blend rather than
-    ##                 the flat palette red, which is unreadable under body text.
+    ##                 ever draws mantle. Critical is a deep red picked by rendering
+    ##                 the candidates side by side, not the flat palette red, which is
+    ##                 unreadable under body text (this one holds 4.8:1 against it).
     notifications = {
       monitor    = "code";        # DP-3, the bottom-left screen
       accent     = "blue";        # one of the mockup's four
@@ -50,7 +51,7 @@
       urgency = {
         low      = { bg = "#24273a"; border = "#363a4f"; };
         normal   = { bg = "#1e2030"; border = "#494d64"; };   # the mockup
-        critical = { bg = "#3a2531"; border = "#ed8796"; };
+        critical = { bg = "#6e2435"; border = "#ed8796"; };
       };
     };
 

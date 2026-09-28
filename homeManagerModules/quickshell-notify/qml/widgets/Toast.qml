@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import Quickshell.Services.Notifications
 import "root:/"
 
@@ -29,6 +30,17 @@ Rectangle {
         : "normal"
     // Urgent is one predicate used twice (D8): it bypasses DND *and* never expires.
     readonly property bool urgent: level === "critical"
+
+    // How long this card holds, honouring what the application asked for. The value
+    // is the raw freedesktop one in MILLISECONDS — Quickshell's doc comment says
+    // seconds, but it assigns the D-Bus int straight through and `-t 15000` arrives
+    // as 15000. Semantics: -1 defer to the server, 0 never expire, >0 milliseconds.
+    readonly property int holdMs: notif.expireTimeout < 0 ? Config.holdMs
+                                                          : notif.expireTimeout
+    // Whether a countdown runs at all: urgent cards never expire (D8), and neither
+    // does one the application explicitly asked to keep.
+    readonly property bool expires: !urgent && holdMs > 0
+
     readonly property var  colors: Config.urgency[level] || Config.urgency.normal
     readonly property color accent:
         Theme[Config.accent] !== undefined ? Theme[Config.accent] : Theme.blue
@@ -57,9 +69,9 @@ Rectangle {
     Timer {
         interval: 50
         repeat: true
-        running: !root.urgent && !root.expanded && root.remaining > 0
+        running: root.expires && !root.expanded && root.remaining > 0
         onTriggered: {
-            root.remaining -= interval / Math.max(1, Config.holdMs);
+            root.remaining -= interval / Math.max(1, root.holdMs);
             if (root.remaining <= 0) {
                 root.remaining = 0;
                 root.dismissed();
@@ -88,9 +100,22 @@ Rectangle {
                 width: 24; height: 24
                 radius: 7
                 color: Theme.surface0
+                clip: true
+                // The notification's own image (a sender's avatar, typically) wins
+                // over the application icon; the initials are the last resort.
+                Image {
+                    anchors.fill: parent
+                    source: root.tileSource
+                    visible: root.tileSource !== ""
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: 48
+                    sourceSize.height: 48
+                    asynchronous: true
+                }
                 Text {
                     anchors.centerIn: parent
                     text: root.initials
+                    visible: root.tileSource === ""
                     font.family: Theme.fontMono
                     font.pixelSize: 10
                     font.bold: true
@@ -189,15 +214,36 @@ Rectangle {
                 model: root.expanded ? root.notif.actions : []
                 Rectangle {
                     required property var modelData
+                    // With action-icons the identifier IS an icon name and the label
+                    // is meaningless; without it the identifier is the opaque key and
+                    // the label is what to show. Falls back to the label if the named
+                    // icon cannot be resolved, so a bad icon name is not a blank button.
+                    readonly property string iconSource:
+                        root.notif.hasActionIcons
+                            ? Quickshell.iconPath(modelData.identifier, true)
+                            : ""
+                    readonly property bool asIcon: iconSource !== ""
+
                     radius: 9
                     color: actArea.containsMouse ? Theme.surface1 : Theme.surface0
-                    implicitWidth: actLabel.implicitWidth + 26
+                    implicitWidth: asIcon ? 34 : actLabel.implicitWidth + 26
                     implicitHeight: 28
                     Behavior on color { ColorAnimation { duration: 120 } }
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 16; height: 16
+                        source: parent.iconSource
+                        visible: parent.asIcon
+                        sourceSize.width: 32
+                        sourceSize.height: 32
+                        asynchronous: true
+                    }
                     Text {
                         id: actLabel
                         anchors.centerIn: parent
                         text: modelData.text || modelData.identifier
+                        visible: !parent.asIcon
                         font.family: Theme.fontUi
                         font.pixelSize: 12
                         color: Theme.fg
@@ -208,14 +254,18 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: { modelData.invoke(); root.dismissed(); }
+                        // Just invoke. Quickshell closes the notification itself unless
+                        // it is `resident`, and the closed handler below takes the card
+                        // off the stack — so a resident notification keeps its card,
+                        // which is the whole point of the flag.
+                        onClicked: modelData.invoke()
                     }
                 }
             }
         }
 
-        // expand affordance — given real room rather than sitting tight against the
-        // body above it and the countdown below.
+        // expand affordance — given real room rather than sitting tight against
+        // the body above it and the countdown below.
         Item {
             width: parent.width
             height: 22
@@ -248,7 +298,7 @@ Rectangle {
         height: 3
         radius: height / 2
         color: Theme.surface0
-        visible: !root.urgent
+        visible: root.expires
         Rectangle {
             height: parent.height
             radius: parent.radius
@@ -261,6 +311,31 @@ Rectangle {
     }
 
     // ---- derived ---------------------------------------------------------------
+    // The notification closing — because the application withdrew it, or because
+    // invoking a non-resident action closed it — takes the card with it. Without
+    // this the card would sit there until its countdown, long after the thing it
+    // refers to is gone.
+    Connections {
+        target: root.notif
+        function onClosed(reason) { root.dismissed(); }
+    }
+
+    readonly property string tileSource: {
+        const img = notif.image || "";
+        if (img !== "") {
+            // `image` is often an image://icon/<name> URL that Quickshell builds from
+            // the image-path hint WITHOUT checking the name resolves — and the icon
+            // provider answers an unresolvable name with a purple/black placeholder
+            // rather than failing, so `Image.status` never reports an error. The name
+            // has to be validated here or the tile renders that placeholder.
+            const m = img.match(/^image:\/\/icon\/(.+)$/);
+            if (!m) return img;                      // a real file:// or data URL
+            return Quickshell.iconPath(m[1], true) === "" ? "" : img;
+        }
+        const ic = notif.appIcon || "";
+        return ic === "" ? "" : Quickshell.iconPath(ic, true);
+    }
+
     // Sticky: once either block has had to elide, the card is expandable and stays
     // marked so. Reading `truncated` directly would flip back to false the moment
     // expanding revealed the text, taking the chevron away exactly when it should

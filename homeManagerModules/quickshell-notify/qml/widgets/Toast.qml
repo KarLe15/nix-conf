@@ -129,7 +129,7 @@ Rectangle {
                 anchors.rightMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
                 elide: Text.ElideRight
-                text: root.notif.appName || "Notification"
+                text: root.displayName
                 font.family: Theme.fontUi
                 font.pixelSize: 12
                 color: Theme.subtext0
@@ -320,6 +320,22 @@ Rectangle {
         function onClosed(reason) { root.dismissed(); }
     }
 
+    // The sending application, resolved to its real desktop entry where possible.
+    // `desktop-entry` is a hint many applications simply do not set, so a heuristic
+    // lookup on the app name covers the common case — it is what turns a raw
+    // appName of "thunderbird" into "Thunderbird". Falls back to whatever the
+    // application called itself.
+    readonly property var entry: {
+        if (notif.desktopEntry) {
+            const byId = DesktopEntries.byId(notif.desktopEntry);
+            if (byId) return byId;
+        }
+        const name = notif.appName || "";
+        return name === "" ? null : DesktopEntries.heuristicLookup(name);
+    }
+    readonly property string displayName:
+        (entry && entry.name) ? entry.name : (notif.appName || "Notification")
+
     readonly property string tileSource: {
         const img = notif.image || "";
         if (img !== "") {
@@ -332,7 +348,7 @@ Rectangle {
             if (!m) return img;                      // a real file:// or data URL
             return Quickshell.iconPath(m[1], true) === "" ? "" : img;
         }
-        const ic = notif.appIcon || "";
+        const ic = notif.appIcon || ((entry && entry.icon) ? entry.icon : "");
         return ic === "" ? "" : Quickshell.iconPath(ic, true);
     }
 
@@ -344,7 +360,7 @@ Rectangle {
     readonly property bool hasMore: everTruncated || notif.actions.length > 0
 
     readonly property string initials: {
-        const a = (notif.appName || "?").trim();
+        const a = (root.displayName || "?").trim();
         if (a.length === 0) return "?";
         return a.charAt(0).toUpperCase() + (a.length > 1 ? a.charAt(1).toLowerCase() : "");
     }

@@ -593,6 +593,46 @@ Phase 8 is the only one with a risk window, and D4 is its undo.
 
 ---
 
+## Environment gaps
+
+Not shell bugs — machine-level problems the shell can only work around.
+
+### No Qt icon theme is configured
+
+`QIcon::fromTheme()` resolves **nothing** on this host. Probed inside a Quickshell
+instance under the real Wayland platform, every name came back empty — including ones
+that exist as files in the installed Adwaita 50 theme:
+
+```
+mail-unread -> []   mail-reply-all -> []   document-open -> []
+```
+
+Consequences in the toast, all of them silent fallbacks rather than errors:
+
+- action buttons always render their **label**, never an icon, whatever an application
+  sets `action-icons` to
+- the app tile always falls back to **initials**, so `-i <name>` and the icon a desktop
+  entry declares never appear
+- `Quickshell.iconPath(name, true)` is what saves this from being worse: it returns ""
+  for an unresolvable name, which is why the fallbacks engage at all. Anything that
+  skips that check renders the icon provider's purple-and-black placeholder instead —
+  which is exactly the bug the notification `image` path hit.
+
+Scope is wider than the shell: this affects any Qt application on the machine asking
+for a themed icon. Stylix configures a GTK icon theme, but nothing appears to give Qt
+one — the usual fix is a platform theme (`QT_QPA_PLATFORMTHEME`, qt6ct, or the
+Home Manager `qt` module) that maps the GTK theme across.
+
+Reproduce, without touching the shell:
+
+```sh
+# any Quickshell config will do; the point is fromTheme() inside a real Qt app
+quickshell-notify-send "icon probe" "check the tile" -i mail-unread
+```
+Initials instead of an envelope means it is still unresolved.
+
+---
+
 ## Deliberately deferred
 
 Not open questions — decisions to *not* do something, recorded so they are not
